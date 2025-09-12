@@ -5,7 +5,6 @@ const TextFieldInput = ({
 }) => (
     <TextField
         fullWidth
-        margin={margin}
         {...textFieldProps}
     />
 );
