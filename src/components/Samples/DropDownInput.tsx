@@ -1,11 +1,13 @@
 import { Autocomplete, TextField } from '@mui/material';
 
-// options: string[];
-// value: string | null;
-// onChange: (event: React.SyntheticEvent, newValue: string | null) => void;
-// label: string;
+interface DropDownInputProps {
+    options: string[];
+    value: string | null;
+    onChange: (event: React.SyntheticEvent, newValue: string | null) => void;
+    label: string;
+}
 
-const DropDownInput = ({
+const DropDownInput: React.FC<DropDownInputProps> = ({
     options,
     value,
     onChange,

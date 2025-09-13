@@ -1,12 +1,14 @@
 import { Autocomplete, Chip, TextField, } from '@mui/material';
 
-// value: string[];
-// onChange: (event: React.SyntheticEvent, newValue: string[] | null) => void;
-// options: string[];
-// freeSolo: boolean;
-// label: string;
+interface MultiSelectInputProps {
+    value: string[];
+    onChange: (event: React.SyntheticEvent, newValue: string[] | null) => void;
+    options: string[];
+    freeSolo: boolean;
+    label: string;
+}
 
-const MultiSelectInput = ({
+const MultiSelectInput: React.FC<MultiSelectInputProps> = ({
     value,
     onChange,
     options,
@@ -34,4 +36,4 @@ const MultiSelectInput = ({
     />
 )
 
-export default CustomMultiSelect;
+export default MultiSelectInput;
