@@ -17,6 +17,7 @@
     "@mui/styled-engine-sc": "^7.3.2",
     "@prisma/client": "^6.16.1",
     "@prisma/extension-accelerate": "^2.0.2",
+    "dayjs": "^1.11.18",
     "next": "15.5.3",
     "next-auth": "^5.0.0-beta.29",
     "react": "19.1.0",
