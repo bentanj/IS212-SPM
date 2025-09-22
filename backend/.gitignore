@@ -1,0 +1,16 @@
+**/.venv/
+**/venv/
+**/__pycache__/
+**/*.py[cod]
+**/.env
+**/.env.*
+!**/.env.example
+**/*.log
+**/.pytest_cache/
+**/.mypy_cache/
+**/htmlcov/
+**/.coverage
+**/*.db
+**/*.sqlite
+**/*.egg-info/
+**/migrations/*.__pycache__/
