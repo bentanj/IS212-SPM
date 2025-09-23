@@ -404,17 +404,18 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
       const isCurrentUser = user.userId === currentUser.userId;
       const isExistingAssignee = isEditMode && existingAssignees.some(existing => existing.userId === user.userId);
       const canDelete = canRemoveUser(user);
+      const { key, ...tagPropsWithoutKey } = getTagProps({ index });
 
       return (
         <Chip
           key={user.userId}
-          {...getTagProps({ index })}
+          {...tagPropsWithoutKey}
           icon={!canDelete ? <LockIcon fontSize="small" /> : undefined}
           label={`${user.name}${isCurrentUser ? ' (You)' : ''}${isExistingAssignee ? ' (Existing)' : ''}`}
           size="small"
           color={isCurrentUser ? 'primary' : isExistingAssignee ? 'secondary' : 'default'}
           variant={isCurrentUser || isExistingAssignee ? 'filled' : 'outlined'}
-          onDelete={canDelete ? getTagProps({ index }).onDelete : undefined}
+          onDelete={canDelete ? tagPropsWithoutKey.onDelete : undefined}
         />
       );
     });
