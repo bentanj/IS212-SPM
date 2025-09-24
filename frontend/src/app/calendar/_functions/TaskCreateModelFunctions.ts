@@ -21,7 +21,7 @@ export const canRemoveUser = (
 };
 
 //  Check if form entries are valid
-export const validateForm = (formData: IFormData, setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>): boolean => {
+const validateForm = (formData: IFormData, setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>): boolean => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.title.trim()) newErrors.title = 'Title is required';
@@ -68,12 +68,13 @@ export const handleSubmit = async (params: {
     currentUser: User;
     onTaskCreated?: (task: Task) => void;
     onTaskUpdated?: (task: Task) => void;
+    setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
     setSubmitStatus: React.Dispatch<React.SetStateAction<'idle' | 'success' | 'error'>>;
     setSubmitMessage: React.Dispatch<React.SetStateAction<string>>;
     handleReset: () => void;
     onClose: () => void;
 }) => {
-    const { canEdit, isEditMode, editingTask, formData, newComment, currentUser, onTaskCreated, onTaskUpdated, setSubmitStatus, setSubmitMessage, handleReset, onClose } = params;
+    const { canEdit, isEditMode, editingTask, formData, newComment, currentUser, onTaskCreated, onTaskUpdated, setErrors, setSubmitStatus, setSubmitMessage, handleReset, onClose } = params;
 
     if (!canEdit) {
         setSubmitStatus('error');
@@ -82,7 +83,7 @@ export const handleSubmit = async (params: {
     }
 
     // Validate form
-    if (!validateForm(formData, () => { })) {
+    if (!validateForm(formData, setErrors)) {
         setSubmitStatus('error');
         setSubmitMessage('Please fix the errors above');
         return;
