@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import {
   Dialog, DialogContent, DialogActions,
-  Button, TextField, FormControl, InputLabel, Select, MenuItem, Chip, Box, Typography, Alert, Autocomplete, Stack,
+  Button, TextField, Chip, Box, Typography, Alert, Autocomplete, Stack,
   useTheme, useMediaQuery, Paper, IconButton
 } from '@mui/material';
 import { CloudUpload as CloudUploadIcon, Delete as DeleteIcon } from '@mui/icons-material';
@@ -11,7 +11,7 @@ import { CloudUpload as CloudUploadIcon, Delete as DeleteIcon } from '@mui/icons
 import dayjs from 'dayjs';
 import { Task, taskMockData, allUsers } from '@/mocks/staff/taskMockData';
 import IFormData from "@/types/IFormData";
-import DefaultFormData from '@/constants/DefaultFormData';
+import DefaultFormData, { PriorityOptions, StatusOptions } from '@/constants/DefaultFormData';
 import {
   getAvailableUsers,
   handleFileUpload, handleRemoveFile, handleAssignedUsersChange,
@@ -21,6 +21,7 @@ import renderAssignedUserTags from '../_functions/renderAssignedUserTags';
 import NoPermission from './_TaskCreateModal/NoPermission';
 import ModalTitle from './_TaskCreateModal/ModalTitle';
 import DateRow from './_TaskCreateModal/DateRow';
+import DropDownMenu from './_TaskCreateModal/DropDownMenu';
 
 interface TaskCreateModalProps {
   open: boolean;
@@ -174,41 +175,23 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
 
         {/* Priority and Status Row */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }}>
-          <FormControl fullWidth error={!!errors.priority}>
-            <InputLabel required>Priority</InputLabel>
-            <Select label="Priority"
-              value={formData.priority}
-              onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value as any }))}
-            >
-              <MenuItem value="Low">Low</MenuItem>
-              <MenuItem value="Medium">Medium</MenuItem>
-              <MenuItem value="High">High</MenuItem>
-            </Select>
-            {errors.priority && (
-              <Typography variant="caption" color="error" sx={{ mt: 0.5, mx: 1.75 }}>
-                {errors.priority}
-              </Typography>
-            )}
-          </FormControl>
+          <DropDownMenu
+            label="Priority"
+            value={formData.priority}
+            onChange={(val) => setFormData((prev) => ({ ...prev, priority: val }))}
+            options={PriorityOptions}
+            error={!!errors.priority}
+            helperText={errors.priority}
+            required />
 
-          <FormControl fullWidth error={!!errors.status}>
-            <InputLabel required>Status</InputLabel>
-            <Select
-              value={formData.status}
-              onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as any }))}
-              label="Status"
-            >
-              <MenuItem value="To Do">To Do</MenuItem>
-              <MenuItem value="In Progress">In Progress</MenuItem>
-              <MenuItem value="Completed">Completed</MenuItem>
-              <MenuItem value="Blocked">Blocked</MenuItem>
-            </Select>
-            {errors.status && (
-              <Typography variant="caption" color="error" sx={{ mt: 0.5, mx: 1.75 }}>
-                {errors.status}
-              </Typography>
-            )}
-          </FormControl>
+          <DropDownMenu
+            label="Status"
+            value={formData.status}
+            onChange={(val) => setFormData((prev) => ({ ...prev, status: val }))}
+            options={StatusOptions}
+            error={!!errors.status}
+            helperText={errors.status}
+            required />
         </Stack>
 
         {/* Assigned Users */}
