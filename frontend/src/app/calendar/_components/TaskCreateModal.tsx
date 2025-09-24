@@ -22,6 +22,7 @@ import NoPermission from './_TaskCreateModal/NoPermission';
 import ModalTitle from './_TaskCreateModal/ModalTitle';
 import DateRow from './_TaskCreateModal/DateRow';
 import DropDownMenu from './_TaskCreateModal/DropDownMenu';
+import Tags from './_TaskCreateModal/Tags';
 
 interface TaskCreateModalProps {
   open: boolean;
@@ -229,25 +230,14 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
         />
 
         {/* Tags */}
-        <TextField label="Add Tags"
-          fullWidth margin="normal"
-          value={tagInput}
-          onChange={(e) => setTagInput(e.target.value)}
-          onKeyDown={(event) => {
-            handleAddTag(event, tagInput, setTagInput, formData, setFormData);
-          }}
-          helperText="Type a tag and press Enter to add it"
+        <Tags
+          tagInput={tagInput}
+          setTagInput={setTagInput}
+          handleAddTag={handleAddTag}
+          handleRemoveTag={handleRemoveTag}
+          formData={formData}
+          setFormData={setFormData}
         />
-
-        {formData.tags.length > 0 && (
-          <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-            {formData.tags.map((tag, index) => (
-              <Chip key={index} label={tag}
-                size="small" color="primary" variant="outlined"
-                onDelete={() => handleRemoveTag(tag, setFormData)} />
-            ))}
-          </Box>
-        )}
 
         {/* Comments */}
         {isEditMode ? (
