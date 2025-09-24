@@ -36,7 +36,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import { User, Task, Comment, taskMockData, allUsers } from '@/mocks/staff/taskMockData';
-import FormData from "@/types/IFormData";
+import IFormData from "@/types/IFormData";
 
 interface TaskCreateModalProps {
   open: boolean;
@@ -73,7 +73,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   const existingAssignees = isEditMode ? editingTask!.assignedUsers : [];
 
   // Form state
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<IFormData>({
     title: '',
     description: '',
     startDate: null,
