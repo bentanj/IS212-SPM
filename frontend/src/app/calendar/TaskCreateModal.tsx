@@ -36,6 +36,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import { User, Task, Comment, taskMockData, allUsers } from '@/mocks/staff/taskMockData';
+import FormData from "@/types/IFormData";
 
 interface TaskCreateModalProps {
   open: boolean;
@@ -43,22 +44,7 @@ interface TaskCreateModalProps {
   onTaskCreated?: (task: Task) => void;
   onTaskUpdated?: (task: Task) => void;
   editingTask?: Task | null; // New prop for edit mode
-}
-
-interface FormData {
-  title: string;
-  description: string;
-  startDate: Dayjs | null;
-  completedDate: Dayjs | null;
-  dueDate: Dayjs | null;
-  priority: 'Low' | 'Medium' | 'High' | '';
-  assignedUsers: User[];
-  tags: string[];
-  status: 'To Do' | 'In Progress' | 'Completed' | 'Blocked' | '';
-  comments: string;
-  projectName: string;
-  attachedFile: File | null;
-}
+};
 
 const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   open,
