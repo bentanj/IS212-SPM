@@ -1,5 +1,7 @@
 import { Dayjs } from 'dayjs';
 import { User } from '@/mocks/staff/taskMockData';
+import Priority from './TPriority';
+import Status from './TStatus';
 
 interface FormData {
     title: string;
@@ -7,10 +9,10 @@ interface FormData {
     startDate: Dayjs | null;
     completedDate: Dayjs | null;
     dueDate: Dayjs | null;
-    priority: 'Low' | 'Medium' | 'High' | '';
+    priority: Priority;
     assignedUsers: User[];
     tags: string[];
-    status: 'To Do' | 'In Progress' | 'Completed' | 'Blocked' | '';
+    status: Status;
     comments: string;
     projectName: string;
     attachedFile: File | null;
