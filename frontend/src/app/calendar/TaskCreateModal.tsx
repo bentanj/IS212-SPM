@@ -78,9 +78,9 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   const currentUserObj = allUsers.find(user => user.userId === currentUser.userId);
 
   // Check if current user has edit permissions
-  const canEdit = isEditMode ? 
-    (editingTask!.ownerId === currentUser.userId || 
-     editingTask!.assignedUsers.some(user => user.userId === currentUser.userId)) : 
+  const canEdit = isEditMode ?
+    (editingTask!.ownerId === currentUser.userId ||
+      editingTask!.assignedUsers.some(user => user.userId === currentUser.userId)) :
     true;
 
   // Get existing assignees for edit mode (cannot be removed)
@@ -168,47 +168,47 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   // Validation function
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!formData.title.trim()) {
       newErrors.title = 'Title is required';
     }
-    
+
     if (!formData.description.trim()) {
       newErrors.description = 'Description is required';
     }
-    
+
     if (!formData.startDate) {
       newErrors.startDate = 'Start date is required';
     }
-    
+
     if (!formData.dueDate) {
       newErrors.dueDate = 'Due date is required';
     }
-    
+
     if (formData.startDate && formData.dueDate && formData.startDate.isAfter(formData.dueDate)) {
       newErrors.dueDate = 'Due date must be after start date';
     }
-    
+
     if (formData.completedDate && formData.startDate && formData.completedDate.isBefore(formData.startDate)) {
       newErrors.completedDate = 'Completed date cannot be before start date';
     }
-    
+
     if (!formData.priority) {
       newErrors.priority = 'Priority is required';
     }
-    
+
     if (formData.assignedUsers.length === 0) {
       newErrors.assignedUsers = 'At least one user must be assigned';
     }
-    
+
     if (formData.assignedUsers.length > 5) {
       newErrors.assignedUsers = 'Maximum 5 users can be assigned to a task';
     }
-    
+
     if (!formData.status) {
       newErrors.status = 'Status is required';
     }
-    
+
     if (!formData.projectName.trim()) {
       newErrors.projectName = 'Project name is required';
     }
@@ -235,7 +235,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
       if (isEditMode && editingTask) {
         // Update existing task
         const updatedComments = [...editingTask.comments];
-        
+
         // Add new comment if provided
         if (newComment.trim()) {
           const newCommentObj: Comment = {
@@ -269,14 +269,14 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
       } else {
         // Create new task
         const newTaskId = Math.max(...taskMockData.tasks.map(t => t.taskId)) + 1;
-        
+
         const comments = formData.comments.trim()
           ? [{
-              commentId: 1,
-              author: currentUser.name,
-              content: formData.comments.trim(),
-              timestamp: dayjs().toISOString(),
-            }]
+            commentId: 1,
+            author: currentUser.name,
+            content: formData.comments.trim(),
+            timestamp: dayjs().toISOString(),
+          }]
           : [];
 
         const newTask: Task = {
@@ -375,7 +375,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   const handleAssignedUsersChange = (event: React.SyntheticEvent, users: User[]) => {
     // In edit mode, ensure existing assignees cannot be removed
     let updatedUsers = users;
-    
+
     if (isEditMode) {
       // Add back any existing assignees that might have been removed
       const missingExistingUsers = existingAssignees.filter(
@@ -465,8 +465,8 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
 
         <DialogContent dividers>
           {submitStatus !== 'idle' && (
-            <Alert 
-              severity={submitStatus === 'success' ? 'success' : 'error'} 
+            <Alert
+              severity={submitStatus === 'success' ? 'success' : 'error'}
               sx={{ mb: 2 }}
             >
               {submitMessage}
@@ -475,7 +475,8 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
 
           {/* Title */}
           <TextField
-            label="Title *"
+            label="Title"
+            required
             fullWidth
             margin="normal"
             value={formData.title}
@@ -486,7 +487,8 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
 
           {/* Description */}
           <TextField
-            label="Description *"
+            label="Description"
+            required
             fullWidth
             multiline
             rows={3}
@@ -507,7 +509,8 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
             renderInput={(params) => (
               <TextField
                 {...params}
-                label="Project Name *"
+                label="Project Name"
+                required
                 margin="normal"
                 error={!!errors.projectName}
                 helperText={errors.projectName}
@@ -518,11 +521,12 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
           {/* Dates Row */}
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }}>
             <DatePicker
-              label="Start Date *"
+              label="Start Date"
               value={convertNullToUndefined(formData.startDate)}
               onChange={(date) => setFormData(prev => ({ ...prev, startDate: date }))}
               slotProps={{
                 textField: {
+                  required: true,
                   fullWidth: true,
                   error: !!errors.startDate,
                   helperText: errors.startDate,
@@ -530,12 +534,13 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
               }}
             />
             <DatePicker
-              label="Due Date *"
+              label="Due Date"
               value={convertNullToUndefined(formData.dueDate)}
               onChange={(date) => setFormData(prev => ({ ...prev, dueDate: date }))}
               minDate={convertNullToUndefined(formData.startDate)}
               slotProps={{
                 textField: {
+                  required: true,
                   fullWidth: true,
                   error: !!errors.dueDate,
                   helperText: errors.dueDate,
@@ -560,11 +565,11 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
           {/* Priority and Status Row */}
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }}>
             <FormControl fullWidth error={!!errors.priority}>
-              <InputLabel>Priority *</InputLabel>
+              <InputLabel required>Priority</InputLabel>
               <Select
                 value={formData.priority}
                 onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value as any }))}
-                label="Priority *"
+                label="Priority"
               >
                 <MenuItem value="Low">Low</MenuItem>
                 <MenuItem value="Medium">Medium</MenuItem>
@@ -578,11 +583,11 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
             </FormControl>
 
             <FormControl fullWidth error={!!errors.status}>
-              <InputLabel>Status *</InputLabel>
+              <InputLabel required>Status</InputLabel>
               <Select
                 value={formData.status}
                 onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as any }))}
-                label="Status *"
+                label="Status"
               >
                 <MenuItem value="To Do">To Do</MenuItem>
                 <MenuItem value="In Progress">In Progress</MenuItem>
@@ -608,17 +613,18 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
               !canAddMoreUsers
                 ? "Maximum 5 users reached. Remove a user to add more."
                 : availableUsers.length === 0
-                ? "No more users available"
-                : "No options"
+                  ? "No more users available"
+                  : "No options"
             }
             renderInput={(params) => (
               <TextField
+                required
                 {...params}
-                label="Assigned Users *"
+                label="Assigned Users"
                 margin="normal"
                 error={!!errors.assignedUsers}
                 helperText={
-                  errors.assignedUsers || 
+                  errors.assignedUsers ||
                   (isEditMode ? "Note: Existing assignees cannot be removed, but you can add new ones" : "")
                 }
               />
@@ -685,7 +691,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
             <Typography variant="subtitle2" gutterBottom>
               File Attachment (Optional - Maximum 1 file)
             </Typography>
-            
+
             {!formData.attachedFile ? (
               <Button
                 component="label"
@@ -722,8 +728,8 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
             variant="contained"
             disabled={submitStatus === 'success'}
           >
-            {submitStatus === 'success' ? 
-              (isEditMode ? 'Updated!' : 'Created!') : 
+            {submitStatus === 'success' ?
+              (isEditMode ? 'Updated!' : 'Created!') :
               (isEditMode ? 'Update Task' : 'Create Task')
             }
           </Button>
