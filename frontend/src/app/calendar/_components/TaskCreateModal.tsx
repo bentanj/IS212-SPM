@@ -23,6 +23,7 @@ import DateRow from './_TaskCreateModal/DateRow';
 import DropDownMenu from './_TaskCreateModal/DropDownMenu';
 import Tags from './_TaskCreateModal/Tags';
 import AssignedUsersAutocomplete from './_TaskCreateModal/AssignedUsers';
+import Comments from './_TaskCreateModal/Comments';
 import FileUpload from './_TaskCreateModal/FileUpload';
 
 interface TaskCreateModalProps {
@@ -143,8 +144,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
           value={formData.title}
           onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
           error={!!errors.title}
-          helperText={errors.title}
-        />
+          helperText={errors.title} />
 
         {/* Description */}
         <TextField label="Description"
@@ -153,8 +153,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
           value={formData.description}
           onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
           error={!!errors.description}
-          helperText={errors.description}
-        />
+          helperText={errors.description} />
 
         {/* Project Name */}
         <Autocomplete
@@ -167,10 +166,8 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
             <TextField label="Project Name"
               {...params} required margin="normal"
               error={!!errors.projectName}
-              helperText={errors.projectName}
-            />
-          )}
-        />
+              helperText={errors.projectName} />
+          )} />
 
         {/* Dates Row */}
         <DateRow formData={formData} setFormData={setFormData} errors={errors} />
@@ -207,8 +204,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
           currentUserObj={currentUserObj}
           error={!!errors.assignedUsers}
           helperText={errors.assignedUsers}
-          canAddMoreUsers={canAddMoreUsers}
-        />
+          canAddMoreUsers={canAddMoreUsers} />
 
         {/* Tags */}
         <Tags
@@ -217,35 +213,20 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
           handleAddTag={handleAddTag}
           handleRemoveTag={handleRemoveTag}
           formData={formData}
-          setFormData={setFormData}
-        />
+          setFormData={setFormData} />
 
         {/* Comments */}
-        {isEditMode ? (
-          <TextField label="Add New Comment (Optional)"
-            fullWidth margin="normal"
-            multiline rows={2}
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            helperText="Add an optional comment about your changes"
-          />
-        ) : (
-          <TextField label="Initial Comment (Optional)"
-            fullWidth margin="normal"
-            multiline rows={2}
-            value={formData.comments}
-            onChange={(e) => setFormData(prev => ({ ...prev, comments: e.target.value }))}
-            error={!!errors.comments}
-            helperText={errors.comments || "Add an optional initial comment to the task"}
-          />
-        )}
+        <Comments
+          isEditMode={isEditMode}
+          formData={formData}
+          setFormData={setFormData}
+          errors={errors} newComment={newComment} setNewComment={setNewComment} />
 
         {/* File Upload */}
         <FileUpload
           isMobile={isMobile}
           formData={formData}
-          setFormData={setFormData}
-        />
+          setFormData={setFormData} />
 
       </DialogContent>
 
