@@ -2,33 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
+  Dialog, DialogContent, DialogActions,
   Button, TextField, FormControl, InputLabel, Select, MenuItem, Chip, Box, Typography, Alert, Autocomplete, Stack,
   useTheme, useMediaQuery, Paper, IconButton
 } from '@mui/material';
-import {
-  Close as CloseIcon,
-  CloudUpload as CloudUploadIcon,
-  Delete as DeleteIcon,
-  Lock as LockIcon,
-  Edit as EditIcon,
-} from '@mui/icons-material';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { CloudUpload as CloudUploadIcon, Delete as DeleteIcon } from '@mui/icons-material';
+
 import dayjs from 'dayjs';
-import { User, Task, Comment, taskMockData, allUsers } from '@/mocks/staff/taskMockData';
+import { Task, taskMockData, allUsers } from '@/mocks/staff/taskMockData';
 import IFormData from "@/types/IFormData";
 import DefaultFormData from '@/constants/DefaultFormData';
-import CustomDatePicker from '@/components/DatePickerInput';
 import {
-  getAvailableUsers, validateForm,
+  getAvailableUsers,
   handleFileUpload, handleRemoveFile, handleAssignedUsersChange,
-  handleAddTag, handleRemoveTag, resetForm,
-  handleSubmit,
+  handleAddTag, handleRemoveTag, resetForm, handleSubmit,
 } from '../_functions/TaskCreateModelFunctions';
 import renderAssignedUserTags from '../_functions/renderAssignedUserTags';
 import NoPermission from './_TaskCreateModal/NoPermission';
 import ModalTitle from './_TaskCreateModal/ModalTitle';
+import DateRow from './_TaskCreateModal/DateRow';
 
 interface TaskCreateModalProps {
   open: boolean;
@@ -110,7 +102,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   const onSubmit = () => {
     handleSubmit({
       canEdit, isEditMode, editingTask, formData, newComment, currentUser,
-      onTaskCreated, onTaskUpdated, setSubmitStatus, setSubmitMessage, handleReset, onClose
+      onTaskCreated, onTaskUpdated, setSubmitStatus, setSubmitMessage, setErrors, handleReset, onClose
     });
   };
 
@@ -178,42 +170,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
         />
 
         {/* Dates Row */}
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }}>
-            <CustomDatePicker label="Start Date"
-              value={formData.startDate ? formData.startDate.toDate() : null}
-              onChange={(date) => setFormData(prev => ({ ...prev, startDate: date ? dayjs(date) : null }))}
-              minSelectableDate={new Date()}
-              textFieldProps={{
-                required: true,
-                error: !!errors.startDate,
-                helperText: errors.startDate,
-              }}
-            />
-
-            <CustomDatePicker label="Due Date"
-              value={formData.dueDate ? formData.dueDate.toDate() : null}
-              onChange={(date) => setFormData(prev => ({ ...prev, dueDate: date ? dayjs(date) : null }))}
-              minSelectableDate={formData.startDate ? formData.startDate.toDate() : null}
-              textFieldProps={{
-                required: true,
-                error: !!errors.dueDate,
-                helperText: errors.dueDate,
-              }}
-            />
-
-            <CustomDatePicker label="Completed Date"
-              value={formData.completedDate ? formData.completedDate.toDate() : null}
-              onChange={(date) => setFormData(prev => ({ ...prev, completedDate: date ? dayjs(date) : null }))}
-              minSelectableDate={formData.startDate ? formData.startDate.toDate() : null}
-              textFieldProps={{
-                required: true,
-                error: !!errors.completedDate,
-                helperText: errors.completedDate,
-              }}
-            />
-          </Stack>
-        </LocalizationProvider>
+        <DateRow formData={formData} setFormData={setFormData} errors={errors} />
 
         {/* Priority and Status Row */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }}>
