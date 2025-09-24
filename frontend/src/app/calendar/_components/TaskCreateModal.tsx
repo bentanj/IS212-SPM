@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import {
   Dialog, DialogContent, DialogActions,
-  Button, TextField, Chip, Box, Typography, Alert, Autocomplete, Stack,
+  Button, TextField, Box, Typography, Alert, Autocomplete, Stack,
   useTheme, useMediaQuery, Paper, IconButton
 } from '@mui/material';
 import { CloudUpload as CloudUploadIcon, Delete as DeleteIcon } from '@mui/icons-material';
@@ -12,17 +12,13 @@ import dayjs from 'dayjs';
 import { Task, taskMockData, allUsers } from '@/mocks/staff/taskMockData';
 import IFormData from "@/types/IFormData";
 import DefaultFormData, { PriorityOptions, StatusOptions } from '@/constants/DefaultFormData';
-import {
-  getAvailableUsers,
-  handleFileUpload, handleRemoveFile, handleAssignedUsersChange,
-  handleAddTag, handleRemoveTag, resetForm, handleSubmit,
-} from '../_functions/TaskCreateModelFunctions';
-import renderAssignedUserTags from '../_functions/renderAssignedUserTags';
+import { getAvailableUsers, handleFileUpload, handleRemoveFile, handleAddTag, handleRemoveTag, resetForm, handleSubmit } from '../_functions/TaskCreateModelFunctions';
 import NoPermission from './_TaskCreateModal/NoPermission';
 import ModalTitle from './_TaskCreateModal/ModalTitle';
 import DateRow from './_TaskCreateModal/DateRow';
 import DropDownMenu from './_TaskCreateModal/DropDownMenu';
 import Tags from './_TaskCreateModal/Tags';
+import AssignedUsersAutocomplete from './_TaskCreateModal/AssignedUsers';
 
 interface TaskCreateModalProps {
   open: boolean;
@@ -196,37 +192,17 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
         </Stack>
 
         {/* Assigned Users */}
-        <Autocomplete
-          multiple
-          options={availableUsers}
-          getOptionLabel={(user) => user.name}
-          value={formData.assignedUsers}
-          onChange={(event, value) => {
-            handleAssignedUsersChange(event, value, isEditMode, existingAssignees, currentUser, currentUserObj, setFormData);
-          }}
-          noOptionsText={
-            !canAddMoreUsers
-              ? "Maximum 5 users reached. Remove a user to add more."
-              : availableUsers.length === 0
-                ? "No more users available"
-                : "No options"
-          }
-          renderInput={(params) => (
-            <TextField label="Assigned Users"
-              required margin="normal"
-              {...params}
-              error={!!errors.assignedUsers}
-              helperText={
-                errors.assignedUsers ||
-                (isEditMode ? "Note: Existing assignees cannot be removed, but you can add new ones" : "")
-              }
-            />
-          )}
-          renderValue={(user, getTagProps) =>
-            renderAssignedUserTags(user, getTagProps, currentUser, isEditMode, existingAssignees)
-          }
-          filterSelectedOptions
-          getOptionDisabled={(option) => !canAddMoreUsers}
+        <AssignedUsersAutocomplete
+          availableUsers={availableUsers}
+          assignedUsers={formData.assignedUsers}
+          setFormData={setFormData}
+          isEditMode={isEditMode}
+          existingAssignees={existingAssignees}
+          currentUser={currentUser}
+          currentUserObj={currentUserObj}
+          error={!!errors.assignedUsers}
+          helperText={errors.assignedUsers}
+          canAddMoreUsers={canAddMoreUsers}
         />
 
         {/* Tags */}
