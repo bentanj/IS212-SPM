@@ -502,7 +502,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
             />
 
             <CustomDatePicker
-              label="Completed Date" s
+              label="Completed Date"
               value={formData.completedDate ? formData.completedDate.toDate() : null}
               onChange={(date) => setFormData(prev => ({ ...prev, completedDate: date ? dayjs(date) : null }))}
               minSelectableDate={formData.startDate ? formData.startDate.toDate() : null}
@@ -514,7 +514,6 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
             />
           </Stack>
         </LocalizationProvider>
-
 
         {/* Priority and Status Row */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }}>
