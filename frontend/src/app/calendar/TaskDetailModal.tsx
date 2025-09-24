@@ -22,7 +22,7 @@ import {
 import { Edit as EditIcon } from '@mui/icons-material';
 import { Task, taskMockData } from '@/mocks/staff/taskMockData';
 import dayjs from 'dayjs';
-import TaskCreateModal from './TaskCreateModal';
+import TaskCreateModal from './_components/TaskCreateModal';
 
 interface TaskDetailModalProps {
   task: Task | null;
@@ -50,11 +50,11 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ 
-  task, 
-  open, 
-  onClose, 
-  onTaskUpdated 
+const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
+  task,
+  open,
+  onClose,
+  onTaskUpdated
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -66,8 +66,8 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   if (!task) return null;
 
   // Check if current user can edit this task
-  const canEdit = task.ownerId === currentUser.userId || 
-                  task.assignedUsers.some(user => user.userId === currentUser.userId);
+  const canEdit = task.ownerId === currentUser.userId ||
+    task.assignedUsers.some(user => user.userId === currentUser.userId);
 
   const handleEditClick = () => {
     setEditModalOpen(true);
@@ -139,9 +139,9 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
           </Box>
 
           {/* Dates Section - Responsive Stack */}
-          <Stack 
-            direction={{ xs: 'column', sm: 'row' }} 
-            spacing={{ xs: 2, sm: 4 }} 
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={{ xs: 2, sm: 4 }}
             sx={{ mb: 3 }}
           >
             <Box>
@@ -240,9 +240,9 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         </DialogContent>
 
         <DialogActions>
-          <Button 
-          onClick={onClose}
-          variant="outlined"
+          <Button
+            onClick={onClose}
+            variant="outlined"
           >
             Close
           </Button>

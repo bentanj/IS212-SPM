@@ -25,8 +25,8 @@ import {
   handleFileUpload, handleRemoveFile, handleAssignedUsersChange,
   handleAddTag, handleRemoveTag, resetForm,
   handleSubmit,
-} from './_functions/TaskCreateModelFunctions';
-import renderAssignedUserTags from './_functions/renderAssignedUserTags';
+} from '../_functions/TaskCreateModelFunctions';
+import renderAssignedUserTags from '../_functions/renderAssignedUserTags';
 
 interface TaskCreateModalProps {
   open: boolean;

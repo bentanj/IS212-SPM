@@ -38,7 +38,7 @@ dayjs.extend(weekOfYear);
 
 import { taskMockData, Task } from '@/mocks/staff/taskMockData';
 import TaskDetailModal from './TaskDetailModal';
-import TaskCreateModal from './TaskCreateModal';
+import TaskCreateModal from './_components/TaskCreateModal';
 import DayTasksModal from './DayTasksModal';
 
 const TaskCalendar: React.FC = () => {
@@ -50,7 +50,7 @@ const TaskCalendar: React.FC = () => {
   // Create Tasks
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [tasks, setTasks] = useState(taskMockData.tasks);
-  
+
   // Task Day
   const [dayTasksModalOpen, setDayTasksModalOpen] = useState(false);
   const [selectedDayTasks, setSelectedDayTasks] = useState<Task[]>([]);
@@ -67,13 +67,13 @@ const TaskCalendar: React.FC = () => {
       task.assignedUsers.some(assignedUser => assignedUser.userId === currentUser.userId)
     );
   }, [tasks]); // Add tasks as dependency
-  
+
 
   // BUSINESS LOGIC 2: Get tasks for current month by START DATE
   const monthTasks = useMemo(() => {
     const startOfMonth = currentDate.startOf('month');
     const endOfMonth = currentDate.endOf('month');
-    
+
     return assignedTasks.filter(task => {
       const taskStartDate = dayjs(task.startDate); // Changed from dueDate to startDate
       return taskStartDate.isBetween(startOfMonth, endOfMonth, 'day', '[]');
@@ -149,8 +149,8 @@ const TaskCalendar: React.FC = () => {
 
   // Handle Task Updates
   const handleTaskUpdated = (updatedTask: Task) => {
-    setTasks(prev => 
-      prev.map(task => 
+    setTasks(prev =>
+      prev.map(task =>
         task.taskId === updatedTask.taskId ? updatedTask : task
       )
     );
@@ -181,7 +181,7 @@ const TaskCalendar: React.FC = () => {
       <Typography variant="h6" sx={{ mb: 2, color: '#9e9e9e', fontSize: '0.875rem', fontWeight: 500 }}>
         TASK MANAGER
       </Typography>
-      
+
       {/* User Profile */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
         <Avatar sx={{ width: 48, height: 48, mr: 2 }}>
@@ -244,9 +244,9 @@ const TaskCalendar: React.FC = () => {
     <Box sx={{ display: 'flex', height: '100vh', bgcolor: '#f5f5f5', overflow: 'hidden' }}>
       {/* Sidebar for Desktop */}
       {!isMobile && (
-        <Paper sx={{ 
-          width: 280, 
-          mr: 2, 
+        <Paper sx={{
+          width: 280,
+          mr: 2,
           height: '100vh',
           overflow: 'auto',
           flexShrink: 0
@@ -260,7 +260,7 @@ const TaskCalendar: React.FC = () => {
         anchor="left"
         open={sidebarOpen}
         onClose={toggleSidebar}
-        sx={{ 
+        sx={{
           display: { xs: 'block', md: 'none' },
           '& .MuiDrawer-paper': { width: 280 }
         }}
@@ -269,10 +269,10 @@ const TaskCalendar: React.FC = () => {
       </Drawer>
 
       {/* Main Content */}
-      <Box sx={{ 
-        flex: 1, 
-        display: 'flex', 
-        flexDirection: 'column', 
+      <Box sx={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
         minWidth: 0,
         height: '100vh',
         overflow: 'hidden'
@@ -289,7 +289,7 @@ const TaskCalendar: React.FC = () => {
               placeholder="Search my tasks..."
               variant="outlined"
               size="small"
-              sx={{ 
+              sx={{
                 mr: 'auto',
                 width: { xs: '150px', sm: '200px', md: '300px' }
               }}
@@ -301,9 +301,9 @@ const TaskCalendar: React.FC = () => {
                 ),
               }}
             />
-            <Typography 
-              variant="h6" 
-              sx={{ 
+            <Typography
+              variant="h6"
+              sx={{
                 mx: { xs: 1, sm: 2 },
                 display: { xs: 'none', sm: 'block' }
               }}
@@ -311,43 +311,43 @@ const TaskCalendar: React.FC = () => {
               My Calendar
             </Typography>
             <Button
-                variant="contained"
-                startIcon={<Add />}
-                onClick={() => setCreateModalOpen(true)}
-                size={isMobile ? 'small' : 'medium'}
-              >
-                {isMobile ? '+' : 'Add task'}
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => setCreateModalOpen(true)}
+              size={isMobile ? 'small' : 'medium'}
+            >
+              {isMobile ? '+' : 'Add task'}
             </Button>
           </Toolbar>
         </AppBar>
 
         {/* Calendar Container */}
-        <Box sx={{ 
-          flex: 1, 
-          p: { xs: 1, sm: 2 }, 
+        <Box sx={{
+          flex: 1,
+          p: { xs: 1, sm: 2 },
           minHeight: 0,
           overflow: 'hidden'
         }}>
-          <Paper sx={{ 
+          <Paper sx={{
             height: '100%',
-            p: { xs: 1, sm: 2 }, 
-            display: 'flex', 
+            p: { xs: 1, sm: 2 },
+            display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden'
           }}>
             {/* Month Navigation */}
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               mb: 2,
               flexShrink: 0
             }}>
               <IconButton onClick={() => navigateMonth('prev')}>
                 <ChevronLeft />
               </IconButton>
-              <Typography 
-                variant={isMobile ? 'h6' : 'h5'} 
+              <Typography
+                variant={isMobile ? 'h6' : 'h5'}
                 sx={{ mx: 2, minWidth: { xs: 120, sm: 140 }, textAlign: 'center' }}
               >
                 {currentDate.format(isMobile ? 'MMM YYYY' : 'MMMM YYYY')}
@@ -360,29 +360,29 @@ const TaskCalendar: React.FC = () => {
             {/* Calendar Grid */}
             <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
               {/* Day Headers */}
-              <Stack 
-                direction="row" 
-                spacing={0.5} 
-                sx={{ 
+              <Stack
+                direction="row"
+                spacing={0.5}
+                sx={{
                   mb: 1,
                   flexShrink: 0,
                   height: { xs: 24, sm: 32 }
                 }}
               >
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                  <Box 
-                    key={day} 
-                    sx={{ 
-                      flex: 1, 
-                      textAlign: 'center', 
+                  <Box
+                    key={day}
+                    sx={{
+                      flex: 1,
+                      textAlign: 'center',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       minWidth: 0
                     }}
                   >
-                    <Typography 
-                      variant="subtitle2" 
+                    <Typography
+                      variant="subtitle2"
                       color="text.secondary"
                       sx={{ fontSize: { xs: '0.7rem', sm: '0.875rem' } }}
                     >
@@ -393,19 +393,19 @@ const TaskCalendar: React.FC = () => {
               </Stack>
 
               {/* Calendar Body with Fixed Heights */}
-              <Stack 
-                spacing={0.5} 
-                sx={{ 
+              <Stack
+                spacing={0.5}
+                sx={{
                   flex: 1,
                   minHeight: 0
                 }}
               >
                 {weeks.map((week, weekIndex) => (
-                  <Stack 
-                    key={weekIndex} 
-                    direction="row" 
-                    spacing={0.5} 
-                    sx={{ 
+                  <Stack
+                    key={weekIndex}
+                    direction="row"
+                    spacing={0.5}
+                    sx={{
                       height: getCellHeight(),
                       flexShrink: 0
                     }}
@@ -416,10 +416,10 @@ const TaskCalendar: React.FC = () => {
                       const isToday = day.isSame(dayjs(), 'day');
 
                       return (
-                        <Box 
-                          key={day.toString()} 
-                          sx={{ 
-                            flex: 1, 
+                        <Box
+                          key={day.toString()}
+                          sx={{
+                            flex: 1,
                             minWidth: 0,
                             height: '100%'
                           }}
@@ -442,21 +442,21 @@ const TaskCalendar: React.FC = () => {
                             }}
                             onClick={isMobile && dayTasks.length === 1 ? () => handleTaskClick(dayTasks[0]) : undefined}
                           >
-                            <Typography 
-                              variant="body2" 
+                            <Typography
+                              variant="body2"
                               fontWeight={isToday ? 'bold' : 'normal'}
                               color={isToday ? 'primary.main' : 'text.primary'}
-                              sx={{ 
-                                mb: { xs: 0.5, sm: 1 }, 
+                              sx={{
+                                mb: { xs: 0.5, sm: 1 },
                                 flexShrink: 0,
                                 fontSize: { xs: '0.7rem', sm: '0.875rem' }
                               }}
                             >
                               {day.format('D')}
                             </Typography>
-                            
-                            <Box sx={{ 
-                              flex: 1, 
+
+                            <Box sx={{
+                              flex: 1,
                               overflow: 'hidden',
                               display: 'flex',
                               flexDirection: 'column',
@@ -464,14 +464,14 @@ const TaskCalendar: React.FC = () => {
                             }}>
                               {/* Only show tasks that fit within the cell */}
                               {dayTasks.slice(0, isMobile ? 1 : 2).map((task) => (
-                                <Card 
-                                  key={task.taskId} 
-                                  sx={{ 
-                                    mb: 0.5, 
+                                <Card
+                                  key={task.taskId}
+                                  sx={{
+                                    mb: 0.5,
                                     cursor: 'pointer',
                                     bgcolor: getPriorityColor(task.priority) + '20',
                                     borderLeft: `3px solid ${getPriorityColor(task.priority)}`,
-                                    '&:hover': { 
+                                    '&:hover': {
                                       bgcolor: getPriorityColor(task.priority) + '30',
                                     },
                                     minHeight: 0,
@@ -482,8 +482,8 @@ const TaskCalendar: React.FC = () => {
                                   }}
                                   onClick={() => handleTaskClick(task)}
                                 >
-                                  <CardContent sx={{ 
-                                    p: '2px 4px !important', 
+                                  <CardContent sx={{
+                                    p: '2px 4px !important',
                                     '&:last-child': { pb: '2px !important' },
                                     height: '100%',
                                     display: 'flex',
@@ -491,11 +491,11 @@ const TaskCalendar: React.FC = () => {
                                     minWidth: 0,
                                     width: '100%'
                                   }}>
-                                    <Typography 
-                                      variant="caption" 
+                                    <Typography
+                                      variant="caption"
                                       noWrap
-                                      sx={{ 
-                                        display: 'block', 
+                                      sx={{
+                                        display: 'block',
                                         lineHeight: 1,
                                         fontSize: { xs: '0.6rem', sm: '0.7rem' },
                                         width: '100%',
@@ -508,13 +508,13 @@ const TaskCalendar: React.FC = () => {
                                   </CardContent>
                                 </Card>
                               ))}
-                              
+
                               {/* Show more indicator only if it fits - MAKE IT CLICKABLE */}
                               {dayTasks.length > (isMobile ? 1 : 2) && (
-                                <Typography 
-                                  variant="caption" 
-                                  color="text.secondary" 
-                                  sx={{ 
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  sx={{
                                     fontSize: { xs: '0.55rem', sm: '0.65rem' },
                                     flexShrink: 0,
                                     lineHeight: 1,
@@ -531,7 +531,7 @@ const TaskCalendar: React.FC = () => {
                                 >
                                   +{dayTasks.length - (isMobile ? 1 : 2)} more
                                 </Typography>
-                              )}  
+                              )}
                             </Box>
                           </Paper>
                         </Box>
@@ -569,7 +569,7 @@ const TaskCalendar: React.FC = () => {
         onTaskCreated={handleTaskCreated}
       />
 
-      
+
     </Box>
   );
 };
