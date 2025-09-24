@@ -105,11 +105,6 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
     }
   }, [open, isEditMode, editingTask]);
 
-  // Helper function to convert null to undefined for DatePicker props
-  const convertNullToUndefined = (date: Dayjs | null): Dayjs | undefined => {
-    return date === null ? undefined : date;
-  };
-
   // Filter out already assigned users from available options
   const getAvailableUsers = (): User[] => {
     const assignedUserIds = formData.assignedUsers.map(u => u.userId);
@@ -271,20 +266,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
 
   // Reset form
   const resetForm = () => {
-    setFormData({
-      title: '',
-      description: '',
-      startDate: null,
-      completedDate: null,
-      dueDate: null,
-      priority: '',
-      assignedUsers: currentUserObj ? [currentUserObj] : [],
-      tags: [],
-      status: '',
-      comments: '',
-      projectName: '',
-      attachedFile: null,
-    });
+    setFormData(DefaultFormData);
     setErrors({});
     setSubmitStatus('idle');
     setSubmitMessage('');
