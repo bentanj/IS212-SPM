@@ -27,6 +27,7 @@ import {
   handleSubmit,
 } from '../_functions/TaskCreateModelFunctions';
 import renderAssignedUserTags from '../_functions/renderAssignedUserTags';
+import NoPermission from './_TaskCreateModal/NoPermission';
 
 interface TaskCreateModalProps {
   open: boolean;
@@ -123,15 +124,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
 
   if (!canEdit && isEditMode) {
     return (
-      <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-        <DialogTitle>Access Denied</DialogTitle>
-        <DialogContent>
-          <Typography>You do not have permission to edit this task.</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={onClose}>Close</Button>
-        </DialogActions>
-      </Dialog>
+      <NoPermission open={open} onClose={onClose} />
     );
   }
 
