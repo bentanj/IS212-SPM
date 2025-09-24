@@ -3,22 +3,27 @@
 import { useState, useEffect } from 'react';
 import {
   Dialog, DialogContent, DialogActions,
-  Button, TextField, Box, Typography, Alert, Autocomplete, Stack,
-  useTheme, useMediaQuery, Paper, IconButton
+  Button, TextField, Alert, Autocomplete, Stack,
+  useTheme, useMediaQuery
 } from '@mui/material';
-import { CloudUpload as CloudUploadIcon, Delete as DeleteIcon } from '@mui/icons-material';
-
 import dayjs from 'dayjs';
+
+// Functions
+import { getAvailableUsers, handleAddTag, handleRemoveTag, resetForm, handleSubmit } from '../_functions/TaskCreateModelFunctions';
+
+// Types and Constants
 import { Task, taskMockData, allUsers } from '@/mocks/staff/taskMockData';
 import IFormData from "@/types/IFormData";
 import DefaultFormData, { PriorityOptions, StatusOptions } from '@/constants/DefaultFormData';
-import { getAvailableUsers, handleFileUpload, handleRemoveFile, handleAddTag, handleRemoveTag, resetForm, handleSubmit } from '../_functions/TaskCreateModelFunctions';
+
+// Components
 import NoPermission from './_TaskCreateModal/NoPermission';
 import ModalTitle from './_TaskCreateModal/ModalTitle';
 import DateRow from './_TaskCreateModal/DateRow';
 import DropDownMenu from './_TaskCreateModal/DropDownMenu';
 import Tags from './_TaskCreateModal/Tags';
 import AssignedUsersAutocomplete from './_TaskCreateModal/AssignedUsers';
+import FileUpload from './_TaskCreateModal/FileUpload';
 
 interface TaskCreateModalProps {
   open: boolean;
@@ -236,29 +241,12 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
         )}
 
         {/* File Upload */}
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="subtitle2" gutterBottom>
-            File Attachment (Optional - Maximum 1 file)
-          </Typography>
+        <FileUpload
+          isMobile={isMobile}
+          formData={formData}
+          setFormData={setFormData}
+        />
 
-          {!formData.attachedFile ? (
-            <Button component="label" variant="outlined"
-              startIcon={<CloudUploadIcon />} fullWidth={isMobile}>
-              Upload File
-              <input type="file" hidden
-                onChange={(event) => { handleFileUpload(event, setFormData) }} />
-            </Button>
-          ) : (
-            <Paper variant="outlined" sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="body2" sx={{ flexGrow: 1 }}>
-                {formData.attachedFile.name}
-              </Typography>
-              <IconButton size="small" onClick={() => handleRemoveFile(setFormData)}>
-                <DeleteIcon />
-              </IconButton>
-            </Paper>
-          )}
-        </Box>
       </DialogContent>
 
       <DialogActions>
