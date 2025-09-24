@@ -28,6 +28,7 @@ import {
 } from '../_functions/TaskCreateModelFunctions';
 import renderAssignedUserTags from '../_functions/renderAssignedUserTags';
 import NoPermission from './_TaskCreateModal/NoPermission';
+import ModalTitle from './_TaskCreateModal/ModalTitle';
 
 interface TaskCreateModalProps {
   open: boolean;
@@ -132,13 +133,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
     <Dialog open={open} onClose={onClose}
       maxWidth="md" fullWidth fullScreen={isMobile}
     >
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        {isEditMode ? <EditIcon /> : null}
-        {isEditMode ? 'Edit Task' : 'Create New Task'}
-        <IconButton sx={{ ml: 'auto' }} onClick={onClose} aria-label="close">
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
+      <ModalTitle isEditMode={isEditMode} onClose={onClose} />
 
       <DialogContent dividers>
         {submitStatus !== 'idle' && (
