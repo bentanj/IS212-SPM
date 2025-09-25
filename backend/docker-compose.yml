@@ -14,5 +14,5 @@ services:
       - SQLALCHEMY_ECHO=${SQLALCHEMY_ECHO}
       - ENV=${ENV}
     ports:
-      - "8001:8001"
+      - "8080:8080"
     restart: unless-stopped

@@ -9,7 +9,7 @@ class Config:
     HOST = os.getenv("DB_HOST")
     PORT = os.getenv("DB_PORT")
     DBNAME = os.getenv("DB_NAME")
+
     SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}?sslmode=require"
     SQLALCHEMY_ECHO = os.getenv("SQLALCHEMY_ECHO", "false").lower() == "true"
     ENV = os.getenv("ENV", "dev")
-    FRONTEND_ORIGIN="http://localhost:3000"

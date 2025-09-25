@@ -1,44 +1,10 @@
-from flask import Flask, g
-from flask_cors import CORS
-from config import Config
-from db import SessionLocal, init_db
-from Controllers.TaskController import bp as task_bp
+from flask import Flask
 
-def create_app():
-    app = Flask(__name__)
-    app.config.from_object(Config)
-    
-    # Allow all origins for CORS
-    CORS(app, origins="*")
-    
-    @app.before_request
-    def before_request():
-        g.db_session = SessionLocal()
-    
-    @app.after_request
-    def after_request(response):
-        if hasattr(g, 'db_session'):
-            g.db_session.close()
-        return response
-    
-    @app.teardown_appcontext
-    def close_db_session(error):
-        if hasattr(g, 'db_session'):
-            g.db_session.close()
-    
-    @app.get("/api/tasks/health")
-    def health():
-        return {"status": "ok", "service": "tasks"}
-    
-    app.register_blueprint(task_bp)
-    
-    if app.config.get('ENV') != 'test':
-        with app.app_context():
-            init_db()
-    
-    return app
+app = Flask(__name__)
 
-app = create_app()
+@app.get("/api/tasks/health")
+def health():
+    return {"status": "ok", "service": "tasks"}
 
 if __name__ == "__main__":
-    app.run(debug=True, port=8001, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0', port=8080)

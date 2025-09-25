@@ -15,17 +15,10 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements for caching
-COPY requirements.txt requirements-dev.txt ./
+COPY requirements.txt .
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Optional: install dev deps when CI=true or INSTALL_DEV=true
-ARG INSTALL_DEV=false
-ENV INSTALL_DEV=${INSTALL_DEV}
-RUN if [ "$INSTALL_DEV" = "true" ] || [ "$CI" = "true" ]; then \
-      pip install --no-cache-dir -r requirements-dev.txt; \
-    fi
 
 # Copy application code
 COPY . .
@@ -35,7 +28,7 @@ RUN adduser --disabled-password --gecos '' appuser && chown -R appuser:appuser /
 USER appuser
 
 # Expose port
-EXPOSE 8001
+EXPOSE 8080
 
 # Run the application
 CMD ["python", "app.py"]
