@@ -1,7 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session, declarative_base
 from config import Config
-from sqlalchemy import text
 
 engine = create_engine(
     Config.SQLALCHEMY_DATABASE_URI,
@@ -16,4 +15,5 @@ Base = declarative_base()
 def init_db():
     # import models here so Base.metadata is populated
     from Models.Task import Task  # noqa
-    Base.metadata.create_all(bind=engine)
+    Base.metadata.create_all(bind=engine)       
+

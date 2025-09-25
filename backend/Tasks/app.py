@@ -32,9 +32,8 @@ def create_app():
     
     app.register_blueprint(task_bp)
     
-    if app.config.get('ENV') != 'test':
-        with app.app_context():
-            init_db()
+    with app.app_context():
+        init_db()
     
     return app
 
