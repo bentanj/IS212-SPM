@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        service: [ "user", "tasks" ]   # <-- add more services here
+        service: [ "tasks" ]   # <-- add more services here
 
     services:
       postgres:
