@@ -15,10 +15,17 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements for caching
-COPY requirements.txt .
+COPY requirements.txt requirements-dev.txt ./
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Optional: install dev deps when CI=true or INSTALL_DEV=true
+ARG INSTALL_DEV=false
+ENV INSTALL_DEV=${INSTALL_DEV}
+RUN if [ "$INSTALL_DEV" = "true" ] || [ "$CI" = "true" ]; then \
+      pip install --no-cache-dir -r requirements-dev.txt; \
+    fi
 
 # Copy application code
 COPY . .
