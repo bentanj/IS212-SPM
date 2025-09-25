@@ -9,7 +9,5 @@ def _taskService() -> TaskService:
     return TaskService(repo)
 
 @bp.get("")
-def list_tasks():
-    print("API CALL DETECTED")
-    # tasks = _svc().list_tasks()
-    # return jsonify([{"id": t.id, "title": t.title, "completed": t.completed} for t in tasks])
+def get_tasks():
+    pass
