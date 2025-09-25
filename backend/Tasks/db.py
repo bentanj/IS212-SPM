@@ -16,9 +16,4 @@ def init_db():
     # import models here so Base.metadata is populated
     from Models.Task import Task  # noqa
     Base.metadata.create_all(bind=engine)       
-from sqlalchemy import text
 
-# Test connection
-with engine.connect() as conn:
-    result = conn.execute(text("SELECT 1"))
-    print("Connection test result:", result.scalar())
