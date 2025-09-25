@@ -28,7 +28,7 @@ RUN adduser --disabled-password --gecos '' appuser && chown -R appuser:appuser /
 USER appuser
 
 # Expose port
-EXPOSE 8080
+EXPOSE 8001
 
 # Run the application
 CMD ["python", "app.py"]
