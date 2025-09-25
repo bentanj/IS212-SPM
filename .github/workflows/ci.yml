@@ -66,17 +66,19 @@ jobs:
           echo "DB_PORT=${DB_PORT:-5432}" >> $GITHUB_ENV
           echo "DB_NAME=${DB_NAME:-testdb}" >> $GITHUB_ENV
 
-      - name: Lint (flake8)
-        run: flake8 .
+      # TODO: Uncomment after adding formatter/linter
+      # - name: Lint (flake8)
+      #   run: flake8 .
 
-      - name: Format check (black)
-        run: black --check .
+      # - name: Format check (black)
+      #   run: black --check .
+
 
       # If you use Alembic per service, uncomment and adapt path:
       # - name: Run DB migrations
       #   run: alembic upgrade head
 
-      - name: Run tests (skip gracefully if none)
+      - name: Run tests (skipped if none)
         run: |
           set -e
           if pytest -q --maxfail=1 --disable-warnings \
