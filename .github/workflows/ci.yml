@@ -6,7 +6,6 @@ on:
   pull_request:
     branches: [ main ]
 
-# avoid overlapping runs on the same ref
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -16,15 +15,19 @@ permissions:
 
 jobs:
   backend:
-    name: Backend · Flask + SQLAlchemy
+    name: Backend · ${{ matrix.service }}
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [ "user", "tasks" ]   # <-- add more services here
 
     services:
       postgres:
         image: postgres:16
         ports: ["5432:5432"]
         env:
-          # passwordless trust auth for CI-only (no secrets; no GitGuardian warning)
           POSTGRES_HOST_AUTH_METHOD: trust
           POSTGRES_DB: testdb
         options: >-
@@ -33,7 +36,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: backend
+        working-directory: backend/${{ matrix.service }}
 
     steps:
       - name: Checkout
@@ -48,20 +51,23 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements*.txt') }}
-          restore-keys: ${{ runner.os }}-pip-
+          # hash each service's requirements plus shared common if present
+          key: ${{ runner.os }}-pip-${{ matrix.service }}-${{ hashFiles(format('backend/{0}/requirements.txt', matrix.service), 'backend/requirements.common.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ matrix.service }}-
+            ${{ runner.os }}-pip-
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-cov black flake8
+          # if you prefer pre-commit/flake8/black shared via common, that's fine too
+          pip install flake8 black pytest pytest-cov
 
       - name: Export test env
         run: |
           echo "FLASK_ENV=test" >> $GITHUB_ENV
           echo "DATABASE_URL=postgresql+psycopg://postgres@localhost:5432/testdb" >> $GITHUB_ENV
-          # dummies so your code that expects these won't crash in tests
           echo "SUPABASE_URL=http://localhost" >> $GITHUB_ENV
           echo "SUPABASE_ANON_KEY=test" >> $GITHUB_ENV
 
@@ -71,7 +77,7 @@ jobs:
       - name: Format check (black)
         run: black --check .
 
-      # If you use Alembic, uncomment:
+      # If you use Alembic per service, uncomment and adapt path:
       # - name: Run DB migrations
       #   run: alembic upgrade head
 
@@ -84,8 +90,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: backend-pytest-report
-          path: backend/pytest-report.xml
+          name: backend-${{ matrix.service }}-pytest-report
+          path: backend/${{ matrix.service }}/pytest-report.xml
 
   frontend:
     name: Frontend · Next.js
@@ -118,7 +124,4 @@ jobs:
       - name: Build
         env:
           NEXT_TELEMETRY_DISABLED: 1
-          # Add any NEXT_PUBLIC_* envs your build strictly needs:
-          # NEXT_PUBLIC_SUPABASE_URL: http://localhost
-          # NEXT_PUBLIC_SUPABASE_ANON_KEY: test
         run: npm run build
