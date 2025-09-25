@@ -1,0 +1,124 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# avoid overlapping runs on the same ref
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend · Flask + SQLAlchemy
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        ports: ["5432:5432"]
+        env:
+          # passwordless trust auth for CI-only (no secrets; no GitGuardian warning)
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd="pg_isready -U postgres -d testdb"
+          --health-interval=10s --health-timeout=5s --health-retries=5
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements*.txt') }}
+          restore-keys: ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov black flake8
+
+      - name: Export test env
+        run: |
+          echo "FLASK_ENV=test" >> $GITHUB_ENV
+          echo "DATABASE_URL=postgresql+psycopg://postgres@localhost:5432/testdb" >> $GITHUB_ENV
+          # dummies so your code that expects these won't crash in tests
+          echo "SUPABASE_URL=http://localhost" >> $GITHUB_ENV
+          echo "SUPABASE_ANON_KEY=test" >> $GITHUB_ENV
+
+      - name: Lint (flake8)
+        run: flake8 .
+
+      - name: Format check (black)
+        run: black --check .
+
+      # If you use Alembic, uncomment:
+      # - name: Run DB migrations
+      #   run: alembic upgrade head
+
+      - name: Run tests
+        run: |
+          pytest -q --maxfail=1 --disable-warnings \
+            --cov=. --cov-report=term-missing --junitxml=pytest-report.xml
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-pytest-report
+          path: backend/pytest-report.xml
+
+  frontend:
+    name: Frontend · Next.js
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint --if-present
+
+      - name: Test
+        run: npm test --if-present -- --ci
+
+      - name: Build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+          # Add any NEXT_PUBLIC_* envs your build strictly needs:
+          # NEXT_PUBLIC_SUPABASE_URL: http://localhost
+          # NEXT_PUBLIC_SUPABASE_ANON_KEY: test
+        run: npm run build
