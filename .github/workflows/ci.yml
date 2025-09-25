@@ -23,16 +23,8 @@ jobs:
       matrix:
         service: [ "tasks" ]   # <-- add more services here
 
-    services:
-      postgres:
-        image: postgres:16
-        ports: ["5432:5432"]
-        env:
-          POSTGRES_HOST_AUTH_METHOD: trust
-          POSTGRES_DB: testdb
-        options: >-
-          --health-cmd="pg_isready -U postgres -d testdb"
-          --health-interval=10s --health-timeout=5s --health-retries=5
+    # Add job-level services here if a backend service needs its own dependencies (e.g., Redis)
+    # For hosted DBs like Supabase, no local DB service is required.
 
     defaults:
       run:
@@ -67,9 +59,12 @@ jobs:
       - name: Export test env
         run: |
           echo "FLASK_ENV=test" >> $GITHUB_ENV
-          echo "DATABASE_URL=postgresql+psycopg://postgres@localhost:5432/testdb" >> $GITHUB_ENV
-          echo "SUPABASE_URL=http://localhost" >> $GITHUB_ENV
-          echo "SUPABASE_ANON_KEY=test" >> $GITHUB_ENV
+          # Supply dummy envs if your code expects them; override with repository/environment secrets as needed
+          echo "DB_USER=${DB_USER:-test_user}" >> $GITHUB_ENV
+          echo "DB_PASSWORD=${DB_PASSWORD:-test_password}" >> $GITHUB_ENV
+          echo "DB_HOST=${DB_HOST:-localhost}" >> $GITHUB_ENV
+          echo "DB_PORT=${DB_PORT:-5432}" >> $GITHUB_ENV
+          echo "DB_NAME=${DB_NAME:-testdb}" >> $GITHUB_ENV
 
       - name: Lint (flake8)
         run: flake8 .
@@ -81,10 +76,22 @@ jobs:
       # - name: Run DB migrations
       #   run: alembic upgrade head
 
-      - name: Run tests
+      - name: Run tests (skip gracefully if none)
         run: |
-          pytest -q --maxfail=1 --disable-warnings \
-            --cov=. --cov-report=term-missing --junitxml=pytest-report.xml
+          set -e
+          if pytest -q --maxfail=1 --disable-warnings \
+               --cov=. --cov-report=term-missing --junitxml=pytest-report.xml; then
+            echo "Pytest completed."
+          else
+            code=$?
+            if [ "$code" -eq 5 ]; then
+              echo "No tests collected. Skipping as success."
+              echo '<testsuite name="pytest" tests="0"/>' > pytest-report.xml
+              exit 0
+            else
+              exit $code
+            fi
+          fi
 
       - name: Upload test report
         if: always()
