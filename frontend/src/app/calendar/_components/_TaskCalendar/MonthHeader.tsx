@@ -1,13 +1,13 @@
 import { Box, IconButton, Typography } from '@mui/material'
 import { ChevronLeft, ChevronRight } from '@mui/icons-material'
 
-interface CalendarNavBarProps {
+interface MonthHeaderProps {
     isMobile: boolean
     currentDate: any
     navigateMonth: (direction: 'prev' | 'next') => void
 }
 
-const CalendarNavBar: React.FC<CalendarNavBarProps> = ({
+const MonthHeader: React.FC<MonthHeaderProps> = ({
     isMobile, currentDate, navigateMonth
 }) => {
     return (
@@ -34,4 +34,4 @@ const CalendarNavBar: React.FC<CalendarNavBarProps> = ({
     )
 }
 
-export default CalendarNavBar;
+export default MonthHeader;

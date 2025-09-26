@@ -5,26 +5,13 @@ import {
   Box,
   Paper,
   Typography,
-  Button,
-  IconButton,
   Card,
   CardContent,
-  AppBar,
-  Toolbar,
-  TextField,
-  InputAdornment,
   Stack,
   useTheme,
   useMediaQuery,
   Drawer
 } from '@mui/material';
-import {
-  ChevronLeft,
-  ChevronRight,
-  Search,
-  Add,
-  Menu as MenuIcon
-} from '@mui/icons-material';
 import dayjs, { Dayjs } from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
@@ -36,10 +23,10 @@ dayjs.extend(weekOfYear);
 import { taskMockData, Task } from '@/mocks/staff/taskMockData';
 import SideBar from './_components/SideBar';
 import Header from './_components/Header';
+import MonthHeader from './_components/_TaskCalendar/MonthHeader';
 import TaskDetailModal from './TaskDetailModal';
 import TaskCreateModal from './_components/TaskCreateModal';
 import DayTasksModal from './DayTasksModal';
-import CalendarNavBar from './_components/_TaskCalendar/CalendarNavBar';
 
 const TaskCalendar: React.FC = () => {
   const [currentDate, setCurrentDate] = useState<Dayjs>(dayjs());
@@ -212,7 +199,7 @@ const TaskCalendar: React.FC = () => {
             overflow: 'hidden'
           }}>
             {/* Month Navigation */}
-            <CalendarNavBar
+            <MonthHeader
               isMobile={isMobile}
               currentDate={currentDate}
               navigateMonth={navigateMonth} />
