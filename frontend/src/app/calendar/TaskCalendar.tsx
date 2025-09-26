@@ -34,7 +34,7 @@ dayjs.extend(isBetween);
 dayjs.extend(weekOfYear);
 
 import { taskMockData, Task } from '@/mocks/staff/taskMockData';
-import SideBarContent from './_components/SideBarContent';
+import SideBar from './_components/SideBar';
 import TaskDetailModal from './TaskDetailModal';
 import TaskCreateModal from './_components/TaskCreateModal';
 import DayTasksModal from './DayTasksModal';
@@ -176,30 +176,12 @@ const TaskCalendar: React.FC = () => {
   return (
     <Box sx={{ display: 'flex', height: '100vh', bgcolor: '#f5f5f5', overflow: 'hidden' }}>
       {/* Sidebar for Desktop */}
-      {!isMobile && (
-        <Paper sx={{
-          width: 280,
-          mr: 2,
-          height: '100vh',
-          overflow: 'auto',
-          flexShrink: 0
-        }}>
-          <SideBarContent isMobile={isMobile} currentUser={currentUser} assignedTasks={assignedTasks} />
-        </Paper>
-      )}
-
-      {/* Mobile Drawer */}
-      <Drawer
-        anchor="left"
-        open={sidebarOpen}
-        onClose={toggleSidebar}
-        sx={{
-          display: { xs: 'block', md: 'none' },
-          '& .MuiDrawer-paper': { width: 280 }
-        }}
-      >
-        <SideBarContent isMobile={isMobile} currentUser={currentUser} assignedTasks={assignedTasks} />
-      </Drawer>
+      <SideBar isMobile={isMobile}
+        sidebarOpen={sidebarOpen}
+        toggleSidebar={toggleSidebar}
+        currentUser={currentUser}
+        assignedTasks={assignedTasks}
+      />
 
       {/* Main Content */}
       <Box sx={{
