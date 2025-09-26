@@ -27,6 +27,7 @@ import MonthHeader from './_components/_TaskCalendar/MonthHeader';
 import TaskDetailModal from './TaskDetailModal';
 import TaskCreateModal from './_components/TaskCreateModal';
 import DayTasksModal from './DayTasksModal';
+import DayHeaders from './_components/_TaskCalendar/DayHeaders';
 
 const TaskCalendar: React.FC = () => {
   const [currentDate, setCurrentDate] = useState<Dayjs>(dayjs());
@@ -207,37 +208,7 @@ const TaskCalendar: React.FC = () => {
             {/* Calendar Grid */}
             <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
               {/* Day Headers */}
-              <Stack
-                direction="row"
-                spacing={0.5}
-                sx={{
-                  mb: 1,
-                  flexShrink: 0,
-                  height: { xs: 24, sm: 32 }
-                }}
-              >
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                  <Box
-                    key={day}
-                    sx={{
-                      flex: 1,
-                      textAlign: 'center',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      minWidth: 0
-                    }}
-                  >
-                    <Typography
-                      variant="subtitle2"
-                      color="text.secondary"
-                      sx={{ fontSize: { xs: '0.7rem', sm: '0.875rem' } }}
-                    >
-                      {isMobile ? day.slice(0, 2) : day}
-                    </Typography>
-                  </Box>
-                ))}
-              </Stack>
+              <DayHeaders isMobile={isMobile} />
 
               {/* Calendar Body with Fixed Heights */}
               <Stack
