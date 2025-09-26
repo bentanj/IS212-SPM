@@ -35,6 +35,7 @@ dayjs.extend(weekOfYear);
 
 import { taskMockData, Task } from '@/mocks/staff/taskMockData';
 import SideBar from './_components/SideBar';
+import Header from './_components/Header';
 import TaskDetailModal from './TaskDetailModal';
 import TaskCreateModal from './_components/TaskCreateModal';
 import DayTasksModal from './DayTasksModal';
@@ -193,48 +194,11 @@ const TaskCalendar: React.FC = () => {
         overflow: 'hidden'
       }}>
         {/* Header */}
-        <AppBar position="static" color="transparent" elevation={0} sx={{ bgcolor: 'white', flexShrink: 0 }}>
-          <Toolbar sx={{ minHeight: { xs: 56, sm: 64 } }}>
-            {isMobile && (
-              <IconButton edge="start" onClick={toggleSidebar} sx={{ mr: 2 }}>
-                <MenuIcon />
-              </IconButton>
-            )}
-            <TextField
-              placeholder="Search my tasks..."
-              variant="outlined"
-              size="small"
-              sx={{
-                mr: 'auto',
-                width: { xs: '150px', sm: '200px', md: '300px' }
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <Typography
-              variant="h6"
-              sx={{
-                mx: { xs: 1, sm: 2 },
-                display: { xs: 'none', sm: 'block' }
-              }}
-            >
-              My Calendar
-            </Typography>
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={() => setCreateModalOpen(true)}
-              size={isMobile ? 'small' : 'medium'}
-            >
-              {isMobile ? '+' : 'Add task'}
-            </Button>
-          </Toolbar>
-        </AppBar>
+        <Header
+          isMobile={isMobile}
+          toggleSidebar={toggleSidebar}
+          setCreateModalOpen={setCreateModalOpen}
+        />
 
         {/* Calendar Container */}
         <Box sx={{
