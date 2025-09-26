@@ -39,6 +39,7 @@ import Header from './_components/Header';
 import TaskDetailModal from './TaskDetailModal';
 import TaskCreateModal from './_components/TaskCreateModal';
 import DayTasksModal from './DayTasksModal';
+import CalendarNavBar from './_components/_TaskCalendar/CalendarNavBar';
 
 const TaskCalendar: React.FC = () => {
   const [currentDate, setCurrentDate] = useState<Dayjs>(dayjs());
@@ -186,12 +187,8 @@ const TaskCalendar: React.FC = () => {
 
       {/* Main Content */}
       <Box sx={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        minWidth: 0,
-        height: '100vh',
-        overflow: 'hidden'
+        flex: 1, display: 'flex', flexDirection: 'column',
+        minWidth: 0, height: '100vh', overflow: 'hidden'
       }}>
         {/* Header */}
         <Header
@@ -215,26 +212,10 @@ const TaskCalendar: React.FC = () => {
             overflow: 'hidden'
           }}>
             {/* Month Navigation */}
-            <Box sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              mb: 2,
-              flexShrink: 0
-            }}>
-              <IconButton onClick={() => navigateMonth('prev')}>
-                <ChevronLeft />
-              </IconButton>
-              <Typography
-                variant={isMobile ? 'h6' : 'h5'}
-                sx={{ mx: 2, minWidth: { xs: 120, sm: 140 }, textAlign: 'center' }}
-              >
-                {currentDate.format(isMobile ? 'MMM YYYY' : 'MMMM YYYY')}
-              </Typography>
-              <IconButton onClick={() => navigateMonth('next')}>
-                <ChevronRight />
-              </IconButton>
-            </Box>
+            <CalendarNavBar
+              isMobile={isMobile}
+              currentDate={currentDate}
+              navigateMonth={navigateMonth} />
 
             {/* Calendar Grid */}
             <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
