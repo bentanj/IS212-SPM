@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import {
+  Alert, AlertColor,
   Box,
   Paper,
   Typography,
@@ -10,7 +11,7 @@ import {
   Stack,
   useTheme,
   useMediaQuery,
-  Drawer
+  Snackbar
 } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -43,6 +44,21 @@ const TaskCalendar: React.FC = () => {
   const [dayTasksModalOpen, setDayTasksModalOpen] = useState(false);
   const [selectedDayTasks, setSelectedDayTasks] = useState<Task[]>([]);
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
+
+  // Snackbar
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<AlertColor>('success');
+  const setSnackbarContent = (message: string, severity: AlertColor) => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+  const snackbarReset = () => {
+    setSnackbarOpen(false);
+    setSnackbarMessage('');
+    setSnackbarSeverity('success');
+  }
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -378,6 +394,7 @@ const TaskCalendar: React.FC = () => {
         open={modalOpen}
         onClose={handleCloseModal}
         onTaskUpdated={handleTaskUpdated}
+        setSnackbarContent={setSnackbarContent}
       />
 
       {/* Task Create Modal */}
@@ -385,8 +402,19 @@ const TaskCalendar: React.FC = () => {
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
         onTaskCreated={handleTaskCreated}
+        setSnackbarContent={setSnackbarContent}
       />
 
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={2000}
+        onClose={snackbarReset}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={snackbarReset} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
 
     </Box>
   );

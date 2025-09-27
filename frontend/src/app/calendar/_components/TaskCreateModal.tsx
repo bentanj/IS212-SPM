@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import {
+  Alert, AlertColor, Autocomplete, Button,
   Dialog, DialogContent, DialogActions,
-  Button, TextField, Alert, Autocomplete, Stack,
+  Stack, TextField,
   useTheme, useMediaQuery
 } from '@mui/material';
 import dayjs from 'dayjs';
@@ -31,6 +32,7 @@ interface TaskCreateModalProps {
   onClose: () => void;
   onTaskCreated?: (task: Task) => void;
   onTaskUpdated?: (task: Task) => void;
+  setSnackbarContent: (message: string, severity: AlertColor) => void;
   editingTask?: Task | null; // New prop for edit mode
 };
 
@@ -39,6 +41,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   onClose,
   onTaskCreated,
   onTaskUpdated,
+  setSnackbarContent,
   editingTask = null,
 }) => {
   const theme = useTheme();
@@ -108,6 +111,10 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
       canEdit, isEditMode, editingTask, formData, newComment, currentUser,
       onTaskCreated, onTaskUpdated, setSubmitStatus, setSubmitMessage, setErrors, handleReset, onClose
     });
+    // Placeholder. To replace with actual success condition
+    if (editingTask) setSnackbarContent('Task updated successfully', 'success');
+    else if (true) setSnackbarContent('Task created successfully', 'success');
+    else setSnackbarContent('Failed to create task', 'error');
   };
 
   // Check if user can add more assignees

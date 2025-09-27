@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import {
+  AlertColor,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -28,6 +29,7 @@ interface TaskDetailModalProps {
   task: Task | null;
   open: boolean;
   onClose: () => void;
+  setSnackbarContent: (message: string, severity: AlertColor) => void;
   onTaskUpdated?: (task: Task) => void;
 }
 
@@ -54,7 +56,8 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   task,
   open,
   onClose,
-  onTaskUpdated
+  onTaskUpdated,
+  setSnackbarContent
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -264,6 +267,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         onClose={handleEditClose}
         onTaskUpdated={handleTaskUpdated}
         editingTask={task}
+        setSnackbarContent={setSnackbarContent}
       />
     </>
   );
