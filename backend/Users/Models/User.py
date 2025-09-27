@@ -1,6 +1,6 @@
 from sqlalchemy import Column, BigInteger, Text, DateTime, Boolean
 from sqlalchemy.dialects.postgresql import UUID
-from db import Base
+from Users.db import Base
 import uuid
 from datetime import datetime
 
@@ -14,7 +14,7 @@ class User(Base):
     password_hash = Column(Text, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     is_verified = Column(Boolean, default=False, nullable=False)
-    role = Column(Text, default='user', nullable=False)
+    role = Column(Text, default='staff', nullable=False)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     last_login = Column(DateTime(timezone=True), nullable=True)

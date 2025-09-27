@@ -2,9 +2,9 @@ from flask import Blueprint, jsonify, request, g
 from datetime import datetime
 from uuid import UUID
 from sqlalchemy.exc import SQLAlchemyError
-from Repositories.UserRepository import UserRepository
-from Services.UserService import UserService
-from exceptions import UserNotFoundError, UserValidationError, UserAlreadyExistsError
+from Users.Repositories.UserRepository import UserRepository
+from Users.Services.UserService import UserService
+from Users.exceptions import UserNotFoundError, UserValidationError, UserAlreadyExistsError
 
 bp = Blueprint("users", __name__, url_prefix="/api/users")
 

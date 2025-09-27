@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session, declarative_base
-from config import Config
+from Users.config import Config
 from sqlalchemy import text
 
 engine = create_engine(
@@ -15,5 +15,5 @@ Base = declarative_base()
 
 def init_db():
     # import models here so Base.metadata is populated
-    from Models.User import User  # noqa
+    from Users.Models.User import User  # noqa
     Base.metadata.create_all(bind=engine)

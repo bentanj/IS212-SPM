@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 from datetime import datetime
 from uuid import UUID
-from Models.User import User
+from Users.Models.User import User
 
 class UserRepository:
     def __init__(self, session: Session):

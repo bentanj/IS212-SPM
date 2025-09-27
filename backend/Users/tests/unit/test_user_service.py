@@ -3,9 +3,10 @@ from unittest.mock import Mock, MagicMock
 from datetime import datetime
 from uuid import uuid4
 
-from ...Services.UserService import UserService
-from ...Models.User import User
-from ...exceptions import UserNotFoundError, UserValidationError, UserAlreadyExistsError
+from Users.Services.UserService import UserService
+from Users.Models.User import User
+from Users.exceptions import UserNotFoundError, UserValidationError, UserAlreadyExistsError
+
 
 
 class TestUserService(unittest.TestCase):

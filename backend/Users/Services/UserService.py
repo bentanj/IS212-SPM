@@ -3,9 +3,10 @@ from datetime import datetime
 from uuid import UUID
 import hashlib
 import secrets
-from Repositories.UserRepository import UserRepository
-from Models.User import User
-from exceptions import UserNotFoundError, UserValidationError, UserAlreadyExistsError
+from Users.Repositories.UserRepository import UserRepository
+
+from Users.Models.User import User
+from Users.exceptions import UserNotFoundError, UserValidationError, UserAlreadyExistsError
 
 class UserService:
     def __init__(self, repo: UserRepository):
