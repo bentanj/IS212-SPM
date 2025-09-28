@@ -20,7 +20,7 @@ import {
   useTheme,
   useMediaQuery
 } from '@mui/material';
-import { Edit as EditIcon } from '@mui/icons-material';
+import { Edit as EditIcon, Add as AddIcon } from '@mui/icons-material';
 import { Task, taskMockData } from '@/mocks/staff/taskMockData';
 import dayjs from 'dayjs';
 import TaskCreateModal from './_components/TaskCreateModal';
@@ -31,6 +31,7 @@ interface TaskDetailModalProps {
   onClose: () => void;
   setSnackbarContent: (message: string, severity: AlertColor) => void;
   onTaskUpdated?: (task: Task) => void;
+  onCreateSubtask?: (parentTask: Task) => void;
 }
 
 const getPriorityColor = (priority: string) => {
@@ -57,7 +58,8 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   open,
   onClose,
   onTaskUpdated,
-  setSnackbarContent
+  setSnackbarContent,
+  onCreateSubtask, // Accept the new prop
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -83,6 +85,11 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   const handleTaskUpdated = (updatedTask: Task) => {
     onTaskUpdated?.(updatedTask);
     setEditModalOpen(false);
+  };
+
+  // New handler for subtask creation
+  const handleCreateSubtask = () => {
+    onCreateSubtask?.(task);
   };
 
   return (
@@ -243,12 +250,25 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         </DialogContent>
 
         <DialogActions>
+          {/* Create Subtask Button - Only show if onCreateSubtask prop is provided and task is not already a subtask */}
+          {onCreateSubtask && !task.parentTaskId && (
+            <Button
+              onClick={handleCreateSubtask}
+              variant="outlined"
+              startIcon={<AddIcon />}
+              sx={{ mr: 'auto' }} // Pushes button to the left
+            >
+              {isMobile ? 'Subtask' : 'Create Subtask'}
+            </Button>
+          )}
+
           <Button
             onClick={onClose}
             variant="outlined"
           >
             Close
           </Button>
+          
           {canEdit && (
             <Button
               onClick={handleEditClick}

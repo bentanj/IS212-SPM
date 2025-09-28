@@ -25,6 +25,7 @@ export interface Task {
   projectName: string;
   ownerId: number;
   sharedWith: number[];
+  parentTaskId?: number; // Add this line
 }
 
 export interface CurrentUser {
