@@ -1,19 +1,30 @@
-// app/user-management/page.tsx
-import React from 'react';
-import { Metadata } from 'next';
-import UserManagementTable from './UserManagement';
+'use client';
 
-// Metadata for the page
-export const metadata: Metadata = {
-  title: 'User Management | Sisyphus Ventures',
-  description: 'Manage your team members and their account permissions',
-};
+import UserManagement from './UserManagement';
+import { taskMockData } from '@/mocks/staff/taskMockData';
 
-// Main page component
 export default function UserManagementPage() {
-  return (
-    <div>
-      <UserManagementTable />
-    </div>
-  );
+  // Mock authentication check - replace with actual auth
+  const currentUser = taskMockData.currentUser;
+  
+  // Only allow HR/Admin access
+  if (!currentUser || (currentUser.role !== 'Admin' && currentUser.department !== 'Human Resources')) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        flexDirection: 'column',
+        backgroundColor: '#f5f5f5'
+      }}>
+        <h1 style={{ color: '#d32f2f', marginBottom: '16px' }}>Access Denied</h1>
+        <p style={{ color: '#666', textAlign: 'center' }}>
+          Only HR and Admin users can access the User Management system.
+        </p>
+      </div>
+    );
+  }
+
+  return <UserManagement />;
 }
