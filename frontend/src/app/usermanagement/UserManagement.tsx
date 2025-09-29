@@ -48,6 +48,7 @@ import UserEditModal from './UserEditModal';
 import UserCreateModal from './UserCreateModal';
 
 interface ExtendedUser extends User {
+  // Removed status and lastLogin properties
 }
 
 // Custom hook for debounced value
@@ -156,8 +157,14 @@ function CustomPagination() {
 
 export default function UserManagement() {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+  const [mounted, setMounted] = useState(false);
+  
+  // Use state instead of useMediaQuery for initial render to prevent hydration mismatch
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+  
+  const mobileMQ = useMediaQuery(theme.breakpoints.down('sm'));
+  const tabletMQ = useMediaQuery(theme.breakpoints.down('md'));
 
   const [users, setUsers] = useState<ExtendedUser[]>([]);
   const [departments, setDepartments] = useState<string[]>([]);
@@ -182,6 +189,21 @@ export default function UserManagement() {
     role: 'Staff' as 'Staff' | 'Manager' | 'Admin',
     department: ''
   });
+
+  // Handle client-side mounting to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+    setIsMobile(mobileMQ);
+    setIsTablet(tabletMQ);
+  }, [mobileMQ, tabletMQ]);
+
+  // Update responsive states when media queries change
+  useEffect(() => {
+    if (mounted) {
+      setIsMobile(mobileMQ);
+      setIsTablet(tabletMQ);
+    }
+  }, [mounted, mobileMQ, tabletMQ]);
 
   // Debounce search term to reduce filtering frequency
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -383,19 +405,19 @@ export default function UserManagement() {
         }}>
           <Box
             sx={{
-              width: { xs: 24, sm: 32 },
-              height: { xs: 24, sm: 32 },
+              width: isMobile ? 24 : 32,
+              height: isMobile ? 24 : 32,
               borderRadius: '50%',
               backgroundColor: '#1976d2',
               color: 'white',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: { xs: '10px', sm: '14px' },
+              fontSize: isMobile ? '10px' : '14px',
               fontWeight: 'bold',
               flexShrink: 0,
-              minWidth: { xs: 24, sm: 32 },
-              maxWidth: { xs: 24, sm: 32 }
+              minWidth: isMobile ? 24 : 32,
+              maxWidth: isMobile ? 24 : 32
             }}
           >
             {params.value.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
@@ -462,7 +484,7 @@ export default function UserManagement() {
             color={getRoleColor(params.value)}
             size="small"
             variant="outlined"
-            sx={{ fontSize: { xs: '0.7rem', sm: '0.8rem' } }}
+            sx={{ fontSize: isMobile ? '0.7rem' : '0.8rem' }}
           />
         </Box>
       ),
@@ -512,7 +534,7 @@ export default function UserManagement() {
         />
       ],
     },
-  ], [getColumnWidth, getRoleColor, handleOpenEditDialog]);
+  ], [getColumnWidth, getRoleColor, handleOpenEditDialog, isMobile]);
 
   // Memoized rows to prevent recreation on each render
   const rows: GridRowsProp = useMemo(() => 
@@ -533,23 +555,28 @@ export default function UserManagement() {
     setSnackbar(prev => ({ ...prev, open: false }));
   }, []);
 
+  // Show loading or return null during initial render to prevent hydration mismatch
+  if (!mounted) {
+    return null;
+  }
+
   return (
     <Box sx={{ 
-      p: { xs: 1, sm: 2, md: 3 }, 
+      p: isMobile ? 1 : isTablet ? 2 : 3, 
       minHeight: '100vh', 
       backgroundColor: '#f5f5f5'
     }}>
       <Paper sx={{ 
-        height: { xs: 'calc(100vh - 16px)', sm: 'calc(100vh - 32px)', md: 'calc(100vh - 48px)' },
+        height: isMobile ? 'calc(100vh - 16px)' : isTablet ? 'calc(100vh - 32px)' : 'calc(100vh - 48px)',
         display: 'flex', 
         flexDirection: 'column' 
       }}>
         <Toolbar sx={{ 
           borderBottom: 1, 
           borderColor: 'divider',
-          flexDirection: { xs: 'column', sm: 'row' },
-          gap: { xs: 1, sm: 0 },
-          py: { xs: 1, sm: 2 }
+          flexDirection: isMobile ? 'column' : 'row',
+          gap: isMobile ? 1 : 0,
+          py: isMobile ? 1 : 2
         }}>
           <Typography 
             variant={isMobile ? "h6" : "h5"} 
@@ -557,7 +584,7 @@ export default function UserManagement() {
             sx={{ 
               flexGrow: 1, 
               fontWeight: 600,
-              textAlign: { xs: 'center', sm: 'left' }
+              textAlign: isMobile ? 'center' : 'left'
             }}
           >
             User Management
@@ -569,7 +596,7 @@ export default function UserManagement() {
               onClick={handleOpenCreateDialog}
               sx={{ 
                 borderRadius: 2,
-                fontSize: { xs: '0.8rem', sm: '0.875rem' }
+                fontSize: '0.875rem'
               }}
             >
               Add User
@@ -578,9 +605,9 @@ export default function UserManagement() {
         </Toolbar>
 
         <Box sx={{ 
-          p: { xs: 1, sm: 2 }, 
+          p: isMobile ? 1 : 2, 
           display: 'flex', 
-          gap: { xs: 1, sm: 2 }, 
+          gap: isMobile ? 1 : 2, 
           alignItems: 'center', 
           flexWrap: 'wrap' 
         }}>
@@ -597,16 +624,16 @@ export default function UserManagement() {
               ),
             }}
             sx={{ 
-              minWidth: { xs: '100%', sm: 200, md: 250 },
-              mb: { xs: 1, sm: 0 }
+              minWidth: isMobile ? '100%' : isTablet ? 200 : 250,
+              mb: isMobile ? 1 : 0
             }}
           />
 
           <FormControl 
             size="small" 
             sx={{ 
-              minWidth: { xs: '48%', sm: 120, md: 150 },
-              mb: { xs: 1, sm: 0 }
+              minWidth: isMobile ? '48%' : isTablet ? 120 : 150,
+              mb: isMobile ? 1 : 0
             }}
           >
             <InputLabel>Department</InputLabel>
@@ -625,8 +652,8 @@ export default function UserManagement() {
           <FormControl 
             size="small" 
             sx={{ 
-              minWidth: { xs: '48%', sm: 100, md: 120 },
-              mb: { xs: 1, sm: 0 }
+              minWidth: isMobile ? '48%' : isTablet ? 100 : 120,
+              mb: isMobile ? 1 : 0
             }}
           >
             <InputLabel>Role</InputLabel>
@@ -664,8 +691,8 @@ export default function UserManagement() {
               size="small"
               onClick={handleClearFilters}
               sx={{ 
-                fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                width: { xs: '100%', sm: 'auto' }
+                fontSize: isMobile ? '0.7rem' : '0.875rem',
+                width: isMobile ? '100%' : 'auto'
               }}
             >
               Clear Filters
@@ -675,7 +702,7 @@ export default function UserManagement() {
 
         <Box sx={{ 
           flexGrow: 1, 
-          p: { xs: 1, sm: 2 }, 
+          p: isMobile ? 1 : 2, 
           pt: 0,
           overflow: 'hidden'
         }}>
@@ -700,7 +727,7 @@ export default function UserManagement() {
               },
               '& .MuiDataGrid-cell': {
                 borderBottom: '1px solid #f0f0f0',
-                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                fontSize: isMobile ? '0.75rem' : '0.875rem',
                 display: 'flex',
                 alignItems: 'center',
                 padding: '0 8px',
@@ -715,7 +742,7 @@ export default function UserManagement() {
               '& .MuiDataGrid-columnHeaders': {
                 backgroundColor: '#fafafa',
                 color: '#333',
-                fontSize: { xs: '0.75rem', sm: '14px' },
+                fontSize: isMobile ? '0.75rem' : '14px',
                 fontWeight: 600,
               },
               '& .MuiDataGrid-columnHeader': {
@@ -743,9 +770,9 @@ export default function UserManagement() {
                 borderTop: '1px solid #f0f0f0',
               },
               '& .MuiDataGrid-toolbarContainer': {
-                padding: { xs: '8px', sm: '16px' },
+                padding: isMobile ? '8px' : '16px',
                 '& .MuiButton-root': {
-                  fontSize: { xs: '0.7rem', sm: '0.875rem' }
+                  fontSize: isMobile ? '0.7rem' : '0.875rem'
                 }
               },
             }}
