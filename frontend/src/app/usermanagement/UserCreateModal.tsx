@@ -15,9 +15,7 @@ import {
   InputLabel,
   useTheme,
   useMediaQuery,
-  Alert,
-  IconButton,
-  Tooltip
+  FormHelperText
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 
@@ -50,23 +48,49 @@ const UserCreateModal = memo(function UserCreateModal({
   
   const [showNewDepartment, setShowNewDepartment] = useState(false);
   const [newDepartment, setNewDepartment] = useState('');
-  const [nameError, setNameError] = useState('');
+  const [errors, setErrors] = useState({
+    name: '',
+    email: '',
+    department: ''
+  });
+  const [touched, setTouched] = useState({
+    name: false,
+    email: false,
+    department: false
+  });
+
+  const validateField = (field: string, value: string) => {
+    switch (field) {
+      case 'name':
+        if (!value.trim()) return 'Full name is required';
+        if (!/^[a-zA-Z\s]+$/.test(value)) return 'Name can only contain letters and spaces';
+        return '';
+      case 'email':
+        if (!value.trim()) return 'Email address is required';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Please enter a valid email address';
+        return '';
+      case 'department':
+        if (!value.trim()) return 'Department is required';
+        return '';
+      default:
+        return '';
+    }
+  };
 
   const handleFieldChange = (field: string) => (event: any) => {
     const value = event.target.value;
-    
-    // Special validation for name field
-    if (field === 'name') {
-      const nameRegex = /^[a-zA-Z\s]+$/;
-      if (value && !nameRegex.test(value)) {
-        setNameError('Name can only contain letters and spaces');
-        return; // Don't update the field if validation fails
-      } else {
-        setNameError('');
-      }
-    }
-    
     onFormDataChange(field, value);
+    
+    // Clear error when user starts typing
+    if (errors[field as keyof typeof errors]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const handleFieldBlur = (field: string) => () => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+    const error = validateField(field, formData[field as keyof typeof formData]);
+    setErrors(prev => ({ ...prev, [field]: error }));
   };
 
   const handleDepartmentChange = (event: any) => {
@@ -75,6 +99,10 @@ const UserCreateModal = memo(function UserCreateModal({
       setShowNewDepartment(true);
     } else {
       onFormDataChange('department', value);
+      // Clear department error
+      if (errors.department) {
+        setErrors(prev => ({ ...prev, department: '' }));
+      }
     }
   };
 
@@ -84,6 +112,8 @@ const UserCreateModal = memo(function UserCreateModal({
       onFormDataChange('department', newDepartment.trim());
       setNewDepartment('');
       setShowNewDepartment(false);
+      // Clear department error
+      setErrors(prev => ({ ...prev, department: '' }));
     }
   };
 
@@ -92,10 +122,46 @@ const UserCreateModal = memo(function UserCreateModal({
     setShowNewDepartment(false);
   };
 
+  const handleCreate = () => {
+    // Validate all fields and show errors
+    const nameError = validateField('name', formData.name);
+    const emailError = validateField('email', formData.email);
+    const departmentError = validateField('department', formData.department);
+    
+    setErrors({
+      name: nameError,
+      email: emailError,
+      department: departmentError
+    });
+
+    setTouched({
+      name: true,
+      email: true,
+      department: true
+    });
+
+    // If no errors, proceed with creation
+    if (!nameError && !emailError && !departmentError) {
+      onCreate();
+      // Reset form state
+      setErrors({ name: '', email: '', department: '' });
+      setTouched({ name: false, email: false, department: false });
+    }
+  };
+
+  const handleClose = () => {
+    // Reset form state when closing
+    setErrors({ name: '', email: '', department: '' });
+    setTouched({ name: false, email: false, department: false });
+    setShowNewDepartment(false);
+    setNewDepartment('');
+    onClose();
+  };
+
   return (
     <Dialog 
       open={open} 
-      onClose={onClose} 
+      onClose={handleClose} 
       maxWidth="sm" 
       fullWidth
       fullScreen={isMobile}
@@ -114,12 +180,13 @@ const UserCreateModal = memo(function UserCreateModal({
             label="Full Name"
             value={formData.name}
             onChange={handleFieldChange('name')}
+            onBlur={handleFieldBlur('name')}
             required
             fullWidth
             size={isMobile ? "small" : "medium"}
             placeholder="Enter full name (letters only)"
-            error={!!nameError}
-            helperText={nameError || 'Only letters and spaces are allowed'}
+            error={touched.name && !!errors.name}
+            helperText={touched.name ? errors.name || 'Only letters and spaces are allowed' : 'Only letters and spaces are allowed'}
           />
           
           <TextField
@@ -127,10 +194,13 @@ const UserCreateModal = memo(function UserCreateModal({
             type="email"
             value={formData.email}
             onChange={handleFieldChange('email')}
+            onBlur={handleFieldBlur('email')}
             required
             fullWidth
             size={isMobile ? "small" : "medium"}
             placeholder="Enter email address"
+            error={touched.email && !!errors.email}
+            helperText={touched.email && errors.email}
           />
 
           <FormControl fullWidth required size={isMobile ? "small" : "medium"}>
@@ -146,12 +216,18 @@ const UserCreateModal = memo(function UserCreateModal({
             </Select>
           </FormControl>
 
-          <FormControl fullWidth required size={isMobile ? "small" : "medium"}>
+          <FormControl 
+            fullWidth 
+            required 
+            size={isMobile ? "small" : "medium"}
+            error={touched.department && !!errors.department}
+          >
             <InputLabel>Department</InputLabel>
             <Select
               value={formData.department}
               label="Department"
               onChange={handleDepartmentChange}
+              onBlur={handleFieldBlur('department')}
             >
               <MenuItem value="" disabled>
                 Select a department
@@ -173,6 +249,9 @@ const UserCreateModal = memo(function UserCreateModal({
                 Add New Department
               </MenuItem>
             </Select>
+            {touched.department && errors.department && (
+              <FormHelperText>{errors.department}</FormHelperText>
+            )}
           </FormControl>
 
           {showNewDepartment && (
@@ -217,15 +296,14 @@ const UserCreateModal = memo(function UserCreateModal({
         gap: { xs: 1, sm: 0 }
       }}>
         <Button 
-          onClick={onClose}
+          onClick={handleClose}
           sx={{ width: { xs: '100%', sm: 'auto' } }}
         >
           Cancel
         </Button>
         <Button 
-          onClick={onCreate} 
+          onClick={handleCreate} 
           variant="contained"
-          disabled={!!nameError || !formData.name}
           sx={{ width: { xs: '100%', sm: 'auto' } }}
         >
           Create User

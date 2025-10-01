@@ -48,7 +48,6 @@ import UserEditModal from './UserEditModal';
 import UserCreateModal from './UserCreateModal';
 
 interface ExtendedUser extends User {
-  // Removed status and lastLogin properties
 }
 
 // Custom hook for debounced value
