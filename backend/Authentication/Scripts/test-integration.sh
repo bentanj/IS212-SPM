@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Integration Test Script for Tasks Service (matching CI behavior)
+# Integration Test Script for Authentication Service (matching CI behavior)
 # Usage: ./test-integration.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TASKS_DIR="$(dirname "$SCRIPT_DIR")"
-BACKEND_DIR="$(dirname "$TASKS_DIR")"
+AUTH_DIR="$(dirname "$SCRIPT_DIR")"
+BACKEND_DIR="$(dirname "$AUTH_DIR")"
 
-echo "==> Tasks Integration Tests"
+echo "==> Authentication Integration Tests"
 
-# Change to Tasks directory
-cd "$TASKS_DIR"
+# Change to Authentication directory
+cd "$AUTH_DIR"
 
 # Activate virtual environment if it exists
 if [ -f "$BACKEND_DIR/venv/bin/activate" ]; then
@@ -67,5 +67,3 @@ else
   echo "==> Missing DB credentials, integration tests will be skipped"
   echo "⚠️  Integration tests skipped (no real DB credentials)"
 fi
-
-

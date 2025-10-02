@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Iterable, Optional, Dict, Any, List
 from uuid import UUID, uuid4
+import pytest
 
 from Services.TaskService import TaskService
 from Models.Task import Task
@@ -67,6 +68,7 @@ class InMemoryRepo:
         return results
 
 
+@pytest.mark.unit
 def test_create_task_defaults():
     service = TaskService(InMemoryRepo())
     task = service.create_task({
@@ -81,6 +83,7 @@ def test_create_task_defaults():
     assert task.due_date is not None
 
 
+@pytest.mark.unit
 def test_mark_completed_sets_completed_date():
     service = TaskService(InMemoryRepo())
     t = service.create_task({'title': 'Finish', 'status': 'in_progress'})
@@ -90,6 +93,7 @@ def test_mark_completed_sets_completed_date():
     assert updated.completed_date is not None
 
 
+@pytest.mark.unit
 def test_assign_and_remove_users():
     service = TaskService(InMemoryRepo())
     t = service.create_task({'title': 'Assign Test'})

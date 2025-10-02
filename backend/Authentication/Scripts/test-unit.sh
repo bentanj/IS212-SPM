@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Unit Test Script for Tasks Service (matching CI behavior)
+# Unit Test Script for Authentication Service (matching CI behavior)
 # Usage: ./test-unit.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TASKS_DIR="$(dirname "$SCRIPT_DIR")"
+AUTH_DIR="$(dirname "$SCRIPT_DIR")"
 
-echo "==> Tasks Unit Tests"
+echo "==> Authentication Unit Tests"
 
-# Change to Tasks directory
-cd "$TASKS_DIR"
+# Change to Authentication directory
+cd "$AUTH_DIR"
 
 # Activate virtual environment if it exists
 if [ -f "$BACKEND_DIR/venv/bin/activate" ]; then
@@ -49,5 +49,3 @@ else
     exit $code
   fi
 fi
-
-
