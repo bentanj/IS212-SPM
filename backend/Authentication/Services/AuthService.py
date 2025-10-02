@@ -7,8 +7,10 @@ from typing import Dict, Optional, Tuple
 # Handle both relative and absolute imports
 try:
     from ..config import Config
+    from .JWTService import JWTService
 except ImportError:
     from config import Config
+    from Services.JWTService import JWTService
 
 class AuthService:
     """OAuth 2.0 service for handling Google OAuth flow with PKCE"""
@@ -21,6 +23,7 @@ class AuthService:
         self.google_auth_url = "https://accounts.google.com/o/oauth2/v2/auth"
         self.google_token_url = "https://oauth2.googleapis.com/token"
         self.google_userinfo_url = "https://www.googleapis.com/oauth2/v2/userinfo"
+        self.jwt_service = JWTService()
         
         print(f"DEBUG: OAuth config - client_id: {self.client_id}")
         print(f"DEBUG: OAuth config - redirect_uri: {self.redirect_uri}")
@@ -122,3 +125,15 @@ class AuthService:
             'google_id': user_info.get('id'),
             'picture': user_info.get('picture')
         }
+    
+    def generate_jwt_tokens(self, user_data: Dict) -> Tuple[str, str]:
+        """Generate JWT access and refresh tokens for authenticated user"""
+        return self.jwt_service.generate_token_pair(user_data)
+    
+    def validate_jwt_token(self, token: str) -> Dict:
+        """Validate JWT access token and return payload"""
+        return self.jwt_service.decode_access_token(token)
+    
+    def refresh_jwt_token(self, refresh_token: str, user_data: Dict = None) -> str:
+        """Generate new access token from refresh token"""
+        return self.jwt_service.refresh_access_token(refresh_token, user_data)
