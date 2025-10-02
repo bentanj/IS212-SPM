@@ -8,8 +8,9 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     
+    
     # Allow all origins for CORS
-    CORS(app, origins="*")
+    CORS(app, origins="*", supports_credentials=True)
     
     @app.before_request
     def before_request():
