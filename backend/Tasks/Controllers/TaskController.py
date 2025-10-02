@@ -240,6 +240,43 @@ def get_root_tasks():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@bp.post("/filter")
+def filter_tasks():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No filter data provided"}), 400
+
+        filters = _parse_filter_data(data)
+        tasks = _task_service().search_tasks(filters)
+        return jsonify([task.to_dict() for task in tasks])
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+def _parse_filter_data(data: dict):
+    filters = {}
+
+    # String filters - pass through directly
+    for key in ['status', 'project_name', 'priority']:
+        if key in data and data[key]:
+            filters[key] = data[key]
+
+    # Integer filters
+    if 'parent_id' in data and data['parent_id'] is not None:
+        filters['parent_id'] = int(data['parent_id'])
+
+    # Date filters
+    for date_field in ['due_before', 'due_after', 'start_date_after', 'start_date_before']:
+        if date_field in data and data[date_field]:
+            try:
+                filters[date_field] = datetime.fromisoformat(data[date_field].replace('Z', '+00:00'))
+            except ValueError:
+                raise ValueError(f"Invalid {date_field} format. Use ISO format")
+
+    return filters
+
 def _parse_task_data(data: dict, is_update: bool = False):
     task_data = {}
 

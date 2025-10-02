@@ -70,6 +70,14 @@ class InMemoryRepo:
         if 'parent_id' in filters:
             results = [t for t in results if t.parent_id ==
                        filters['parent_id']]
+        if 'due_before' in filters:
+            results = [t for t in results if t.due_date and t.due_date <= filters['due_before']]
+        if 'due_after' in filters:
+            results = [t for t in results if t.due_date and t.due_date >= filters['due_after']]
+        if 'start_date_after' in filters:
+            results = [t for t in results if t.start_date and t.start_date >= filters['start_date_after']]
+        if 'start_date_before' in filters:
+            results = [t for t in results if t.start_date and t.start_date <= filters['start_date_before']]
         return results
 
     def find_by_parent(self, parent_id: int) -> Iterable[Task]:
@@ -213,3 +221,213 @@ def test_search_tasks_by_parent_id():
     assert subtask1 in results
     assert subtask2 in results
     assert other_task not in results
+
+
+@pytest.mark.unit
+def test_search_tasks_by_date_range():
+    from datetime import timedelta
+    service = TaskService(InMemoryRepo())
+
+    now = datetime.now()
+    past = now - timedelta(days=10)
+    future = now + timedelta(days=10)
+
+    task1 = service.create_task({'title': 'Past Task', 'due_date': past})
+    task2 = service.create_task({'title': 'Future Task', 'due_date': future})
+    task3 = service.create_task({'title': 'Now Task', 'due_date': now})
+
+    # Filter due_before
+    results = list(service.search_tasks({'due_before': now}))
+    assert task1 in results
+    assert task3 in results
+    assert task2 not in results
+
+    # Filter due_after
+    results = list(service.search_tasks({'due_after': now}))
+    assert task2 in results
+    assert task3 in results
+    assert task1 not in results
+
+
+@pytest.mark.unit
+def test_search_tasks_by_multiple_filters():
+    service = TaskService(InMemoryRepo())
+
+    task1 = service.create_task({'title': 'Task 1', 'status': 'pending', 'priority': 'high', 'project_name': 'SPM'})
+    task2 = service.create_task({'title': 'Task 2', 'status': 'pending', 'priority': 'low', 'project_name': 'SPM'})
+    task3 = service.create_task({'title': 'Task 3', 'status': 'completed', 'priority': 'high', 'project_name': 'Other'})
+
+    results = list(service.search_tasks({
+        'status': 'pending',
+        'priority': 'high',
+        'project_name': 'SPM'
+    }))
+
+    assert len(results) == 1
+    assert task1 in results
+    assert task2 not in results
+    assert task3 not in results
+
+
+@pytest.mark.unit
+def test_search_tasks_with_null_dates():
+    service = TaskService(InMemoryRepo())
+    from datetime import timedelta
+
+    now = datetime.now()
+    task_with_date = service.create_task({'title': 'Has date', 'due_date': now})
+    # Explicitly create task with null due_date by updating after creation
+    task_without_date = service.create_task({'title': 'No date'})
+    task_without_date.due_date = None
+
+    # Tasks with null dates should be excluded from date filters
+    results = list(service.search_tasks({'due_before': now + timedelta(days=1)}))
+    assert task_with_date in results
+    assert task_without_date not in results
+
+    results = list(service.search_tasks({'due_after': now - timedelta(days=1)}))
+    assert task_with_date in results
+    assert task_without_date not in results
+
+
+@pytest.mark.unit
+def test_search_tasks_exact_date_boundary():
+    service = TaskService(InMemoryRepo())
+
+    exact_time = datetime(2025, 10, 15, 12, 0, 0)
+    task = service.create_task({'title': 'Exact Task', 'due_date': exact_time})
+
+    # Test exact boundary with due_before (uses <=)
+    results = list(service.search_tasks({'due_before': exact_time}))
+    assert task in results
+
+    # Test exact boundary with due_after (uses >=)
+    results = list(service.search_tasks({'due_after': exact_time}))
+    assert task in results
+
+
+@pytest.mark.unit
+def test_search_tasks_empty_filters():
+    service = TaskService(InMemoryRepo())
+    task1 = service.create_task({'title': 'Task 1'})
+    task2 = service.create_task({'title': 'Task 2'})
+
+    # Empty filters should return all tasks
+    results = list(service.search_tasks({}))
+    assert len(results) == 2
+    assert task1 in results
+    assert task2 in results
+
+
+@pytest.mark.unit
+def test_search_tasks_no_results():
+    service = TaskService(InMemoryRepo())
+    task = service.create_task({'title': 'Task', 'status': 'pending'})
+
+    # Filter that matches nothing
+    results = list(service.search_tasks({'status': 'nonexistent_status'}))
+    assert len(results) == 0
+
+
+@pytest.mark.unit
+def test_search_tasks_combined_date_and_status():
+    from datetime import timedelta
+    service = TaskService(InMemoryRepo())
+
+    now = datetime.now()
+    future = now + timedelta(days=5)
+
+    task1 = service.create_task({'title': 'Pending Future', 'status': 'pending', 'due_date': future})
+    task2 = service.create_task({'title': 'Completed Future', 'status': 'completed', 'due_date': future})
+    task3 = service.create_task({'title': 'Pending Past', 'status': 'pending', 'due_date': now - timedelta(days=1)})
+
+    # Combined filters: pending AND due in future
+    results = list(service.search_tasks({
+        'status': 'pending',
+        'due_after': now
+    }))
+
+    assert len(results) == 1
+    assert task1 in results
+    assert task2 not in results
+    assert task3 not in results
+
+
+@pytest.mark.unit
+def test_parent_id_filter_with_zero():
+    service = TaskService(InMemoryRepo())
+    # parent_id=0 is technically valid but shouldn't match anything
+    task = service.create_task({'title': 'Task'})
+
+    results = list(service.search_tasks({'parent_id': 0}))
+    assert len(results) == 0
+
+
+@pytest.mark.unit
+def test_search_tasks_case_sensitivity():
+    service = TaskService(InMemoryRepo())
+    task = service.create_task({'title': 'Task', 'project_name': 'SPM', 'status': 'pending'})
+
+    # Test case sensitivity for project_name
+    results = list(service.search_tasks({'project_name': 'SPM'}))
+    assert len(results) == 1
+
+    results = list(service.search_tasks({'project_name': 'spm'}))
+    assert len(results) == 0  # Case-sensitive, should not match
+
+    # Test case sensitivity for status
+    results = list(service.search_tasks({'status': 'PENDING'}))
+    assert len(results) == 0  # Case-sensitive, should not match
+
+
+@pytest.mark.unit
+def test_start_date_filters():
+    from datetime import timedelta
+    service = TaskService(InMemoryRepo())
+
+    now = datetime.now()
+    past = now - timedelta(days=5)
+    future = now + timedelta(days=5)
+
+    task1 = service.create_task({'title': 'Past Start', 'start_date': past})
+    task2 = service.create_task({'title': 'Future Start', 'start_date': future})
+    task3 = service.create_task({'title': 'Now Start', 'start_date': now})
+
+    # Filter start_date_before
+    results = list(service.search_tasks({'start_date_before': now}))
+    assert task1 in results
+    assert task3 in results
+    assert task2 not in results
+
+    # Filter start_date_after
+    results = list(service.search_tasks({'start_date_after': now}))
+    assert task2 in results
+    assert task3 in results
+    assert task1 not in results
+
+
+@pytest.mark.unit
+def test_date_range_inclusive():
+    from datetime import timedelta
+    service = TaskService(InMemoryRepo())
+
+    start = datetime(2025, 10, 1, 0, 0, 0)
+    end = datetime(2025, 10, 31, 23, 59, 59)
+
+    task_before = service.create_task({'title': 'Before', 'due_date': start - timedelta(days=1)})
+    task_start = service.create_task({'title': 'Start', 'due_date': start})
+    task_middle = service.create_task({'title': 'Middle', 'due_date': datetime(2025, 10, 15, 12, 0, 0)})
+    task_end = service.create_task({'title': 'End', 'due_date': end})
+    task_after = service.create_task({'title': 'After', 'due_date': end + timedelta(days=1)})
+
+    # Test inclusive range
+    results = list(service.search_tasks({
+        'due_after': start,
+        'due_before': end
+    }))
+
+    assert task_before not in results
+    assert task_start in results
+    assert task_middle in results
+    assert task_end in results
+    assert task_after not in results

@@ -71,6 +71,10 @@ class TaskRepository:
             query = query.filter(Task.due_date <= filters['due_before'])
         if 'due_after' in filters:
             query = query.filter(Task.due_date >= filters['due_after'])
+        if 'start_date_after' in filters:
+            query = query.filter(Task.start_date >= filters['start_date_after'])
+        if 'start_date_before' in filters:
+            query = query.filter(Task.start_date <= filters['start_date_before'])
         if 'parent_id' in filters:
             query = query.filter(Task.parent_id == filters['parent_id'])
 
