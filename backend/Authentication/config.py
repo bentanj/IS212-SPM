@@ -14,3 +14,8 @@ class Config:
     ENV = os.getenv("ENV", "dev")
     FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:3000")
     
+    # OAuth Configuration
+    GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+    GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+    GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
+    SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here")
