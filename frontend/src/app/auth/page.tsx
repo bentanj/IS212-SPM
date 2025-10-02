@@ -39,7 +39,7 @@ export default function AuthPage() {
         </Box>
 
         <Grid container spacing={3} justifyContent="center">
-          <Grid item xs={12} md={8}>
+          <Grid size={{ xs: 12, md: 8 }}>
             {isAuthenticated ? (
               <UserProfile />
             ) : (

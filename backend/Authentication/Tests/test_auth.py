@@ -5,11 +5,11 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
-from Services.AuthService import AuthService
-from Repositories.UserRepository import UserRepository
-from Models.User import User
-from Controllers.AuthController import bp as auth_bp
-from exceptions import ValidationError, AuthenticationError
+from ..Services.AuthService import AuthService
+from ..Repositories.UserRepository import UserRepository
+from ..Models.User import User
+from ..Controllers.AuthController import bp as auth_bp
+from ..exceptions import ValidationError, AuthenticationError
 
 @pytest.mark.unit
 class TestAuthService:
