@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, session, g
-from Services.AuthService import AuthService
-from Repositories.UserRepository import UserRepository
-from exceptions import ValidationError, AuthenticationError
+from ..Services.AuthService import AuthService
+from ..Repositories.UserRepository import UserRepository
+from ..exceptions import ValidationError, AuthenticationError
 import secrets
 import json
 import time
@@ -81,24 +81,8 @@ def callback():
             # User doesn't exist, return error
             raise AuthenticationError("User not found in database. Please contact administrator.")
         
-        # Update user's last login and info with retry logic
-        for attempt in range(max_retries):
-            try:
-                user.last_login = datetime.utcnow()
-                user.updated_at = datetime.utcnow()
-                if user_info['first_name'] and user.first_name != user_info['first_name']:
-                    user.first_name = user_info['first_name']
-                if user_info['last_name'] and user.last_name != user_info['last_name']:
-                    user.last_name = user_info['last_name']
-                g.db_session.commit()
-                g.db_session.refresh(user)
-                break
-            except Exception as e:
-                print(f"Database update attempt {attempt + 1} failed: {str(e)}")
-                if attempt == max_retries - 1:
-                    raise AuthenticationError("Failed to update user information. Please try again.")
-                # Wait before retry
-                time.sleep(1)
+        # Read-only service: no user updates allowed
+        # User information is managed externally
         
         # Store user info in session
         session['user_id'] = user.id
@@ -175,7 +159,7 @@ def db_health():
     """Check database connection health"""
     try:
         # Test database connection
-        from Models.User import User
+        from ..Models.User import User
         user_count = g.db_session.query(User).count()
         
         return jsonify({

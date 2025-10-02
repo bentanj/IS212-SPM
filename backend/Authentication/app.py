@@ -1,8 +1,8 @@
 from flask import Flask, g
 from flask_cors import CORS
-from config import Config
-from db import SessionLocal, init_db
-from Controllers.AuthController import bp as auth_bp
+from .config import Config
+from .db import SessionLocal, init_db
+from .Controllers.AuthController import bp as auth_bp
 
 def create_app():
     app = Flask(__name__)

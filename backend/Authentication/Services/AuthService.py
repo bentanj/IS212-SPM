@@ -4,7 +4,7 @@ import hashlib
 import base64
 import urllib.parse
 from typing import Dict, Optional, Tuple
-from config import Config
+from ..config import Config
 
 class AuthService:
     """OAuth 2.0 service for handling Google OAuth flow with PKCE"""
@@ -101,6 +101,14 @@ class AuthService:
     def get_user_from_token(self, access_token: str) -> Dict:
         """Get user information from access token"""
         user_info = self.get_user_info(access_token)
+        
+        # Validate email verification
+        if not user_info.get('verified_email', False):
+            raise ValueError("Email not verified by Google")
+        
+        # Validate email presence
+        if not user_info.get('email'):
+            raise ValueError("Email not found in user info")
         
         # Map Google user info to our user model
         return {
