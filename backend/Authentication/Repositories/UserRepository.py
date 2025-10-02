@@ -1,7 +1,13 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from ..Models.User import User
-from ..exceptions import ValidationError
+
+# Handle both relative and absolute imports
+try:
+    from ..Models.User import User
+    from ..exceptions import ValidationError
+except ImportError:
+    from Models.User import User
+    from exceptions import ValidationError
 from datetime import datetime
 
 class UserRepository:

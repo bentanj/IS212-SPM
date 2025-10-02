@@ -1,6 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session, declarative_base
-from .config import Config
+# Handle both relative and absolute imports
+try:
+    from .config import Config
+except ImportError:
+    from config import Config
 from sqlalchemy import text
 import logging
 
@@ -29,5 +33,8 @@ Base = declarative_base()
 
 def init_db():
     # import models here so Base.metadata is populated
-    from .Models.User import User  # noqa
+    try:
+        from .Models.User import User  # noqa
+    except ImportError:
+        from Models.User import User  # noqa
     Base.metadata.create_all(bind=engine)

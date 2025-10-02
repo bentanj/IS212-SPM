@@ -1,6 +1,10 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text
 from sqlalchemy.sql import func
-from ..db import Base
+# Handle both relative and absolute imports
+try:
+    from ..db import Base
+except ImportError:
+    from db import Base
 from datetime import datetime
 
 class User(Base):

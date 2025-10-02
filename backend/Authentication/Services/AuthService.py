@@ -4,7 +4,11 @@ import hashlib
 import base64
 import urllib.parse
 from typing import Dict, Optional, Tuple
-from ..config import Config
+# Handle both relative and absolute imports
+try:
+    from ..config import Config
+except ImportError:
+    from config import Config
 
 class AuthService:
     """OAuth 2.0 service for handling Google OAuth flow with PKCE"""

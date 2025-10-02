@@ -1,7 +1,14 @@
 from flask import Blueprint, request, jsonify, session, g
-from ..Services.AuthService import AuthService
-from ..Repositories.UserRepository import UserRepository
-from ..exceptions import ValidationError, AuthenticationError
+
+# Handle both relative and absolute imports
+try:
+    from ..Services.AuthService import AuthService
+    from ..Repositories.UserRepository import UserRepository
+    from ..exceptions import ValidationError, AuthenticationError
+except ImportError:
+    from Services.AuthService import AuthService
+    from Repositories.UserRepository import UserRepository
+    from exceptions import ValidationError, AuthenticationError
 import secrets
 import json
 import time
@@ -159,7 +166,10 @@ def db_health():
     """Check database connection health"""
     try:
         # Test database connection
-        from ..Models.User import User
+        try:
+            from ..Models.User import User
+        except ImportError:
+            from Models.User import User
         user_count = g.db_session.query(User).count()
         
         return jsonify({
