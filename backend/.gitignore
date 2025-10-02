@@ -10,6 +10,7 @@
 **/.mypy_cache/
 **/htmlcov/
 **/.coverage
+**/pytest-report.xml
 **/*.db
 **/*.sqlite
 **/*.egg-info/
