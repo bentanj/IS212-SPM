@@ -222,12 +222,33 @@ def remove_user_from_task(task_id: int):
         g.db_session.rollback()
         return jsonify({"error": str(e)}), 500
 
+@bp.get("/<int:parent_id>/subtasks")
+def get_subtasks(parent_id: int):
+    try:
+        tasks = _task_service().get_subtasks(parent_id)
+        return jsonify([task.to_dict() for task in tasks])
+    except TaskNotFoundError as e:
+        return jsonify({"error": str(e)}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@bp.get("/root")
+def get_root_tasks():
+    try:
+        tasks = _task_service().get_root_tasks()
+        return jsonify([task.to_dict() for task in tasks])
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 def _parse_task_data(data: dict, is_update: bool = False):
     task_data = {}
 
     for key in ['title', 'description', 'priority', 'tags', 'status', 'project_name']:
         if key in data:
             task_data[key] = data[key]
+
+    if 'parent_id' in data:
+        task_data['parent_id'] = data['parent_id']
 
     for date_field in ['start_date', 'completed_date', 'due_date']:
         if date_field in data and data[date_field]:

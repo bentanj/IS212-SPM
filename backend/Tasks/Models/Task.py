@@ -16,6 +16,7 @@ class Task(Base):
     status = Column(Text, nullable=True)
     project_name = Column(Text, nullable=True)
     assigned_users = Column(ARRAY(UUID), nullable=True)
+    parent_id = Column(BigInteger, nullable=True)
 
     def to_dict(self):
         return {
@@ -29,7 +30,8 @@ class Task(Base):
             "tags": self.tags,
             "status": self.status,
             "project_name": self.project_name,
-            "assigned_users": [str(user_id) for user_id in self.assigned_users] if self.assigned_users else []
+            "assigned_users": [str(user_id) for user_id in self.assigned_users] if self.assigned_users else [],
+            "parent_id": self.parent_id
         }
 
     def __repr__(self):

@@ -21,6 +21,12 @@ class TaskService:
     def create_task(self, task_data: Dict[str, Any]) -> Task:
         self._validate_task_data(task_data)
 
+        # Validate parent_id if provided
+        if 'parent_id' in task_data and task_data['parent_id'] is not None:
+            parent_task = self.repo.get(task_data['parent_id'])
+            if not parent_task:
+                raise TaskValidationError(f"Parent task with id {task_data['parent_id']} not found")
+
         if 'start_date' not in task_data or task_data['start_date'] is None:
             task_data['start_date'] = datetime.now()
 
@@ -48,6 +54,14 @@ class TaskService:
 
         self._validate_task_data(task_data, is_update=True)
         self._validate_status_transition(existing_task, task_data.get('status'))
+
+        # Validate parent_id if being updated
+        if 'parent_id' in task_data and task_data['parent_id'] is not None:
+            if task_data['parent_id'] == task_id:
+                raise TaskValidationError("A task cannot be its own parent")
+            parent_task = self.repo.get(task_data['parent_id'])
+            if not parent_task:
+                raise TaskValidationError(f"Parent task with id {task_data['parent_id']} not found")
 
         if 'status' in task_data and task_data['status'] == 'completed':
             if not existing_task.completed_date:
@@ -78,6 +92,15 @@ class TaskService:
 
     def search_tasks(self, filters: Dict[str, Any]) -> Iterable[Task]:
         return self.repo.find_by_criteria(filters)
+
+    def get_subtasks(self, parent_id: int) -> Iterable[Task]:
+        parent_task = self.repo.get(parent_id)
+        if not parent_task:
+            raise TaskNotFoundError(f"Parent task with id {parent_id} not found")
+        return self.repo.find_by_parent(parent_id)
+
+    def get_root_tasks(self) -> Iterable[Task]:
+        return self.repo.find_root_tasks()
 
     def mark_task_completed(self, task_id: int) -> Optional[Task]:
         return self.update_task(task_id, {

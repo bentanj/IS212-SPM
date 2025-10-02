@@ -9,6 +9,8 @@ class TaskRepository:
     def __init__(self, session: Session):
         self.session = session
 
+    def list(self) -> Iterable[Task]:
+        return self.session.query(Task).all()
 
     def get(self, task_id: int) -> Optional[Task]:
         return self.session.get(Task, task_id)
@@ -69,8 +71,16 @@ class TaskRepository:
             query = query.filter(Task.due_date <= filters['due_before'])
         if 'due_after' in filters:
             query = query.filter(Task.due_date >= filters['due_after'])
+        if 'parent_id' in filters:
+            query = query.filter(Task.parent_id == filters['parent_id'])
 
         return query.all()
+
+    def find_by_parent(self, parent_id: int) -> Iterable[Task]:
+        return self.session.query(Task).filter(Task.parent_id == parent_id).all()
+
+    def find_root_tasks(self) -> Iterable[Task]:
+        return self.session.query(Task).filter(Task.parent_id == None).all()
 
     def count_by_status(self) -> Dict[str, int]:
         results = self.session.query(Task.status, self.session.query(Task).filter(Task.status == Task.status).count()).group_by(Task.status).all()
