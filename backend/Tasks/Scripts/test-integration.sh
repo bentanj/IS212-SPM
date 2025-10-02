@@ -1,16 +1,37 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Run integration tests for Tasks service inside Docker
-# Requires DB_* env secrets configured in your environment or docker-compose overrides
-# Usage: ./scripts/test-integration.sh
+# Integration Test Script for Tasks Service (matching CI behavior)
+# Usage: ./test-integration.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BACKEND_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+TASKS_DIR="$(dirname "$SCRIPT_DIR")"
+BACKEND_DIR="$(dirname "$TASKS_DIR")"
 
-cd "$BACKEND_DIR"
+echo "==> Tasks Integration Tests"
 
-# Load backend-level .env if present and export vars
+# Change to Tasks directory
+cd "$TASKS_DIR"
+
+# Activate virtual environment if it exists
+if [ -f "$BACKEND_DIR/venv/bin/activate" ]; then
+    echo "Activating virtual environment..."
+    source "$BACKEND_DIR/venv/bin/activate"
+else
+    echo "Warning: Virtual environment not found. Using system Python."
+fi
+
+# Check if pytest is available
+if ! command -v pytest >/dev/null 2>&1; then
+    echo "Error: pytest is not available. Please install it manually."
+    exit 1
+fi
+
+# Set up test environment variables (matching CI)
+export ENV=test
+export FLASK_ENV=test
+
+# Load backend-level .env if present (for real DB credentials)
 set +u
 if [ -f "$BACKEND_DIR/.env" ]; then
   echo "Loading env from $BACKEND_DIR/.env"
@@ -21,17 +42,30 @@ if [ -f "$BACKEND_DIR/.env" ]; then
 fi
 set -u
 
-docker-compose build --build-arg INSTALL_DEV=true tasks
-docker-compose run --rm \
-  -e ENV=test \
-  -e RUN_INTEGRATION=true \
-  -e DB_USER \
-  -e DB_PASSWORD \
-  -e DB_HOST \
-  -e DB_PORT \
-  -e DB_NAME \
-  tasks python -m pytest -q -m integration
+# Check if we have real DB credentials for integration tests
+missing_env=false
+for v in DB_USER DB_PASSWORD DB_HOST DB_PORT DB_NAME; do
+  if [ -z "${!v-}" ]; then
+    echo "Warning: Missing $v for integration tests"
+    missing_env=true
+  fi
+done
 
-echo "✅ Integration tests passed"
+if [ "$missing_env" = false ]; then
+  echo "==> Real DB credentials found, running integration tests"
+  export RUN_INTEGRATION=true
+  
+  # Run integration tests (matching CI command)
+  echo "Running integration tests..."
+  if pytest -q -m integration --maxfail=1 --disable-warnings --junitxml=pytest-report-integration.xml; then
+    echo "✅ Integration tests passed"
+  else
+    echo "❌ Integration tests failed"
+    exit 1
+  fi
+else
+  echo "==> Missing DB credentials, integration tests will be skipped"
+  echo "⚠️  Integration tests skipped (no real DB credentials)"
+fi
 
 

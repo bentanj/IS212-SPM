@@ -10,7 +10,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 def test_basic_imports():
     """Test basic imports work"""
     try:
-        from Services.AuthService import AuthService
+        from ..Services.AuthService import AuthService
         print("✓ AuthService import successful")
         return True
     except ImportError as e:
@@ -20,7 +20,7 @@ def test_basic_imports():
 def test_auth_service_basic():
     """Test basic OAuth service functionality"""
     try:
-        from Services.AuthService import AuthService
+        from ..Services.AuthService import AuthService
         auth_service = AuthService()
         
         # Test PKCE generation
@@ -47,7 +47,7 @@ def test_authentication_service_read_only():
     """Test that Authentication service is configured for read-only operations"""
     try:
         # Test that we can import the config
-        from config import Config
+        from ..config import Config
         
         # Test that the config can be imported
         assert Config is not None

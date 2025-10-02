@@ -14,20 +14,20 @@ class TestAuthServiceSimple:
     
     def test_auth_service_import(self):
         """Test OAuth service can be imported"""
-        from Services.AuthService import AuthService
+        from ..Services.AuthService import AuthService
         assert AuthService is not None
         print("✓ AuthService import successful")
     
     def test_auth_service_instantiation(self):
         """Test OAuth service can be instantiated"""
-        from Services.AuthService import AuthService
+        from ..Services.AuthService import AuthService
         auth_service = AuthService()
         assert auth_service is not None
         print("✓ AuthService instantiation successful")
     
     def test_pkce_generation(self):
         """Test PKCE code verifier and challenge generation"""
-        from Services.AuthService import AuthService
+        from ..Services.AuthService import AuthService
         auth_service = AuthService()
         
         code_verifier, code_challenge = auth_service.generate_pkce_pair()
@@ -39,7 +39,7 @@ class TestAuthServiceSimple:
     
     def test_auth_url_generation(self):
         """Test auth URL generation"""
-        from Services.AuthService import AuthService
+        from ..Services.AuthService import AuthService
         auth_service = AuthService()
         
         auth_url, verifier = auth_service.generate_auth_url("test_state")
@@ -54,7 +54,7 @@ class TestAuthenticationServiceReadOnly:
     
     def test_config_import(self):
         """Test config can be imported"""
-        from config import Config
+        from ..config import Config
         assert Config is not None
         print("✓ Config import successful")
     
