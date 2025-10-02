@@ -31,16 +31,26 @@ for service_dir in "$BACKEND_DIR"/*/ ; do
   service_name="$(basename "$service_dir")"
 
   # Skip non-service folders
-  if [ ! -d "$service_dir/scripts" ]; then
+  if [ ! -d "$service_dir/Scripts" ] && [ ! -d "$service_dir/scripts" ]; then
     continue
   fi
 
-  unit_script="$service_dir/scripts/test-unit.sh"
-  integ_script="$service_dir/scripts/test-integration.sh"
+  # Check for Scripts (capital S) first, then scripts (lowercase s)
+  if [ -d "$service_dir/Scripts" ]; then
+    unit_script="$service_dir/Scripts/test-unit.sh"
+    integ_script="$service_dir/Scripts/test-integration.sh"
+  else
+    unit_script="$service_dir/scripts/test-unit.sh"
+    integ_script="$service_dir/scripts/test-integration.sh"
+  fi
 
   if [ -x "$unit_script" ]; then
     echo -e "\n=== [${service_name}] Running unit tests ==="
-    (cd "$service_dir" && ./scripts/test-unit.sh)
+    if [ -d "$service_dir/Scripts" ]; then
+      (cd "$service_dir" && ./Scripts/test-unit.sh)
+    else
+      (cd "$service_dir" && ./scripts/test-unit.sh)
+    fi
     ran_any_unit=true
   else
     echo "[${service_name}] No unit test script found, skipping"
@@ -57,7 +67,11 @@ for service_dir in "$BACKEND_DIR"/*/ ; do
 
     if [ "$missing_env" = false ]; then
       echo -e "\n=== [${service_name}] Running integration tests ==="
-      (cd "$service_dir" && ./scripts/test-integration.sh)
+      if [ -d "$service_dir/Scripts" ]; then
+        (cd "$service_dir" && ./Scripts/test-integration.sh)
+      else
+        (cd "$service_dir" && ./scripts/test-integration.sh)
+      fi
       ran_any_integration=true
     fi
   else
