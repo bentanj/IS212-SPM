@@ -6,6 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from unittest.mock import patch, Mock
+from flask import g
 
 from ..app import create_app
 from ..db import Base, SessionLocal
@@ -38,9 +39,15 @@ class TestAuthenticationIntegration:
         app = create_app()
         app.config['TESTING'] = True
         app.config['SQLALCHEMY_DATABASE_URI'] = test_db_url
+        app.config['ENV'] = 'test'
         
-        # Override database session
+        # Override database session in the app
         app.config['DATABASE_SESSION'] = TestingSessionLocal
+        
+        # Override the before_request to use our test session
+        @app.before_request
+        def before_request():
+            g.db_session = TestingSessionLocal()
         
         with app.app_context():
             yield app
