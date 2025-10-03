@@ -16,7 +16,6 @@ import { getAvailableUsers, handleAddTag, handleRemoveTag, resetForm, handleSubm
 import { Task, taskMockData, allUsers, CurrentUser } from '@/mocks/staff/taskMockData';
 import IFormData from "@/types/IFormData";
 import DefaultFormData, { PriorityOptions, StatusOptions } from '@/constants/DefaultFormData';
-import { canEditTask } from '@/constants/Permissions';
 
 // Components
 import ModalTitle from './_TaskCreateModal/ModalTitle';

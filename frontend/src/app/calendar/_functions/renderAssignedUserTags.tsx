@@ -1,7 +1,7 @@
 import { User, CurrentUser } from '@/mocks/staff/taskMockData';
 import Chip from '@mui/material/Chip';
 import LockIcon from '@mui/icons-material/Lock';
-import { canRemoveUser } from "./TaskCreateModelFunctions";
+import { canEditTaskAssignees } from '@/constants/Permissions';
 
 // Custom render for assigned user tags
 const renderAssignedUserTags = (
@@ -14,7 +14,7 @@ const renderAssignedUserTags = (
     return users.map((user, index) => {
         const isCurrentUser = user.userId === currentUser.userId;
         const isExistingAssignee = isEditMode && existingAssignees.some(existing => existing.userId === user.userId);
-        const canDelete = canRemoveUser(user, isEditMode, currentUser, existingAssignees);
+        const canDelete = canEditTaskAssignees(currentUser);
         const { key, ...tagPropsWithoutKey } = getTagProps({ index });
 
         return (
