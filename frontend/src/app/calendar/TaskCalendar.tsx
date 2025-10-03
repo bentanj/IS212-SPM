@@ -31,6 +31,10 @@ import DayTasksModal from './DayTasksModal';
 import DayHeaders from './_components/_TaskCalendar/DayHeaders';
 
 const TaskCalendar: React.FC = () => {
+  // Mock Data
+  const [tasks, setTasks] = useState(taskMockData.tasks);
+  const [mockJWT, setMockJWT] = useState(taskMockData.currentUser);
+
   const [currentDate, setCurrentDate] = useState<Dayjs>(dayjs());
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -38,7 +42,6 @@ const TaskCalendar: React.FC = () => {
 
   // Create Tasks
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [tasks, setTasks] = useState(taskMockData.tasks);
 
   // Task Day
   const [dayTasksModalOpen, setDayTasksModalOpen] = useState(false);
@@ -66,9 +69,8 @@ const TaskCalendar: React.FC = () => {
 
   // BUSINESS LOGIC 1: Filter tasks assigned to current user only
   const assignedTasks = useMemo(() => {
-    const { currentUser } = taskMockData;
     return tasks.filter(task =>
-      task.assignedUsers.some(assignedUser => assignedUser.userId === currentUser.userId)
+      task.assignedUsers.some(assignedUser => assignedUser.userId === mockJWT.userId)
     );
   }, [tasks]); // Add tasks as dependency
 
@@ -161,8 +163,6 @@ const TaskCalendar: React.FC = () => {
     setModalOpen(false);
   };
 
-  const { currentUser } = taskMockData;
-
   // Create weeks array for better calendar rendering
   const weeks = useMemo(() => {
     const weeksArray = [];
@@ -185,7 +185,7 @@ const TaskCalendar: React.FC = () => {
       <SideBar isMobile={isMobile}
         sidebarOpen={sidebarOpen}
         toggleSidebar={toggleSidebar}
-        currentUser={currentUser}
+        currentUser={mockJWT}
         assignedTasks={assignedTasks}
       />
 
