@@ -19,7 +19,6 @@ import DefaultFormData, { PriorityOptions, StatusOptions } from '@/constants/Def
 import { canEditTask } from '@/constants/Permissions';
 
 // Components
-import NoPermission from './_TaskCreateModal/NoPermission';
 import ModalTitle from './_TaskCreateModal/ModalTitle';
 import DateRow from './_TaskCreateModal/DateRow';
 import DropDownMenu from './_TaskCreateModal/DropDownMenu';
@@ -55,11 +54,6 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
 
   // Get current user object from allUsers
   const currentUserObj = allUsers.find(user => user.userId === currentUser.userId);
-
-  // Check if current user has edit permissions
-  const canEdit = isEditMode ?
-    canEditTask(currentUser, existingTaskDetails!) :
-    true;
 
   // Get existing assignees for edit mode (cannot be removed)
   const existingAssignees = isEditMode ? existingTaskDetails!.assignedUsers : [];
@@ -124,12 +118,6 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
 
   // Get unique project names from existing tasks
   const existingProjects = Array.from(new Set(taskMockData.tasks.map(t => t.projectName)));
-
-  if (!canEdit && isEditMode) {
-    return (
-      <NoPermission open={open} onClose={onClose} />
-    );
-  }
 
   return (
     <Dialog open={open} onClose={onClose}
