@@ -24,6 +24,7 @@ import { Edit as EditIcon } from '@mui/icons-material';
 import { CurrentUser, Task, taskMockData } from '@/mocks/staff/taskMockData';
 import dayjs from 'dayjs';
 import TaskCreateModal from './_components/TaskCreateModal';
+import { canEditTask } from '@/constants/Permissions';
 
 interface TaskDetailModalProps {
   task: Task | null;
@@ -70,8 +71,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   if (!task) return null;
 
   // Check if current user can edit this task
-  const canEdit = task.ownerId === currentUser.userId ||
-    task.assignedUsers.some(user => user.userId === currentUser.userId);
+  const canEdit = canEditTask(currentUser, task);
 
   const handleEditClick = () => {
     setEditModalOpen(true);
