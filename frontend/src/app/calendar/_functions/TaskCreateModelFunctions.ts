@@ -62,7 +62,7 @@ export const resetForm = (
 export const handleSubmit = async (params: {
     canEdit: boolean;
     isEditMode: boolean;
-    editingTask: Task | null;
+    existingTaskDetails: Task | null;
     formData: IFormData;
     newComment: string;
     currentUser: User;
@@ -74,7 +74,7 @@ export const handleSubmit = async (params: {
     handleReset: () => void;
     onClose: () => void;
 }) => {
-    const { canEdit, isEditMode, editingTask, formData, newComment, currentUser, onTaskCreated, onTaskUpdated, setErrors, setSubmitStatus, setSubmitMessage, handleReset, onClose } = params;
+    const { canEdit, isEditMode, existingTaskDetails, formData, newComment, currentUser, onTaskCreated, onTaskUpdated, setErrors, setSubmitStatus, setSubmitMessage, handleReset, onClose } = params;
 
     if (!canEdit) {
         setSubmitStatus('error');
@@ -90,13 +90,13 @@ export const handleSubmit = async (params: {
     }
 
     try {
-        if (isEditMode && editingTask) {
+        if (isEditMode && existingTaskDetails) {
             // Update existing task with comments
-            const updatedComments = [...editingTask.comments];
+            const updatedComments = [...existingTaskDetails.comments];
 
             if (newComment.trim()) {
                 const newCommentObj: Comment = {
-                    commentId: Math.max(...editingTask.comments.map(c => c.commentId), 0) + 1,
+                    commentId: Math.max(...existingTaskDetails.comments.map(c => c.commentId), 0) + 1,
                     author: currentUser.name,
                     content: newComment.trim(),
                     timestamp: dayjs().toISOString(),
@@ -105,7 +105,7 @@ export const handleSubmit = async (params: {
             }
 
             const updatedTask: Task = {
-                ...editingTask,
+                ...existingTaskDetails,
                 title: formData.title.trim(),
                 description: formData.description.trim(),
                 startDate: formData.startDate!.format('YYYY-MM-DD'),
@@ -117,7 +117,7 @@ export const handleSubmit = async (params: {
                 status: formData.status as 'To Do' | 'In Progress' | 'Completed' | 'Blocked',
                 comments: updatedComments,
                 projectName: formData.projectName.trim(),
-                sharedWith: formData.assignedUsers.map(user => user.userId).filter(id => id !== editingTask.ownerId),
+                sharedWith: formData.assignedUsers.map(user => user.userId).filter(id => id !== existingTaskDetails.ownerId),
             };
 
             onTaskUpdated?.(updatedTask);

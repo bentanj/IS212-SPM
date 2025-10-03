@@ -269,7 +269,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         onTaskUpdated={handleTaskUpdated}
         setSnackbarContent={setSnackbarContent}
         currentUser={currentUser}
-        editingTask={task}
+        existingTaskDetails={task}
       />
     </>
   );

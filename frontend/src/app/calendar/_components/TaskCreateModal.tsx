@@ -34,7 +34,7 @@ interface TaskCreateModalProps {
   onTaskUpdated?: (task: Task) => void;
   setSnackbarContent: (message: string, severity: AlertColor) => void;
   currentUser: CurrentUser;
-  editingTask?: Task | null; // New prop for edit mode
+  existingTaskDetails?: Task;
 };
 
 const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
@@ -43,28 +43,26 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   onTaskCreated,
   onTaskUpdated,
   setSnackbarContent,
-  editingTask = null,
+  currentUser,
+  existingTaskDetails = null,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // Mock current user details
-  const { currentUser } = taskMockData;
-
   // Determine if in edit mode
-  const isEditMode = editingTask !== null;
+  const isEditMode = existingTaskDetails !== null;
 
   // Get current user object from allUsers
   const currentUserObj = allUsers.find(user => user.userId === currentUser.userId);
 
   // Check if current user has edit permissions
   const canEdit = isEditMode ?
-    (editingTask!.ownerId === currentUser.userId ||
-      editingTask!.assignedUsers.some(user => user.userId === currentUser.userId)) :
+    (existingTaskDetails!.ownerId === currentUser.userId ||
+      existingTaskDetails!.assignedUsers.some(user => user.userId === currentUser.userId)) :
     true;
 
   // Get existing assignees for edit mode (cannot be removed)
-  const existingAssignees = isEditMode ? editingTask!.assignedUsers : [];
+  const existingAssignees = isEditMode ? existingTaskDetails!.assignedUsers : [];
 
   // Form state
   const [formData, setFormData] = useState<IFormData>(DefaultFormData);
@@ -82,25 +80,25 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
     setSubmitMessage('')
     setSubmitStatus('idle');
     if (open) {
-      if (isEditMode && editingTask) {
+      if (isEditMode && existingTaskDetails) {
         // Pre-populate form with existing task data
         setFormData({
-          title: editingTask.title,
-          description: editingTask.description,
-          startDate: dayjs(editingTask.startDate),
-          completedDate: editingTask.completedDate ? dayjs(editingTask.completedDate) : null,
-          dueDate: dayjs(editingTask.dueDate),
-          priority: editingTask.priority,
-          assignedUsers: [...editingTask.assignedUsers],
-          tags: [...editingTask.tags],
-          status: editingTask.status,
+          title: existingTaskDetails.title,
+          description: existingTaskDetails.description,
+          startDate: dayjs(existingTaskDetails.startDate),
+          completedDate: existingTaskDetails.completedDate ? dayjs(existingTaskDetails.completedDate) : null,
+          dueDate: dayjs(existingTaskDetails.dueDate),
+          priority: existingTaskDetails.priority,
+          assignedUsers: [...existingTaskDetails.assignedUsers],
+          tags: [...existingTaskDetails.tags],
+          status: existingTaskDetails.status,
           comments: '',
-          projectName: editingTask.projectName,
+          projectName: existingTaskDetails.projectName,
           attachedFile: null,
         });
       }
     }
-  }, [open, isEditMode, editingTask]);
+  }, [open, isEditMode, existingTaskDetails]);
 
   const handleReset = () => {
     resetForm(setFormData, setErrors, setSubmitStatus, setSubmitMessage, setTagInput, setNewComment)
@@ -109,11 +107,11 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   // Function to Trigger when Submit Button is Clicked
   const onSubmit = () => {
     handleSubmit({
-      canEdit, isEditMode, editingTask, formData, newComment, currentUser,
+      canEdit, isEditMode, existingTaskDetails, formData, newComment, currentUser,
       onTaskCreated, onTaskUpdated, setSubmitStatus, setSubmitMessage, setErrors, handleReset, onClose
     });
     // Placeholder. To replace with actual success condition
-    if (editingTask) setSnackbarContent('Task updated successfully', 'success');
+    if (existingTaskDetails) setSnackbarContent('Task updated successfully', 'success');
     else if (true) setSnackbarContent('Task created successfully', 'success');
     else setSnackbarContent('Failed to create task', 'error');
   };
