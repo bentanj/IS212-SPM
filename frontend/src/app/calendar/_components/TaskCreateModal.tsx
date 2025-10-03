@@ -107,7 +107,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   // Function to Trigger when Submit Button is Clicked
   const onSubmit = () => {
     handleSubmit({
-      canEdit, isEditMode, existingTaskDetails, formData, newComment, currentUser,
+      isEditMode, existingTaskDetails, formData, newComment, currentUser,
       onTaskCreated, onTaskUpdated, setSubmitStatus, setSubmitMessage, setErrors, handleReset, onClose
     });
     // Placeholder. To replace with actual success condition

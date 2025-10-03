@@ -60,7 +60,6 @@ export const resetForm = (
 };
 
 export const handleSubmit = async (params: {
-    canEdit: boolean;
     isEditMode: boolean;
     existingTaskDetails: Task | null;
     formData: IFormData;
@@ -74,13 +73,7 @@ export const handleSubmit = async (params: {
     handleReset: () => void;
     onClose: () => void;
 }) => {
-    const { canEdit, isEditMode, existingTaskDetails, formData, newComment, currentUser, onTaskCreated, onTaskUpdated, setErrors, setSubmitStatus, setSubmitMessage, handleReset, onClose } = params;
-
-    if (!canEdit) {
-        setSubmitStatus('error');
-        setSubmitMessage('You do not have permission to edit this task');
-        return;
-    }
+    const { isEditMode, existingTaskDetails, formData, newComment, currentUser, onTaskCreated, onTaskUpdated, setErrors, setSubmitStatus, setSubmitMessage, handleReset, onClose } = params;
 
     // Validate form
     if (!validateForm(formData, setErrors)) {
@@ -90,7 +83,7 @@ export const handleSubmit = async (params: {
     }
 
     try {
-        if (isEditMode && existingTaskDetails) {
+        if (existingTaskDetails) {
             // Update existing task with comments
             const updatedComments = [...existingTaskDetails.comments];
 
