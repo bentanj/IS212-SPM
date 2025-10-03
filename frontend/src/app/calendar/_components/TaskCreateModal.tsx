@@ -13,7 +13,7 @@ import dayjs from 'dayjs';
 import { getAvailableUsers, handleAddTag, handleRemoveTag, resetForm, handleSubmit } from '../_functions/TaskCreateModelFunctions';
 
 // Types and Constants
-import { Task, taskMockData, allUsers } from '@/mocks/staff/taskMockData';
+import { Task, taskMockData, allUsers, CurrentUser } from '@/mocks/staff/taskMockData';
 import IFormData from "@/types/IFormData";
 import DefaultFormData, { PriorityOptions, StatusOptions } from '@/constants/DefaultFormData';
 
@@ -33,6 +33,7 @@ interface TaskCreateModalProps {
   onTaskCreated?: (task: Task) => void;
   onTaskUpdated?: (task: Task) => void;
   setSnackbarContent: (message: string, severity: AlertColor) => void;
+  currentUser: CurrentUser;
   editingTask?: Task | null; // New prop for edit mode
 };
 

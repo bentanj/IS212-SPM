@@ -21,7 +21,7 @@ import {
   useMediaQuery
 } from '@mui/material';
 import { Edit as EditIcon } from '@mui/icons-material';
-import { Task, taskMockData } from '@/mocks/staff/taskMockData';
+import { CurrentUser, Task, taskMockData } from '@/mocks/staff/taskMockData';
 import dayjs from 'dayjs';
 import TaskCreateModal from './_components/TaskCreateModal';
 
@@ -31,6 +31,7 @@ interface TaskDetailModalProps {
   onClose: () => void;
   setSnackbarContent: (message: string, severity: AlertColor) => void;
   onTaskUpdated?: (task: Task) => void;
+  currentUser: CurrentUser;
 }
 
 const getPriorityColor = (priority: string) => {
@@ -266,8 +267,9 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         open={editModalOpen}
         onClose={handleEditClose}
         onTaskUpdated={handleTaskUpdated}
-        editingTask={task}
         setSnackbarContent={setSnackbarContent}
+        currentUser={currentUser}
+        editingTask={task}
       />
     </>
   );

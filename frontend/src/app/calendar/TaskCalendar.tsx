@@ -395,6 +395,7 @@ const TaskCalendar: React.FC = () => {
         onClose={handleCloseModal}
         onTaskUpdated={handleTaskUpdated}
         setSnackbarContent={setSnackbarContent}
+        currentUser={mockJWT}
       />
 
       {/* Task Create Modal */}
@@ -403,6 +404,7 @@ const TaskCalendar: React.FC = () => {
         onClose={() => setCreateModalOpen(false)}
         onTaskCreated={handleTaskCreated}
         setSnackbarContent={setSnackbarContent}
+        currentUser={mockJWT}
       />
 
       <Snackbar
