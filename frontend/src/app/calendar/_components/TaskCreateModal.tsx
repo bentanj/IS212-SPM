@@ -34,6 +34,7 @@ interface TaskCreateModalProps {
   onTaskUpdated?: (task: Task) => void;
   setSnackbarContent: (message: string, severity: AlertColor) => void;
   editingTask?: Task | null; // New prop for edit mode
+  allTasks: Task[]; // New this prop
 };
 
 const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
@@ -43,6 +44,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   onTaskUpdated,
   setSnackbarContent,
   editingTask = null,
+  allTasks, // New
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -109,7 +111,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   const onSubmit = () => {
     handleSubmit({
       canEdit, isEditMode, editingTask, formData, newComment, currentUser,
-      onTaskCreated, onTaskUpdated, setSubmitStatus, setSubmitMessage, setErrors, handleReset, onClose
+      onTaskCreated, onTaskUpdated, setSubmitStatus, setSubmitMessage, setErrors, handleReset, onClose, allTasks, // New
     });
     // Placeholder. To replace with actual success condition
     if (editingTask) setSnackbarContent('Task updated successfully', 'success');

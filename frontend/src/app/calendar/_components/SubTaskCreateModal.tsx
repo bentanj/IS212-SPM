@@ -153,7 +153,8 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
       setSubmitMessage, 
       setErrors, 
       handleReset, 
-      onClose
+      onClose,
+      allTasks, 
     });
 
     // Success messages

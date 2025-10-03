@@ -113,13 +113,8 @@ const TaskCalendar: React.FC = () => {
     return monthTasks.filter(task => dayjs(task.startDate).isSame(date, 'day'));
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'High': return '#f44336';
-      case 'Medium': return '#ff9800';
-      case 'Low': return '#2196f3';
-      default: return '#9e9e9e';
-    }
+  const getTaskTypeColor = (task: Task) => {
+    return task.parentTaskId ? '#ffeb3b' : '#2196f3'; // Yellow for subtasks, Blue for parent tasks
   };
 
   const handleTaskClick = (task: Task) => {
@@ -320,14 +315,16 @@ const TaskCalendar: React.FC = () => {
                                   sx={{
                                     mb: 0.5,
                                     cursor: 'pointer',
-                                    bgcolor: getPriorityColor(task.priority) + '20',
-                                    borderLeft: `3px solid ${getPriorityColor(task.priority)}`,
+                                    bgcolor: `${getTaskTypeColor(task)}20`,
+                                    borderLeft: task.parentTaskId
+                                      ? `2px dashed ${getTaskTypeColor(task)}`  
+                                      : `3px solid ${getTaskTypeColor(task)}`,  
                                     // Add subtle styling for subtasks
                                     borderLeftWidth: task.parentTaskId ? '2px' : '3px',
                                     borderLeftStyle: task.parentTaskId ? 'dashed' : 'solid',
                                     ml: task.parentTaskId ? 0.5 : 0,
                                     '&:hover': {
-                                      bgcolor: getPriorityColor(task.priority) + '30',
+                                      bgcolor: `${getTaskTypeColor(task)}30`, 
                                     },
                                     minHeight: 0,
                                     flexShrink: 0,
@@ -417,7 +414,9 @@ const TaskCalendar: React.FC = () => {
         onClose={handleCloseModal}
         onTaskUpdated={handleTaskUpdated}
         setSnackbarContent={setSnackbarContent}
-        onCreateSubtask={handleCreateSubtask} // NEW PROP
+        onCreateSubtask={handleCreateSubtask} 
+        onSubtaskClick={handleTaskClick}
+        allTasks={tasks}
       />
 
       {/* Task Create Modal */}
@@ -426,6 +425,7 @@ const TaskCalendar: React.FC = () => {
         onClose={() => setCreateModalOpen(false)}
         onTaskCreated={handleTaskCreated}
         setSnackbarContent={setSnackbarContent}
+        allTasks={tasks}
       />
 
       {/* NEW: Subtask Create Modal */}
