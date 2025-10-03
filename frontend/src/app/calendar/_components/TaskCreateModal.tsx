@@ -16,6 +16,7 @@ import { getAvailableUsers, handleAddTag, handleRemoveTag, resetForm, handleSubm
 import { Task, taskMockData, allUsers, CurrentUser } from '@/mocks/staff/taskMockData';
 import IFormData from "@/types/IFormData";
 import DefaultFormData, { PriorityOptions, StatusOptions } from '@/constants/DefaultFormData';
+import { canEditTask } from '@/constants/Permissions';
 
 // Components
 import NoPermission from './_TaskCreateModal/NoPermission';
@@ -57,8 +58,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
 
   // Check if current user has edit permissions
   const canEdit = isEditMode ?
-    (existingTaskDetails!.ownerId === currentUser.userId ||
-      existingTaskDetails!.assignedUsers.some(user => user.userId === currentUser.userId)) :
+    canEditTask(currentUser, existingTaskDetails!) :
     true;
 
   // Get existing assignees for edit mode (cannot be removed)
