@@ -327,14 +327,14 @@ const TaskCalendar: React.FC = () => {
                                     cursor: 'pointer',
                                     bgcolor: `${getTaskTypeColor(task)}20`,
                                     borderLeft: task.parentTaskId
-                                      ? `2px dashed ${getTaskTypeColor(task)}`  
-                                      : `3px solid ${getTaskTypeColor(task)}`,  
+                                      ? `2px dashed ${getTaskTypeColor(task)}`
+                                      : `3px solid ${getTaskTypeColor(task)}`,
                                     // Add subtle styling for subtasks
                                     borderLeftWidth: task.parentTaskId ? '2px' : '3px',
                                     borderLeftStyle: task.parentTaskId ? 'dashed' : 'solid',
                                     ml: task.parentTaskId ? 0.5 : 0,
                                     '&:hover': {
-                                      bgcolor: `${getTaskTypeColor(task)}30`, 
+                                      bgcolor: `${getTaskTypeColor(task)}30`,
                                     },
                                     minHeight: 0,
                                     flexShrink: 0,
@@ -423,7 +423,9 @@ const TaskCalendar: React.FC = () => {
         open={modalOpen}
         onClose={handleCloseModal}
         onTaskUpdated={handleTaskUpdated}
+        currentUser={mockJWT}
         setSnackbarContent={setSnackbarContent}
+        onCreateSubtask={handleCreateSubtask}
       />
 
       {/* Task Create Modal */}
@@ -432,6 +434,8 @@ const TaskCalendar: React.FC = () => {
         onClose={() => setCreateModalOpen(false)}
         onTaskCreated={handleTaskCreated}
         setSnackbarContent={setSnackbarContent}
+        currentUser={mockJWT}
+        allTasks={tasks}
       />
 
       <Snackbar
