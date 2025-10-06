@@ -19,3 +19,9 @@ class Config:
     GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
     GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
     SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here")
+    
+    # JWT Configuration
+    JWT_SECRET = os.getenv("JWT_SECRET", "your-jwt-secret-key-here")
+    JWT_REFRESH_SECRET = os.getenv("JWT_REFRESH_SECRET", "your-jwt-refresh-secret-key-here")
+    JWT_ACCESS_TOKEN_EXPIRES = 15 * 60  # 15 minutes in seconds
+    JWT_REFRESH_TOKEN_EXPIRES = 7 * 24 * 60 * 60  # 7 days in seconds
