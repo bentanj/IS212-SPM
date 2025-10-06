@@ -109,13 +109,11 @@ const TaskCalendar: React.FC = () => {
     return monthTasks.filter(task => dayjs(task.startDate).isSame(date, 'day')); // Changed from dueDate to startDate
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'High': return '#f44336';
-      case 'Medium': return '#ff9800';
-      case 'Low': return '#2196f3';
-      default: return '#9e9e9e';
-    }
+  const getPriorityColor = (priority: number) => {
+    if (priority >= 7) return '#f44336';
+    if (priority >= 4) return '#ff9800';
+    if (priority >= 1) return '#2196f3';
+    return '#9e9e9e';
   };
 
   const handleTaskClick = (task: Task) => {
