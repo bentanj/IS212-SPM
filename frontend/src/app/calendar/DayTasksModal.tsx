@@ -147,8 +147,9 @@ const DayTasksModal: React.FC<DayTasksModalProps> = ({
                       flex: 1
                     }}
                   >
-                    {task.title}
+                    {task.parentTaskId ? `└ ${task.title}` : task.title}
                   </Typography>
+                  
                   <Stack direction="row" spacing={1}>
                     <Chip 
                       label={task.priority} 

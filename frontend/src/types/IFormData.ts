@@ -16,6 +16,7 @@ interface FormData {
     comments: string;
     projectName: string;
     attachedFile: File | null;
+    parentTaskId?: number | null; // New
 }
 
 export default FormData;

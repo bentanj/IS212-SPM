@@ -72,8 +72,10 @@ export const handleSubmit = async (params: {
     setSubmitMessage: React.Dispatch<React.SetStateAction<string>>;
     handleReset: () => void;
     onClose: () => void;
+    allTasks: Task[]; // New
 }) => {
-    const { isEditMode, existingTaskDetails, formData, newComment, currentUser, onTaskCreated, onTaskUpdated, setErrors, setSubmitStatus, setSubmitMessage, handleReset, onClose } = params;
+    const { isEditMode, existingTaskDetails, formData, newComment, currentUser, 
+        onTaskCreated, onTaskUpdated, setErrors, setSubmitStatus, setSubmitMessage, handleReset, onClose, allTasks } = params;
 
     // Validate form
     if (!validateForm(formData, setErrors)) {
@@ -117,8 +119,10 @@ export const handleSubmit = async (params: {
             setSubmitStatus('success');
             setSubmitMessage('Task updated successfully!');
         } else {
-            // Create new task
-            const newTaskId = Math.max(...taskMockData.tasks.map(t => t.taskId)) + 1;
+            // Create new task with proper ID generation from live state (Updated)
+            const newTaskId = allTasks.length > 0 
+                ? Math.max(...allTasks.map(t => t.taskId), 0) + 1 
+                : 1;
             const comments = formData.comments.trim()
                 ? [{
                     commentId: 1,
@@ -143,6 +147,7 @@ export const handleSubmit = async (params: {
                 projectName: formData.projectName.trim(),
                 ownerId: currentUser.userId,
                 sharedWith: formData.assignedUsers.map(user => user.userId).filter(id => id !== currentUser.userId),
+                parentTaskId: (formData as any).parentTaskId || null, // New 
             };
 
             onTaskCreated?.(newTask);

@@ -22,11 +22,13 @@ dayjs.extend(isBetween);
 dayjs.extend(weekOfYear);
 
 import { taskMockData, Task } from '@/mocks/staff/taskMockData';
+import Priority from '@/types/TPriority';
 import SideBar from './_components/SideBar';
 import Header from './_components/Header';
 import MonthHeader from './_components/_TaskCalendar/MonthHeader';
 import TaskDetailModal from './TaskDetailModal';
 import TaskCreateModal from './_components/TaskCreateModal';
+import SubtaskCreateModal from './_components/SubTaskCreateModal'; // New import
 import DayTasksModal from './DayTasksModal';
 import DayHeaders from './_components/_TaskCalendar/DayHeaders';
 
@@ -42,6 +44,10 @@ const TaskCalendar: React.FC = () => {
 
   // Create Tasks
   const [createModalOpen, setCreateModalOpen] = useState(false);
+
+  // Create Subtasks - NEW STATE
+  const [subtaskModalOpen, setSubtaskModalOpen] = useState(false);
+  const [selectedParentTask, setSelectedParentTask] = useState<Task | null>(null);
 
   // Task Day
   const [dayTasksModalOpen, setDayTasksModalOpen] = useState(false);
@@ -72,8 +78,7 @@ const TaskCalendar: React.FC = () => {
     return tasks.filter(task =>
       task.assignedUsers.some(assignedUser => assignedUser.userId === mockJWT.userId)
     );
-  }, [tasks]); // Add tasks as dependency
-
+  }, [tasks]);
 
   // BUSINESS LOGIC 2: Get tasks for current month by START DATE
   const monthTasks = useMemo(() => {
@@ -81,7 +86,7 @@ const TaskCalendar: React.FC = () => {
     const endOfMonth = currentDate.endOf('month');
 
     return assignedTasks.filter(task => {
-      const taskStartDate = dayjs(task.startDate); // Changed from dueDate to startDate
+      const taskStartDate = dayjs(task.startDate);
       return taskStartDate.isBetween(startOfMonth, endOfMonth, 'day', '[]');
     });
   }, [currentDate, assignedTasks]);
@@ -106,14 +111,20 @@ const TaskCalendar: React.FC = () => {
 
   // BUSINESS LOGIC 2: Get tasks for specific day by START DATE
   const getTasksForDay = (date: Dayjs) => {
-    return monthTasks.filter(task => dayjs(task.startDate).isSame(date, 'day')); // Changed from dueDate to startDate
+    return monthTasks.filter(task => dayjs(task.startDate).isSame(date, 'day'));
   };
 
-  const getPriorityColor = (priority: number) => {
+  const getPriorityColor = (priority: Priority) => {
+    if (typeof priority !== 'number') return '#9e9e9e';
     if (priority >= 7) return '#f44336';
     if (priority >= 4) return '#ff9800';
     if (priority >= 1) return '#2196f3';
     return '#9e9e9e';
+  };
+
+  const getTaskTypeColor = (task: Task) => {
+    if (task.parentTaskId) return '#ffeb3b';
+    return getPriorityColor(task.priority);
   };
 
   const handleTaskClick = (task: Task) => {
@@ -137,6 +148,19 @@ const TaskCalendar: React.FC = () => {
   const handleTaskCreated = (newTask: Task) => {
     setTasks(prev => [...prev, newTask]);
     setCreateModalOpen(false);
+  };
+
+  // NEW FUNCTION: Handle subtask creation
+  const handleSubtaskCreated = (newSubtask: Task) => {
+    setTasks(prev => [...prev, newSubtask]);
+    setSubtaskModalOpen(false);
+    setSelectedParentTask(null);
+  };
+
+  // NEW FUNCTION: Open subtask modal with parent
+  const handleCreateSubtask = (parentTask: Task) => {
+    setSelectedParentTask(parentTask);
+    setSubtaskModalOpen(true);
   };
 
   const handleMoreTasksClick = (date: Dayjs, tasks: Task[]) => {
@@ -301,10 +325,16 @@ const TaskCalendar: React.FC = () => {
                                   sx={{
                                     mb: 0.5,
                                     cursor: 'pointer',
-                                    bgcolor: getPriorityColor(task.priority) + '20',
-                                    borderLeft: `3px solid ${getPriorityColor(task.priority)}`,
+                                    bgcolor: `${getTaskTypeColor(task)}20`,
+                                    borderLeft: task.parentTaskId
+                                      ? `2px dashed ${getTaskTypeColor(task)}`  
+                                      : `3px solid ${getTaskTypeColor(task)}`,  
+                                    // Add subtle styling for subtasks
+                                    borderLeftWidth: task.parentTaskId ? '2px' : '3px',
+                                    borderLeftStyle: task.parentTaskId ? 'dashed' : 'solid',
+                                    ml: task.parentTaskId ? 0.5 : 0,
                                     '&:hover': {
-                                      bgcolor: getPriorityColor(task.priority) + '30',
+                                      bgcolor: `${getTaskTypeColor(task)}30`, 
                                     },
                                     minHeight: 0,
                                     flexShrink: 0,
@@ -332,10 +362,11 @@ const TaskCalendar: React.FC = () => {
                                         fontSize: { xs: '0.6rem', sm: '0.7rem' },
                                         width: '100%',
                                         overflow: 'hidden',
-                                        textOverflow: 'ellipsis'
+                                        textOverflow: 'ellipsis',
+                                        fontStyle: task.parentTaskId ? 'italic' : 'normal'
                                       }}
                                     >
-                                      {task.title}
+                                      {task.parentTaskId ? '└ ' : ''}{task.title}
                                     </Typography>
                                   </CardContent>
                                 </Card>
@@ -357,7 +388,7 @@ const TaskCalendar: React.FC = () => {
                                     }
                                   }}
                                   onClick={(e) => {
-                                    e.stopPropagation(); // Prevent day cell click
+                                    e.stopPropagation();
                                     handleMoreTasksClick(day, dayTasks);
                                   }}
                                 >
@@ -393,7 +424,6 @@ const TaskCalendar: React.FC = () => {
         onClose={handleCloseModal}
         onTaskUpdated={handleTaskUpdated}
         setSnackbarContent={setSnackbarContent}
-        currentUser={mockJWT}
       />
 
       {/* Task Create Modal */}
@@ -402,7 +432,6 @@ const TaskCalendar: React.FC = () => {
         onClose={() => setCreateModalOpen(false)}
         onTaskCreated={handleTaskCreated}
         setSnackbarContent={setSnackbarContent}
-        currentUser={mockJWT}
       />
 
       <Snackbar

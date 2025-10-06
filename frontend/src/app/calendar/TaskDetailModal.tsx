@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   AlertColor,
   Dialog,
@@ -33,6 +33,9 @@ interface TaskDetailModalProps {
   setSnackbarContent: (message: string, severity: AlertColor) => void;
   onTaskUpdated?: (task: Task) => void;
   currentUser: CurrentUser;
+  onCreateSubtask?: (parentTask: Task) => void;
+  onSubtaskClick?: (subtask: Task) => void;
+  allTasks?: Task[]; // New
 }
 
 const getPriorityColor = (priority: string) => {
@@ -59,7 +62,10 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   open,
   onClose,
   onTaskUpdated,
-  setSnackbarContent
+  setSnackbarContent,
+  onCreateSubtask,
+  onSubtaskClick,
+  allTasks, // New
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -67,6 +73,21 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   const { currentUser } = taskMockData;
 
   const [editModalOpen, setEditModalOpen] = useState(false);
+
+  const relatedSubtasks = useMemo(() => {
+    // Return empty array if task is null/undefined
+    // This prevents the "Cannot read properties of null" error
+    if (!task) return [];
+
+    // Only show subtasks if this is a parent task (not a subtask itself)
+    // If the current task has a parentTaskId, it means it's a subtask,
+    // so we don't want to show its siblings or any subtasks
+    if (task.parentTaskId) return [];
+
+    // ✅ Use allTasks prop if provided, fallback to mockData
+    const tasksToFilter = allTasks || taskMockData.tasks;
+    return tasksToFilter.filter(t => t.parentTaskId === task.taskId);
+  }, [task, allTasks]); // ✅ Add allTasks to dependency array
 
   if (!task) return null;
 
@@ -86,6 +107,12 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     setEditModalOpen(false);
   };
 
+  // New handler for subtask creation
+  const handleCreateSubtask = () => {
+    onCreateSubtask?.(task);
+  };
+
+
   return (
     <>
       <Dialog
@@ -104,8 +131,9 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         <DialogTitle sx={{ pb: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2 }}>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              {task.title}
+              {task.parentTaskId ? `└ ${task.title}` : task.title}
             </Typography>
+
             <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
               <Chip
                 label={task.priority}
@@ -210,6 +238,94 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             </Stack>
           </Box>
 
+          {/* Subtasks Section - Only show for parent tasks with subtasks */}
+          {!task.parentTaskId && relatedSubtasks.length > 0 && (
+            <>
+              <Box sx={{ mb: 3 }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    mb: 2,
+                    fontWeight: 600,
+                    color: 'primary.main'
+                  }}
+                >
+                  Subtasks ({relatedSubtasks.length})
+                </Typography>
+                <List sx={{ p: 0 }}>
+                  {relatedSubtasks.map((subtask, index) => (
+                    <React.Fragment key={subtask.taskId}>
+                      <ListItem
+                        sx={{
+                          p: 2,
+                          borderRadius: 1,
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          mb: 1,
+                          '&:hover': {
+                            bgcolor: 'action.hover',
+                            cursor: 'pointer'
+                          }
+                        }}
+                        onClick={() => onSubtaskClick?.(subtask)}
+                      >
+                        <Stack spacing={1} sx={{ width: '100%' }}>
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontWeight: 600,
+                                fontStyle: 'italic',
+                                flexGrow: 1
+                              }}
+                            >
+                              └ {subtask.title}
+                            </Typography>
+
+                            <Chip
+                              label={subtask.priority}
+                              size="small"
+                              color={getPriorityColor(subtask.priority)}
+                            />
+                            <Chip
+                              label={subtask.status}
+                              size="small"
+                              variant="outlined"
+                              color={getStatusColor(subtask.status)}
+                            />
+                          </Stack>
+
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden'
+                            }}
+                          >
+                            {subtask.description}
+                          </Typography>
+
+                          <Stack direction="row" spacing={2}>
+                            <Typography variant="caption" color="text.secondary">
+                              Start: {dayjs(subtask.startDate).format('MMM DD, YYYY')}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              Due: {dayjs(subtask.dueDate).format('MMM DD, YYYY')}
+                            </Typography>
+                          </Stack>
+                        </Stack>
+                      </ListItem>
+                    </React.Fragment>
+                  ))}
+                </List>
+              </Box>
+              <Divider sx={{ mb: 3 }} />
+            </>
+          )}
+
           {/* Comments Section */}
           {task.comments.length > 0 && (
             <Box>
@@ -244,12 +360,25 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         </DialogContent>
 
         <DialogActions>
+          {/* Create Subtask Button - Only show if onCreateSubtask prop is provided and task is not already a subtask */}
+          {onCreateSubtask && !task.parentTaskId && (
+            <Button
+              onClick={handleCreateSubtask}
+              variant="outlined"
+              startIcon={<AddIcon />}
+              sx={{ mr: 'auto' }} // Pushes button to the left
+            >
+              {isMobile ? 'Subtask' : 'Create Subtask'}
+            </Button>
+          )}
+
           <Button
             onClick={onClose}
             variant="outlined"
           >
             Close
           </Button>
+
           {canEdit && (
             <Button
               onClick={handleEditClick}
@@ -270,7 +399,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         setSnackbarContent={setSnackbarContent}
         currentUser={currentUser}
         existingTaskDetails={task}
-      />
+        allTasks={[]} />
     </>
   );
 };

@@ -4,8 +4,8 @@ import Status from "@/types/TStatus";
 
 interface DropDownMenuProps {
     label: string;
-    value: string;
-    onChange: (value: string) => void;
+    value: string | number;
+    onChange: (value: string | number) => void;
     options: Priority[] | Status[];
     error?: boolean;
     helperText?: string;
