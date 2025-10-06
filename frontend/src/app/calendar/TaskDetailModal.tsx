@@ -20,11 +20,12 @@ import {
   useTheme,
   useMediaQuery
 } from '@mui/material';
-import { Edit as EditIcon } from '@mui/icons-material';
+import { Edit, Add } from '@mui/icons-material';
 import { CurrentUser, Task, taskMockData } from '@/mocks/staff/taskMockData';
 import dayjs from 'dayjs';
 import TaskCreateModal from './_components/TaskCreateModal';
 import { canEditTask } from '@/constants/Permissions';
+import { getPriorityColor, getStatusColor } from './_functions/TaskRenderingFunctions';
 
 interface TaskDetailModalProps {
   task: Task | null;
@@ -37,25 +38,6 @@ interface TaskDetailModalProps {
   onSubtaskClick?: (subtask: Task) => void;
   allTasks?: Task[]; // New
 }
-
-const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case 'High': return 'error';
-    case 'Medium': return 'warning';
-    case 'Low': return 'info';
-    default: return 'default';
-  }
-};
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'Completed': return 'success';
-    case 'In Progress': return 'primary';
-    case 'Blocked': return 'error';
-    case 'To Do': return 'default';
-    default: return 'default';
-  }
-};
 
 const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   task,
@@ -137,12 +119,12 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
               <Chip
                 label={task.priority}
-                color={getPriorityColor(task.priority) as any}
+                sx = {{color: getPriorityColor(task.priority)}}
                 size={isMobile ? 'small' : 'medium'}
               />
               <Chip
                 label={task.status}
-                color={getStatusColor(task.status) as any}
+                sx = {{color: getStatusColor(task.status)}}
                 size={isMobile ? 'small' : 'medium'}
               />
             </Stack>
@@ -285,7 +267,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                             <Chip
                               label={subtask.priority}
                               size="small"
-                              color={getPriorityColor(subtask.priority)}
+                              sx={{ color: getPriorityColor(subtask.priority) }}
                             />
                             <Chip
                               label={subtask.status}
@@ -365,7 +347,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             <Button
               onClick={handleCreateSubtask}
               variant="outlined"
-              startIcon={<AddIcon />}
+              startIcon={<Add />}
               sx={{ mr: 'auto' }} // Pushes button to the left
             >
               {isMobile ? 'Subtask' : 'Create Subtask'}
@@ -383,7 +365,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             <Button
               onClick={handleEditClick}
               variant="contained"
-              startIcon={<EditIcon />}
+              startIcon={<Edit />}
             >
               {isMobile ? 'Edit' : 'Edit Task'}
             </Button>

@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import { Task } from '@/mocks/staff/taskMockData';
 import dayjs, { Dayjs } from 'dayjs';
+import { getPriorityColor, getStatusColor } from './_functions/TaskRenderingFunctions';
 
 interface DayTasksModalProps {
   tasks: Task[];
@@ -28,31 +29,12 @@ interface DayTasksModalProps {
   onTaskSelect: (task: Task) => void;
 }
 
-const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case 'High': return '#f44336';
-    case 'Medium': return '#ff9800';
-    case 'Low': return '#2196f3';
-    default: return '#9e9e9e';
-  }
-};
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'Completed': return 'success';
-    case 'In Progress': return 'primary';
-    case 'Blocked': return 'error';
-    case 'To Do': return 'default';
-    default: return 'default';
-  }
-};
-
-const DayTasksModal: React.FC<DayTasksModalProps> = ({ 
-  tasks, 
-  selectedDate, 
-  open, 
-  onClose, 
-  onTaskSelect 
+const DayTasksModal: React.FC<DayTasksModalProps> = ({
+  tasks,
+  selectedDate,
+  open,
+  onClose,
+  onTaskSelect
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -65,38 +47,38 @@ const DayTasksModal: React.FC<DayTasksModalProps> = ({
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose} 
+    <Dialog
+      open={open}
+      onClose={onClose}
       maxWidth="sm"
       fullWidth
       fullScreen={isMobile}
       PaperProps={{
-        sx: { 
+        sx: {
           borderRadius: isMobile ? 0 : 2,
           height: isMobile ? '100vh' : 'auto',
           maxHeight: isMobile ? 'none' : '80vh'
         }
       }}
     >
-      <DialogTitle 
-        sx={{ 
+      <DialogTitle
+        sx={{
           pb: { xs: 1, sm: 2 },
           px: { xs: 2, sm: 3 }
         }}
       >
-        <Typography 
-          variant={isMobile ? 'h6' : 'h5'} 
+        <Typography
+          variant={isMobile ? 'h6' : 'h5'}
           component="div"
-          sx={{ 
+          sx={{
             fontSize: { xs: '1.1rem', sm: '1.5rem' },
             fontWeight: 600
           }}
         >
           Tasks for {selectedDate.format('MMMM D, YYYY')}
         </Typography>
-        <Typography 
-          variant="body2" 
+        <Typography
+          variant="body2"
           color="text.secondary"
           component="div"
           sx={{ mt: 0.5 }}
@@ -105,15 +87,15 @@ const DayTasksModal: React.FC<DayTasksModalProps> = ({
         </Typography>
       </DialogTitle>
 
-      <DialogContent 
-        sx={{ 
+      <DialogContent
+        sx={{
           px: { xs: 1, sm: 2 },
           py: 0
         }}
       >
         <List disablePadding>
           {tasks.map((task, index) => (
-            <ListItem 
+            <ListItem
               key={`task-${task.taskId}-${index}-${task.title.slice(0, 10)}`} // FIXED: Unique key combination
               disablePadding
             >
@@ -140,7 +122,7 @@ const DayTasksModal: React.FC<DayTasksModalProps> = ({
                   <Typography
                     variant="subtitle1"
                     component="div"
-                    sx={{ 
+                    sx={{
                       fontWeight: 600,
                       mr: 2,
                       fontSize: { xs: '0.9rem', sm: '1rem' },
@@ -149,20 +131,20 @@ const DayTasksModal: React.FC<DayTasksModalProps> = ({
                   >
                     {task.parentTaskId ? `└ ${task.title}` : task.title}
                   </Typography>
-                  
+
                   <Stack direction="row" spacing={1}>
-                    <Chip 
-                      label={task.priority} 
+                    <Chip
+                      label={task.priority}
                       size="small"
-                      sx={{ 
+                      sx={{
                         bgcolor: `${getPriorityColor(task.priority)}20`,
                         color: getPriorityColor(task.priority),
                         fontWeight: 600,
                         fontSize: '0.75rem'
                       }}
                     />
-                    <Chip 
-                      label={task.status} 
+                    <Chip
+                      label={task.status}
                       color={getStatusColor(task.status) as any}
                       variant="outlined"
                       size="small"
@@ -172,11 +154,11 @@ const DayTasksModal: React.FC<DayTasksModalProps> = ({
                 </Box>
 
                 {/* Task Description */}
-                <Typography 
-                  variant="body2" 
+                <Typography
+                  variant="body2"
                   color="text.secondary"
                   component="div"
-                  sx={{ 
+                  sx={{
                     mb: 1,
                     fontSize: { xs: '0.8rem', sm: '0.875rem' },
                     display: '-webkit-box',
@@ -190,22 +172,22 @@ const DayTasksModal: React.FC<DayTasksModalProps> = ({
                 </Typography>
 
                 {/* Task Footer */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
+                <Box sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
                   alignItems: 'center',
                   width: '100%'
                 }}>
-                  <Typography 
-                    variant="caption" 
+                  <Typography
+                    variant="caption"
                     color="text.secondary"
                     component="div"
                     sx={{ fontSize: '0.75rem' }}
                   >
                     Project: {task.projectName}
                   </Typography>
-                  <Typography 
-                    variant="caption" 
+                  <Typography
+                    variant="caption"
                     color="text.secondary"
                     component="div"
                     sx={{ fontSize: '0.75rem' }}
@@ -219,15 +201,15 @@ const DayTasksModal: React.FC<DayTasksModalProps> = ({
         </List>
       </DialogContent>
 
-      <DialogActions 
-        sx={{ 
-          px: { xs: 2, sm: 3 }, 
+      <DialogActions
+        sx={{
+          px: { xs: 2, sm: 3 },
           pb: { xs: 2, sm: 2 },
           pt: { xs: 1, sm: 2 }
         }}
       >
-        <Button 
-          onClick={onClose} 
+        <Button
+          onClick={onClose}
           variant="outlined"
           size={isMobile ? 'small' : 'medium'}
           fullWidth={isMobile}

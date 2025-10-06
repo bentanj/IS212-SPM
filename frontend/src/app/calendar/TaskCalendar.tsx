@@ -31,6 +31,7 @@ import TaskCreateModal from './_components/TaskCreateModal';
 import SubtaskCreateModal from './_components/SubTaskCreateModal'; // New import
 import DayTasksModal from './DayTasksModal';
 import DayHeaders from './_components/_TaskCalendar/DayHeaders';
+import { getTaskTypeColor } from './_functions/TaskRenderingFunctions';
 
 const TaskCalendar: React.FC = () => {
   // Mock Data
@@ -112,19 +113,6 @@ const TaskCalendar: React.FC = () => {
   // BUSINESS LOGIC 2: Get tasks for specific day by START DATE
   const getTasksForDay = (date: Dayjs) => {
     return monthTasks.filter(task => dayjs(task.startDate).isSame(date, 'day'));
-  };
-
-  const getPriorityColor = (priority: Priority) => {
-    if (typeof priority !== 'number') return '#9e9e9e';
-    if (priority >= 7) return '#f44336';
-    if (priority >= 4) return '#ff9800';
-    if (priority >= 1) return '#2196f3';
-    return '#9e9e9e';
-  };
-
-  const getTaskTypeColor = (task: Task) => {
-    if (task.parentTaskId) return '#ffeb3b';
-    return getPriorityColor(task.priority);
   };
 
   const handleTaskClick = (task: Task) => {
@@ -435,6 +423,18 @@ const TaskCalendar: React.FC = () => {
         onTaskCreated={handleTaskCreated}
         setSnackbarContent={setSnackbarContent}
         currentUser={mockJWT}
+        allTasks={tasks}
+      />
+
+      <SubtaskCreateModal
+        open={subtaskModalOpen}
+        onClose={() => {
+          setSubtaskModalOpen(false);
+          setSelectedParentTask(null);
+        }}
+        onTaskCreated={handleSubtaskCreated}
+        setSnackbarContent={setSnackbarContent}
+        preselectedParentTask={selectedParentTask}
         allTasks={tasks}
       />
 

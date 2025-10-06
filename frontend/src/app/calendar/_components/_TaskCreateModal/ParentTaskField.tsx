@@ -3,6 +3,7 @@
 import React from 'react';
 import { Autocomplete, TextField, Chip, Box, Typography } from '@mui/material';
 import { Task } from '@/mocks/staff/taskMockData';
+import { getPriorityColor, getStatusColor } from '../../_functions/TaskRenderingFunctions';
 
 interface ParentTaskFieldProps {
   parentTask: Task | null;
@@ -21,24 +22,6 @@ const ParentTaskField: React.FC<ParentTaskFieldProps> = ({
   helperText = '',
   disabled = false,
 }) => {
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'High': return '#f44336';
-      case 'Medium': return '#ff9800';
-      case 'Low': return '#2196f3';
-      default: return '#9e9e9e';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Completed': return '#4caf50';
-      case 'In Progress': return '#2196f3';
-      case 'Blocked': return '#f44336';
-      case 'To Do': return '#9e9e9e';
-      default: return '#9e9e9e';
-    }
-  };
 
   return (
     <Box sx={{ mt: 2 }}>
