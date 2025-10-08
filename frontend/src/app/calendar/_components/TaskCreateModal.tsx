@@ -16,6 +16,7 @@ import { getAvailableUsers, handleAddTag, handleRemoveTag, resetForm, handleSubm
 import { Task, taskMockData, allUsers, CurrentUser } from '@/mocks/staff/taskMockData';
 import IFormData from "@/types/IFormData";
 import DefaultFormData, { PriorityOptions, StatusOptions } from '@/constants/DefaultFormData';
+import { ALL_DEPARTMENTS } from '@/constants/Organisation';
 
 // Components
 import ModalTitle from './_TaskCreateModal/ModalTitle';
@@ -90,6 +91,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
           comments: '',
           projectName: existingTaskDetails.projectName,
           attachedFile: null,
+          department: existingTaskDetails.department,
         });
       }
     }
@@ -167,8 +169,17 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
         {/* Dates Row */}
         <DateRow formData={formData} setFormData={setFormData} errors={errors} />
 
-        {/* Priority and Status Row */}
+        {/* Department, Priority and Status Row */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }}>
+          <DropDownMenu
+            label="Department"
+            value={formData.department}
+            onChange={(val) => setFormData((prev) => ({ ...prev, department: val as string }))}
+            options={ALL_DEPARTMENTS}
+            error={!!errors.department}
+            helperText={errors.department}
+            required />
+
           <DropDownMenu
             label="Priority"
             value={formData.priority}
