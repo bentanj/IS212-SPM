@@ -31,45 +31,48 @@ const ParentTaskField: React.FC<ParentTaskFieldProps> = ({
         value={parentTask}
         onChange={(event, newValue) => onChange(newValue)}
         disabled={disabled}
-        renderOption={(props, option) => (
-          <Box component="li" {...props}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
-                <Typography variant="body2" sx={{ fontWeight: 500, flex: 1 }}>
-                  {option.title}
-                </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-                  ID: {option.taskId}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                <Chip
-                  label={option.priority}
-                  size="small"
-                  sx={{
-                    bgcolor: getPriorityColor(option.priority) + '20',
-                    color: getPriorityColor(option.priority),
-                    fontSize: '0.7rem',
-                    height: '20px'
-                  }}
-                />
-                <Chip
-                  label={option.status}
-                  size="small"
-                  sx={{
-                    bgcolor: getStatusColor(option.status) + '20',
-                    color: getStatusColor(option.status),
-                    fontSize: '0.7rem',
-                    height: '20px'
-                  }}
-                />
-                <Typography variant="caption" color="text.secondary">
-                  {option.projectName}
-                </Typography>
+        renderOption={(props, option) => {
+          const { key, ...otherProps } = props;
+          return (
+            <Box component="li" key={key} {...otherProps}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 500, flex: 1 }}>
+                    {option.title}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                    ID: {option.taskId}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                  <Chip
+                    label={option.priority}
+                    size="small"
+                    sx={{
+                      bgcolor: getPriorityColor(option.priority) + '20',
+                      color: getPriorityColor(option.priority),
+                      fontSize: '0.7rem',
+                      height: '20px'
+                    }}
+                  />
+                  <Chip
+                    label={option.status}
+                    size="small"
+                    sx={{
+                      bgcolor: getStatusColor(option.status) + '20',
+                      color: getStatusColor(option.status),
+                      fontSize: '0.7rem',
+                      height: '20px'
+                    }}
+                  />
+                  <Typography variant="caption" color="text.secondary">
+                    {option.projectName}
+                  </Typography>
+                </Box>
               </Box>
             </Box>
-          </Box>
-        )}
+          )
+        }}
         renderInput={(params) => (
           <TextField
             {...params}
@@ -80,13 +83,12 @@ const ParentTaskField: React.FC<ParentTaskFieldProps> = ({
             fullWidth
           />
         )}
-        renderTags={(value, getTagProps) =>
-          value.map((option, index) => (
+        renderValue={(selected) => {
+          if (!selected) return null;
+          return (
             <Chip
               variant="outlined"
-              label={`${option.title} (ID: ${option.taskId})`}
-              {...getTagProps({ index })}
-              key={option.taskId}
+              label={`${selected.title} (ID: ${selected.taskId})`}
               sx={{
                 maxWidth: '300px',
                 '& .MuiChip-label': {
@@ -96,8 +98,8 @@ const ParentTaskField: React.FC<ParentTaskFieldProps> = ({
                 }
               }}
             />
-          ))
-        }
+          );
+        }}
         isOptionEqualToValue={(option, value) => option.taskId === value.taskId}
         filterOptions={(options, { inputValue }) => {
           return options.filter(option =>
