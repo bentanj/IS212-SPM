@@ -1,4 +1,6 @@
 import Priority from '@/types/TPriority';
+import Status from '@/types/TStatus';
+import { Departments } from '@/types/TOrganisation';
 
 export interface User {
   userId: number;
@@ -16,16 +18,16 @@ export interface Task {
   taskId: number;
   title: string;
   description: string;
-  startDate: string;
-  completedDate: string | null;
-  dueDate: string;
+  projectName: string;
+  department: Departments;
   priority: Priority;
+  status: Status;
+  startDate: string;
+  dueDate: string;
+  completedDate: string | null;
   assignedUsers: User[];
   tags: string[];
-  status: 'To Do' | 'In Progress' | 'Completed' | 'Blocked';
   comments: Comment[];
-  projectName: string;
-  ownerId: number;
   sharedWith: number[];
   parentTaskId?: number;
 }
@@ -34,6 +36,7 @@ export interface CurrentUser {
   userId: number;
   name: string;
   systemRole: string;
+  department: Departments;
 }
 
 export interface MockData {
@@ -45,10 +48,11 @@ export const taskMockData: MockData = {
   currentUser: {
     userId: 1,
     name: "John Smith",
-    systemRole: "Staff"
+    systemRole: "Staff",
+    department: "Sales Manager",
   },
   tasks: [
-    // Original parent tasks (keeping existing ones)
+    // Original parent tasks (existing ones unchanged)
     {
       taskId: 1,
       title: "Implement User Authentication System",
@@ -78,10 +82,9 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "E-Commerce Platform",
-      ownerId: 1,
-      sharedWith: [3]
+      sharedWith: [3],
+      department: "IT Team",
     },
-
     // SUBTASKS FOR TASK 1: User Authentication System
     {
       taskId: 101,
@@ -105,9 +108,9 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "E-Commerce Platform",
-      ownerId: 1,
       sharedWith: [3],
-      parentTaskId: 1
+      parentTaskId: 1,
+      department: "Sales Manager",
     },
     {
       taskId: 102,
@@ -124,9 +127,10 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "E-Commerce Platform",
-      ownerId: 3,
       sharedWith: [1],
-      parentTaskId: 1
+      parentTaskId: 1,
+      // Added missing org attributes (likely IT based on project)
+      department: "IT Team",
     },
     {
       taskId: 103,
@@ -143,9 +147,9 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "E-Commerce Platform",
-      ownerId: 3,
       sharedWith: [1],
-      parentTaskId: 1
+      parentTaskId: 1,
+      department: "IT Team",
     },
     {
       taskId: 104,
@@ -162,11 +166,10 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "E-Commerce Platform",
-      ownerId: 1,
       sharedWith: [3],
-      parentTaskId: 1
+      parentTaskId: 1,
+      department: "IT Team",
     },
-
     {
       taskId: 3,
       title: "API Rate Limiting Implementation",
@@ -195,10 +198,10 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "API Gateway Project",
-      ownerId: 2,
-      sharedWith: [1, 3]
+      sharedWith: [1, 3],
+      // Added organization fields with assumption (engineering/support)
+      department: "Support Team",
     },
-
     // SUBTASKS FOR TASK 3: API Rate Limiting
     {
       taskId: 301,
@@ -222,9 +225,9 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "API Gateway Project",
-      ownerId: 1,
       sharedWith: [2],
-      parentTaskId: 3
+      parentTaskId: 3,
+      department: "Support Team",
     },
     {
       taskId: 302,
@@ -241,9 +244,9 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "API Gateway Project",
-      ownerId: 2,
       sharedWith: [1],
-      parentTaskId: 3
+      parentTaskId: 3,
+      department: "Support Team",
     },
     {
       taskId: 303,
@@ -260,11 +263,10 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "API Gateway Project",
-      ownerId: 3,
       sharedWith: [2],
-      parentTaskId: 3
+      parentTaskId: 3,
+      department: "Support Team",
     },
-
     {
       taskId: 21,
       title: "Frontend Login Component Development",
@@ -287,10 +289,9 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "E-Commerce Platform",
-      ownerId: 3,
-      sharedWith: [1]
+      sharedWith: [1],
+      department: "IT Team",
     },
-
     // SUBTASKS FOR TASK 21: Frontend Login Component
     {
       taskId: 201,
@@ -314,9 +315,9 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "E-Commerce Platform",
-      ownerId: 3,
       sharedWith: [1],
-      parentTaskId: 21
+      parentTaskId: 21,
+      department: "IT Team",
     },
     {
       taskId: 202,
@@ -340,9 +341,9 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "E-Commerce Platform",
-      ownerId: 3,
       sharedWith: [1],
-      parentTaskId: 21
+      parentTaskId: 21,
+      department: "IT Team",
     },
     {
       taskId: 203,
@@ -366,9 +367,9 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "E-Commerce Platform",
-      ownerId: 3,
       sharedWith: [1],
-      parentTaskId: 21
+      parentTaskId: 21,
+      department: "IT Team",
     },
     {
       taskId: 204,
@@ -385,11 +386,10 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "E-Commerce Platform",
-      ownerId: 3,
       sharedWith: [1],
-      parentTaskId: 21
+      parentTaskId: 21,
+      department: "IT Team",
     },
-
     {
       taskId: 24,
       title: "Load Testing Infrastructure",
@@ -406,10 +406,9 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Quality Assurance",
-      ownerId: 6,
-      sharedWith: [1, 2]
+      sharedWith: [1, 2],
+      department: "Consultant",
     },
-
     // SUBTASKS FOR TASK 24: Load Testing Infrastructure
     {
       taskId: 401,
@@ -433,9 +432,9 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "Quality Assurance",
-      ownerId: 4,
       sharedWith: [6],
-      parentTaskId: 24
+      parentTaskId: 24,
+      department: "Consultant",
     },
     {
       taskId: 402,
@@ -459,9 +458,9 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "Quality Assurance",
-      ownerId: 6,
       sharedWith: [4],
-      parentTaskId: 24
+      parentTaskId: 24,
+      department: "Consultant",
     },
     {
       taskId: 403,
@@ -478,9 +477,9 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Quality Assurance",
-      ownerId: 4,
       sharedWith: [6],
-      parentTaskId: 24
+      parentTaskId: 24,
+      department: "Consultant",
     },
     {
       taskId: 404,
@@ -497,11 +496,10 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Quality Assurance",
-      ownerId: 6,
       sharedWith: [4],
-      parentTaskId: 24
+      parentTaskId: 24,
+      department: "Consultant",
     },
-
     {
       taskId: 39,
       title: "Integration Testing Automation",
@@ -525,10 +523,9 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "Quality Assurance",
-      ownerId: 6,
-      sharedWith: [1, 2]
+      sharedWith: [1, 2],
+      department: "Consultant",
     },
-
     // SUBTASKS FOR TASK 39: Integration Testing Automation
     {
       taskId: 501,
@@ -552,9 +549,9 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "Quality Assurance",
-      ownerId: 6,
       sharedWith: [1],
-      parentTaskId: 39
+      parentTaskId: 39,
+      department: "Consultant",
     },
     {
       taskId: 502,
@@ -578,9 +575,9 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "Quality Assurance",
-      ownerId: 1,
       sharedWith: [6],
-      parentTaskId: 39
+      parentTaskId: 39,
+      department: "Consultant",
     },
     {
       taskId: 503,
@@ -597,12 +594,11 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Quality Assurance",
-      ownerId: 6,
       sharedWith: [1],
-      parentTaskId: 39
+      parentTaskId: 39,
+      department: "Consultant",
     },
-
-    // Keep other original tasks without subtasks
+    // Other original tasks without subtasks with default org fields added
     {
       taskId: 2,
       title: "Database Schema Migration",
@@ -625,10 +621,9 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "E-Commerce Platform",
-      ownerId: 1,
-      sharedWith: []
+      sharedWith: [],
+      department: "IT Team",
     },
-
     {
       taskId: 4,
       title: "Code Review Guidelines Documentation",
@@ -645,10 +640,9 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Development Process Improvement",
-      ownerId: 4,
-      sharedWith: [1, 2, 3]
+      sharedWith: [1, 2, 3],
+      department: "Consultant",
     },
-
     {
       taskId: 5,
       title: "Performance Optimization Research",
@@ -671,11 +665,9 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "Performance Enhancement",
-      ownerId: 1,
-      sharedWith: []
+      sharedWith: [],
+      department: "Consultant",
     },
-
-    // Additional tasks to maintain the full dataset
     {
       taskId: 22,
       title: "Security Testing Framework Setup",
@@ -691,10 +683,9 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Security Enhancement",
-      ownerId: 2,
-      sharedWith: [1, 3]
+      sharedWith: [1, 3],
+      department: "Sales Manager",
     },
-
     {
       taskId: 23,
       title: "Redis Cache Implementation",
@@ -717,10 +708,9 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "API Gateway Project",
-      ownerId: 1,
-      sharedWith: [2]
+      sharedWith: [2],
+      department: "Support Team",
     },
-
     {
       taskId: 25,
       title: "API Documentation Generation",
@@ -736,11 +726,12 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Documentation Initiative",
-      ownerId: 3,
-      sharedWith: [2]
-    }
+      sharedWith: [2],
+      department: "Consultant",
+    },
   ]
 };
+
 
 // Additional users for the new tasks
 export const allUsers: User[] = [

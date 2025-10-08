@@ -7,15 +7,16 @@ export const StatusOptions = ["To Do", "In Progress", "Completed", "Blocked", ''
 const DefaultFormData: IFormData = {
     title: '',
     description: '',
+    projectName: '',
     startDate: null,
-    completedDate: null,
     dueDate: null,
+    completedDate: null,
+    department: '',
     priority: '',
+    status: '',
     assignedUsers: [],
     tags: [],
-    status: '',
     comments: '',
-    projectName: '',
     attachedFile: null,
 }
 
