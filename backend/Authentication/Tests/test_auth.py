@@ -1,11 +1,13 @@
 import pytest
 import requests
 from unittest.mock import patch, MagicMock, Mock
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+import time
 
 from ..Services.AuthService import AuthService
+from ..Services.JWTService import JWTService
 from ..Repositories.UserRepository import UserRepository
 from ..Models.User import User
 from ..Controllers.AuthController import bp as auth_bp
@@ -299,7 +301,7 @@ class TestUserModel:
         # for database queries, not for creating new instances
         from ..Models.User import User
         assert User is not None
-        print("✓ User model import successful for read-only operations")
+        print("User model import successful for read-only operations")
 
 
 @pytest.mark.unit
@@ -375,6 +377,10 @@ class TestAuthController:
             'first_name': 'Test',
             'last_name': 'User'
         }
+        mock_auth_instance.generate_jwt_tokens.return_value = (
+            'jwt_access_token',
+            'jwt_refresh_token'
+        )
         mock_auth_service.return_value = mock_auth_instance
         
         # Mock user repository
@@ -407,6 +413,9 @@ class TestAuthController:
             data = response.get_json()
             assert 'user' in data
             assert 'access_token' in data
+            assert 'refresh_token' in data
+            assert 'token_type' in data
+            assert 'expires_in' in data
             assert data['user']['email'] == 'test@example.com'
     
     @patch('Authentication.Controllers.AuthController.AuthService')
@@ -593,6 +602,291 @@ class TestAuthController:
         data = response.get_json()
         assert 'error' in data
         assert 'Access token required' in data['error']
+
+
+@pytest.mark.unit
+class TestSessionAndTokenStateChanges:
+    """Test session and token state changes (before/after)"""
+    
+    @pytest.fixture
+    def mock_app(self):
+        """Mock Flask app"""
+        from flask import Flask, g
+        
+        app = Flask(__name__)
+        app.config['TESTING'] = True
+        app.config['SECRET_KEY'] = 'test-secret-key'
+        
+        @app.before_request
+        def before_request():
+            g.db_session = Mock()
+        
+        app.register_blueprint(auth_bp, url_prefix='/api/auth')
+        return app
+    
+    @pytest.fixture
+    def client(self, mock_app):
+        """Test client"""
+        return mock_app.test_client()
+    
+    @pytest.fixture
+    def jwt_service(self):
+        """JWT service with test secrets"""
+        import os
+        os.environ['JWT_SECRET'] = 'test-jwt-secret-key'
+        os.environ['JWT_REFRESH_SECRET'] = 'test-jwt-refresh-secret-key'
+        return JWTService()
+    
+    def test_login_changes_session_state(self, client):
+        """Verify session state before and after login"""
+        # BEFORE: Empty session
+        with client.session_transaction() as sess:
+            initial_user_id = sess.get('user_id')
+            initial_oauth_state = sess.get('oauth_state')
+            assert initial_user_id is None
+            assert initial_oauth_state is None
+        
+        # Perform login (mock the full flow)
+        with patch('Authentication.Controllers.AuthController.AuthService') as mock_auth_service:
+            with patch('Authentication.Controllers.AuthController.UserRepository') as mock_user_repo:
+                # Setup mocks
+                mock_auth_instance = Mock()
+                mock_auth_instance.generate_auth_url.return_value = (
+                    "https://accounts.google.com/o/oauth2/v2/auth?state=test_state",
+                    "test_verifier"
+                )
+                mock_auth_instance.exchange_code_for_tokens.return_value = {
+                    'access_token': 'test_token'
+                }
+                mock_auth_instance.get_user_from_token.return_value = {
+                    'email': 'test@example.com',
+                    'first_name': 'Test',
+                    'last_name': 'User'
+                }
+                mock_auth_instance.generate_jwt_tokens.return_value = (
+                    'jwt_access_token',
+                    'jwt_refresh_token'
+                )
+                mock_auth_service.return_value = mock_auth_instance
+                
+                mock_user = User(id=1, email='test@example.com', first_name='Test', last_name='User')
+                mock_user_repo_instance = Mock()
+                mock_user_repo_instance.get_user_by_email.return_value = mock_user
+                mock_user_repo.return_value = mock_user_repo_instance
+                
+                # Get login state
+                login_response = client.get('/api/auth/login')
+                state = login_response.get_json()['state']
+                
+                # Complete callback
+                with client.session_transaction() as sess:
+                    sess['oauth_state'] = state
+                    sess['code_verifier'] = 'test_verifier'
+                
+                response = client.post('/api/auth/callback', json={
+                    'code': 'test_code',
+                    'state': state
+                })
+        
+        # AFTER: Session should contain user data
+        with client.session_transaction() as sess:
+            final_user_id = sess.get('user_id')
+            assert final_user_id is not None
+            assert final_user_id == 1
+    
+    def test_logout_clears_session_state(self, client):
+        """Verify session cleared before and after logout"""
+        # BEFORE: Set up authenticated session
+        with client.session_transaction() as sess:
+            sess['user_id'] = 1
+            sess['oauth_state'] = 'test_state'
+            sess['code_verifier'] = 'test_verifier'
+            # Verify session is populated
+            assert sess.get('user_id') == 1
+            assert 'oauth_state' in sess
+            assert 'code_verifier' in sess
+        
+        # Perform logout
+        response = client.post('/api/auth/logout')
+        assert response.status_code == 200
+        
+        # AFTER: Session should be cleared
+        with client.session_transaction() as sess:
+            assert sess.get('user_id') is None
+            assert sess.get('oauth_state') is None
+            assert sess.get('code_verifier') is None
+    
+    def test_refresh_creates_new_token(self, jwt_service):
+        """Verify new token created during refresh"""
+        user_data = {
+            'id': 1,
+            'email': 'test@example.com',
+            'role': 'user',
+            'first_name': 'Test',
+            'last_name': 'User'
+        }
+        
+        # BEFORE: Generate initial tokens
+        old_access_token, refresh_token = jwt_service.generate_token_pair(user_data)
+        old_payload = jwt_service.decode_access_token(old_access_token)
+        old_exp = old_payload['exp']
+        old_iat = old_payload['iat']
+        
+        # Wait to ensure different timestamps
+        time.sleep(1)
+        
+        # Perform refresh with user data
+        new_access_token = jwt_service.refresh_access_token(refresh_token, user_data)
+        
+        # AFTER: Verify new token is different
+        new_payload = jwt_service.decode_access_token(new_access_token)
+        new_exp = new_payload['exp']
+        new_iat = new_payload['iat']
+        
+        # Tokens should be different
+        assert new_access_token != old_access_token
+
+        # New token should have later timestamps
+        assert new_iat > old_iat
+        assert new_exp > old_exp
+        
+        # User data should remain the same
+        assert new_payload['user_id'] == old_payload['user_id']
+        assert new_payload['email'] == old_payload['email']
+        assert new_payload['role'] == old_payload['role']
+    
+    def test_token_validity_before_after_expiration(self, jwt_service):
+        """Test token validity changes after expiration"""
+        import jwt as pyjwt
+        
+        # Create token with short expiration (2 seconds for testing)
+        payload = {
+            'user_id': 1,
+            'email': 'test@example.com',
+            'role': 'user',
+            'exp': datetime.now(timezone.utc) + timedelta(seconds=2),
+            'iat': datetime.now(timezone.utc),
+            'type': 'access'
+        }
+        
+        token = pyjwt.encode(payload, jwt_service.jwt_secret, algorithm='HS256')
+        
+        # BEFORE expiration: Token should be valid
+        decoded = jwt_service.decode_access_token(token)
+        assert decoded['user_id'] == 1
+        assert decoded['email'] == 'test@example.com'
+        
+        # Wait for expiration
+        time.sleep(3)
+        
+        # AFTER expiration: Token should be invalid
+        with pytest.raises(Exception):
+            jwt_service.decode_access_token(token)
+    
+    def test_callback_populates_session_with_user_data(self, client):
+        """Test that OAuth callback populates session with user data"""
+        with patch('Authentication.Controllers.AuthController.AuthService') as mock_auth_service:
+            with patch('Authentication.Controllers.AuthController.UserRepository') as mock_user_repo:
+                # Setup mocks
+                mock_auth_instance = Mock()
+                mock_auth_instance.generate_auth_url.return_value = (
+                    "https://accounts.google.com/o/oauth2/v2/auth?state=test_state",
+                    "test_verifier"
+                )
+                mock_auth_instance.exchange_code_for_tokens.return_value = {
+                    'access_token': 'test_token'
+                }
+                mock_auth_instance.get_user_from_token.return_value = {
+                    'email': 'test@example.com',
+                    'first_name': 'Test',
+                    'last_name': 'User'
+                }
+                mock_auth_instance.generate_jwt_tokens.return_value = (
+                    'jwt_access_token',
+                    'jwt_refresh_token'
+                )
+                mock_auth_service.return_value = mock_auth_instance
+                
+                mock_user = User(id=1, email='test@example.com', first_name='Test', last_name='User')
+                mock_user_repo_instance = Mock()
+                mock_user_repo_instance.get_user_by_email.return_value = mock_user
+                mock_user_repo.return_value = mock_user_repo_instance
+                
+                # Get login state
+                login_response = client.get('/api/auth/login')
+                state = login_response.get_json()['state']
+                
+                # BEFORE callback: Session has only oauth data
+                with client.session_transaction() as sess:
+                    sess['oauth_state'] = state
+                    sess['code_verifier'] = 'test_verifier'
+                    assert sess.get('user_id') is None
+                
+                # Perform callback
+                response = client.post('/api/auth/callback', json={
+                    'code': 'test_code',
+                    'state': state
+                })
+                
+                # AFTER callback: Session should have user_id
+                with client.session_transaction() as sess:
+                    assert sess.get('user_id') == 1
+    
+    def test_token_payload_contains_user_data(self, jwt_service):
+        """Test that JWT token payload contains all required user data"""
+        user_data = {
+            'id': 1,
+            'email': 'test@example.com',
+            'role': 'admin',
+            'first_name': 'Test',
+            'last_name': 'User'
+        }
+        
+        # Generate tokens
+        access_token, refresh_token = jwt_service.generate_token_pair(user_data)
+        
+        # BEFORE decoding: Tokens are just encoded strings
+        assert isinstance(access_token, str)
+        assert isinstance(refresh_token, str)
+        
+        # AFTER decoding: Should contain user data
+        access_payload = jwt_service.decode_access_token(access_token)
+        refresh_payload = jwt_service.decode_refresh_token(refresh_token)
+        
+        # Verify access token contains full user data
+        assert access_payload['user_id'] == 1
+        assert access_payload['email'] == 'test@example.com'
+        assert access_payload['role'] == 'admin'
+        assert access_payload['type'] == 'access'
+        assert 'exp' in access_payload
+        assert 'iat' in access_payload
+        
+        # Verify refresh token contains minimal data
+        assert refresh_payload['user_id'] == 1
+        assert refresh_payload['type'] == 'refresh'
+        assert 'exp' in refresh_payload
+        assert 'iat' in refresh_payload
+    
+    def test_session_persists_across_requests(self, client):
+        """Test that session data persists across multiple requests"""
+        # Set up session
+        with client.session_transaction() as sess:
+            sess['user_id'] = 1
+            initial_user_id = sess['user_id']
+        
+        # Make a request (simulating page refresh)
+        with patch('Authentication.Controllers.AuthController.UserRepository') as mock_user_repo:
+            mock_user = User(id=1, email='test@example.com', first_name='Test', last_name='User')
+            mock_user_repo_instance = Mock()
+            mock_user_repo_instance.get_user_by_id.return_value = mock_user
+            mock_user_repo.return_value = mock_user_repo_instance
+            
+            response = client.get('/api/auth/user')
+        
+        # Verify session persisted
+        with client.session_transaction() as sess:
+            assert sess.get('user_id') == initial_user_id
+            assert sess.get('user_id') == 1
 
 
 if __name__ == "__main__":
