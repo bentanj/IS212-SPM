@@ -1,5 +1,5 @@
 import { CurrentUser, Task } from '@/mocks/staff/taskMockData';
-import { ALL_DEPARTMENTS, ORGANISATION } from './Organisation';
+import { ORGANISATION } from './Organisation';
 
 const AllowEditTask = ['HR/Admin', "Manager"]
 
@@ -12,16 +12,12 @@ export function canEditTaskAssignees(currentUser: CurrentUser) {
 }
 
 export function determineDepartmentScope(currentUser: CurrentUser) {
-    let VisibleDepartments = new Set<string>();
+    let VisibleDepartments = [];
 
-    function dfs(dep: string) {
-        if (!VisibleDepartments.has(dep)) {
-            VisibleDepartments.add(dep);
-            const children = ORGANISATION[dep] || [];
-            children.forEach(child => dfs(child));
-        }
+    VisibleDepartments.push(currentUser.department);
+    if (ORGANISATION[currentUser.department].length != 0) {
+        VisibleDepartments = VisibleDepartments.concat(ORGANISATION[currentUser.department]);
     }
 
-    dfs(currentUser.department);
     return VisibleDepartments;
 }
