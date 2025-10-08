@@ -2,19 +2,21 @@ import { Dayjs } from 'dayjs';
 import { User } from '@/mocks/staff/taskMockData';
 import Priority from './TPriority';
 import Status from './TStatus';
+import { Departments } from './TOrganisation';
 
 interface FormData {
     title: string;
     description: string;
-    startDate: Dayjs | null;
-    completedDate: Dayjs | null;
-    dueDate: Dayjs | null;
+    projectName: string;
+    department: Departments;
     priority: Priority;
+    status: Status;
+    startDate: Dayjs | null;
+    dueDate: Dayjs | null;
+    completedDate: Dayjs | null;
     assignedUsers: User[];
     tags: string[];
-    status: Status;
     comments: string;
-    projectName: string;
     attachedFile: File | null;
     parentTaskId?: number | null; // New
 }
