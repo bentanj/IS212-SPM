@@ -10,7 +10,7 @@ import {
 import dayjs from 'dayjs';
 
 // Functions
-import { getAvailableUsers, handleAddTag, handleRemoveTag, resetForm, handleSubmit } from '../_functions/TaskCreateModelFunctions';
+import { getAvailableUsers, handleAddTag, handleRemoveTag, resetForm, handleSubmit, canAddMoreUsers } from '../_functions/TaskCreateModelFunctions';
 
 // Types and Constants
 import { Task, taskMockData, allUsers } from '@/mocks/staff/taskMockData';
@@ -27,6 +27,10 @@ import AssignedUsersAutocomplete from './_TaskCreateModal/AssignedUsers';
 import Comments from './_TaskCreateModal/Comments';
 import FileUpload from './_TaskCreateModal/FileUpload';
 import ParentTaskField from './_TaskCreateModal/ParentTaskField';
+import { ALL_DEPARTMENTS } from '@/constants/Organisation';
+import Status from '@/types/TStatus';
+import { Departments } from '@/types/TOrganisation';
+import Priority from '@/types/TPriority';
 
 interface SubtaskCreateModalProps {
   open: boolean;
@@ -34,7 +38,7 @@ interface SubtaskCreateModalProps {
   onTaskCreated?: (task: Task) => void;
   onTaskUpdated?: (task: Task) => void;
   setSnackbarContent: (message: string, severity: AlertColor) => void;
-  editingTask?: Task | null;
+  existingTaskDetails?: Task | null;
   preselectedParentTask?: Task | null; // New prop for pre-selecting parent
   allTasks: Task[]; // All tasks for parent selection
 }
@@ -45,7 +49,7 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
   onTaskCreated,
   onTaskUpdated,
   setSnackbarContent,
-  editingTask = null,
+  existingTaskDetails = null,
   preselectedParentTask = null,
   allTasks,
 }) => {
@@ -56,19 +60,13 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
   const { currentUser } = taskMockData;
 
   // Determine if in edit mode
-  const isEditMode = editingTask !== null;
+  const isEditMode = existingTaskDetails !== null;
 
   // Get current user object from allUsers
   const currentUserObj = allUsers.find(user => user.userId === currentUser.userId);
 
-  // Check if current user has edit permissions
-  const canEdit = isEditMode ?
-    (editingTask!.ownerId === currentUser.userId ||
-      editingTask!.assignedUsers.some(user => user.userId === currentUser.userId)) :
-    true;
-
   // Get existing assignees for edit mode (cannot be removed)
-  const existingAssignees = isEditMode ? editingTask!.assignedUsers : [];
+  const existingAssignees = isEditMode ? existingTaskDetails!.assignedUsers : [];
 
   // Form state
   const [formData, setFormData] = useState<IFormData>(DefaultFormData);
@@ -82,9 +80,9 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
   const [newComment, setNewComment] = useState('');
 
   // Get available parent tasks (exclude subtasks and the task being edited)
-  const availableParentTasks = allTasks.filter(task => 
+  const availableParentTasks = allTasks.filter(task =>
     !task.parentTaskId && // Only allow main tasks as parents
-    (!isEditMode || task.taskId !== editingTask!.taskId) // Exclude current task in edit mode
+    (!isEditMode || task.taskId !== existingTaskDetails!.taskId) // Exclude current task in edit mode
   );
 
   // Initialize form data when editing or opening
@@ -92,28 +90,29 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
     setErrors({});
     setSubmitMessage('');
     setSubmitStatus('idle');
-    
+
     if (open) {
-      if (isEditMode && editingTask) {
+      if (isEditMode && existingTaskDetails) {
         // Pre-populate form with existing task data
         setFormData({
-          title: editingTask.title,
-          description: editingTask.description,
-          startDate: dayjs(editingTask.startDate),
-          completedDate: editingTask.completedDate ? dayjs(editingTask.completedDate) : null,
-          dueDate: dayjs(editingTask.dueDate),
-          priority: editingTask.priority,
-          assignedUsers: [...editingTask.assignedUsers],
-          tags: [...editingTask.tags],
-          status: editingTask.status,
+          title: existingTaskDetails.title,
+          description: existingTaskDetails.description,
+          department: existingTaskDetails.department,
+          priority: existingTaskDetails.priority,
+          status: existingTaskDetails.status,
+          startDate: dayjs(existingTaskDetails.startDate),
+          completedDate: existingTaskDetails.completedDate ? dayjs(existingTaskDetails.completedDate) : null,
+          dueDate: dayjs(existingTaskDetails.dueDate),
+          assignedUsers: [...existingTaskDetails.assignedUsers],
+          tags: [...existingTaskDetails.tags],
           comments: '',
-          projectName: editingTask.projectName,
+          projectName: existingTaskDetails.projectName,
           attachedFile: null,
         });
 
         // Set parent task if editing a subtask
-        if (editingTask.parentTaskId) {
-          const parentTaskObj = allTasks.find(t => t.taskId === editingTask.parentTaskId);
+        if (existingTaskDetails.parentTaskId) {
+          const parentTaskObj = allTasks.find(t => t.taskId === existingTaskDetails.parentTaskId);
           setParentTask(parentTaskObj || null);
         } else {
           setParentTask(null);
@@ -124,7 +123,7 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
         setParentTask(preselectedParentTask);
       }
     }
-  }, [open, isEditMode, editingTask, preselectedParentTask, allTasks]);
+  }, [open, isEditMode, existingTaskDetails, preselectedParentTask, allTasks]);
 
   const handleReset = () => {
     resetForm(setFormData, setErrors, setSubmitStatus, setSubmitMessage, setTagInput, setNewComment);
@@ -141,32 +140,18 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
 
     // Use existing submit logic but with modified data
     handleSubmit({
-      canEdit, 
-      isEditMode, 
-      editingTask, 
-      formData: taskWithParent, 
-      newComment, 
-      currentUser,
-      onTaskCreated, 
-      onTaskUpdated, 
-      setSubmitStatus, 
-      setSubmitMessage, 
-      setErrors, 
-      handleReset, 
-      onClose,
-      allTasks, 
+      isEditMode, existingTaskDetails, formData: taskWithParent,
+      newComment, currentUser, onTaskCreated, onTaskUpdated,
+      setSubmitStatus, setSubmitMessage, setErrors, handleReset, onClose,
+      allTasks,
     });
 
     // Success messages
-    if (editingTask) {
-      setSnackbarContent('Subtask updated successfully', 'success');
-    } else {
-      setSnackbarContent(parentTask ? 'Subtask created successfully' : 'Task created successfully', 'success');
-    }
+    if (existingTaskDetails) setSnackbarContent('Subtask updated successfully', 'success');
+    else if (true) setSnackbarContent('Subtask created successfully', 'success');
+    else setSnackbarContent('Failed to create subtask', 'error');
   };
 
-  // Check if user can add more assignees
-  const canAddMoreUsers = formData.assignedUsers.length < 5;
 
   // Get available users for assignment (excluding already assigned)
   const availableUsers = getAvailableUsers(allUsers, formData.assignedUsers);
@@ -174,20 +159,14 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
   // Get unique project names from existing tasks
   const existingProjects = Array.from(new Set(taskMockData.tasks.map(t => t.projectName)));
 
-  if (!canEdit && isEditMode) {
-    return (
-      <NoPermission open={open} onClose={onClose} />
-    );
-  }
-
   return (
     <Dialog open={open} onClose={onClose}
       maxWidth="md" fullWidth fullScreen={isMobile}
     >
-      <ModalTitle 
-        isEditMode={isEditMode} 
+      <ModalTitle
+        isEditMode={isEditMode}
         onClose={onClose}
-        />
+      />
 
       <DialogContent dividers>
         {submitStatus !== 'idle' && (
@@ -225,7 +204,6 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
 
         {/* Project Name */}
         <Autocomplete
-          freeSolo
           options={existingProjects}
           value={formData.projectName}
           onChange={(event: React.SyntheticEvent, value: string | null) => setFormData(prev => ({ ...prev, projectName: value || '' }))}
@@ -243,9 +221,18 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
         {/* Priority and Status Row */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }}>
           <DropDownMenu
+            label="Department"
+            value={formData.department}
+            onChange={(val) => setFormData((prev) => ({ ...prev, department: val as Departments }))}
+            options={ALL_DEPARTMENTS}
+            error={!!errors.department}
+            helperText={errors.department}
+            required />
+
+          <DropDownMenu
             label="Priority"
             value={formData.priority}
-            onChange={(val) => setFormData((prev) => ({ ...prev, priority: val }))}
+            onChange={(val) => setFormData((prev) => ({ ...prev, priority: val as Priority }))}
             options={PriorityOptions}
             error={!!errors.priority}
             helperText={errors.priority}
@@ -254,7 +241,7 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
           <DropDownMenu
             label="Status"
             value={formData.status}
-            onChange={(val) => setFormData((prev) => ({ ...prev, status: val }))}
+            onChange={(val) => setFormData((prev) => ({ ...prev, status: val as Status }))}
             options={StatusOptions}
             error={!!errors.status}
             helperText={errors.status}
@@ -272,7 +259,7 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
           currentUserObj={currentUserObj}
           error={!!errors.assignedUsers}
           helperText={errors.assignedUsers}
-          canAddMoreUsers={canAddMoreUsers} />
+          canAddMoreUsers={canAddMoreUsers(formData.assignedUsers)} />
 
         {/* Tags */}
         <Tags
@@ -288,8 +275,8 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
           isEditMode={isEditMode}
           formData={formData}
           setFormData={setFormData}
-          errors={errors} 
-          newComment={newComment} 
+          errors={errors}
+          newComment={newComment}
           setNewComment={setNewComment} />
 
         {/* File Upload */}
@@ -311,8 +298,8 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
         >
           {submitStatus === 'success' ?
             (isEditMode ? 'Updated!' : 'Created!') :
-            (isEditMode ? 
-              (editingTask?.parentTaskId ? 'Update Subtask' : 'Update Task') : 
+            (isEditMode ?
+              (existingTaskDetails?.parentTaskId ? 'Update Subtask' : 'Update Task') :
               (parentTask ? 'Create Subtask' : 'Create Task')
             )
           }
