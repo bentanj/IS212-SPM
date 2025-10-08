@@ -28,7 +28,6 @@ export interface Task {
   assignedUsers: User[];
   tags: string[];
   comments: Comment[];
-  sharedWith: number[];
   parentTaskId?: number;
 }
 
@@ -82,7 +81,6 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "E-Commerce Platform",
-      sharedWith: [3],
       department: "IT Team",
     },
     // SUBTASKS FOR TASK 1: User Authentication System
@@ -108,7 +106,6 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "E-Commerce Platform",
-      sharedWith: [3],
       parentTaskId: 1,
       department: "Sales Manager",
     },
@@ -127,7 +124,6 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "E-Commerce Platform",
-      sharedWith: [1],
       parentTaskId: 1,
       // Added missing org attributes (likely IT based on project)
       department: "IT Team",
@@ -147,7 +143,6 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "E-Commerce Platform",
-      sharedWith: [1],
       parentTaskId: 1,
       department: "IT Team",
     },
@@ -166,7 +161,6 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "E-Commerce Platform",
-      sharedWith: [3],
       parentTaskId: 1,
       department: "IT Team",
     },
@@ -198,7 +192,6 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "API Gateway Project",
-      sharedWith: [1, 3],
       // Added organization fields with assumption (engineering/support)
       department: "Support Team",
     },
@@ -225,7 +218,6 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "API Gateway Project",
-      sharedWith: [2],
       parentTaskId: 3,
       department: "Support Team",
     },
@@ -244,7 +236,6 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "API Gateway Project",
-      sharedWith: [1],
       parentTaskId: 3,
       department: "Support Team",
     },
@@ -263,7 +254,6 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "API Gateway Project",
-      sharedWith: [2],
       parentTaskId: 3,
       department: "Support Team",
     },
@@ -289,7 +279,6 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "E-Commerce Platform",
-      sharedWith: [1],
       department: "IT Team",
     },
     // SUBTASKS FOR TASK 21: Frontend Login Component
@@ -315,7 +304,6 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "E-Commerce Platform",
-      sharedWith: [1],
       parentTaskId: 21,
       department: "IT Team",
     },
@@ -341,7 +329,6 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "E-Commerce Platform",
-      sharedWith: [1],
       parentTaskId: 21,
       department: "IT Team",
     },
@@ -367,7 +354,6 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "E-Commerce Platform",
-      sharedWith: [1],
       parentTaskId: 21,
       department: "IT Team",
     },
@@ -386,7 +372,6 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "E-Commerce Platform",
-      sharedWith: [1],
       parentTaskId: 21,
       department: "IT Team",
     },
@@ -406,7 +391,6 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Quality Assurance",
-      sharedWith: [1, 2],
       department: "Consultant",
     },
     // SUBTASKS FOR TASK 24: Load Testing Infrastructure
@@ -432,7 +416,6 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "Quality Assurance",
-      sharedWith: [6],
       parentTaskId: 24,
       department: "Consultant",
     },
@@ -458,7 +441,6 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "Quality Assurance",
-      sharedWith: [4],
       parentTaskId: 24,
       department: "Consultant",
     },
@@ -477,7 +459,6 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Quality Assurance",
-      sharedWith: [6],
       parentTaskId: 24,
       department: "Consultant",
     },
@@ -496,7 +477,6 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Quality Assurance",
-      sharedWith: [4],
       parentTaskId: 24,
       department: "Consultant",
     },
@@ -523,7 +503,6 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "Quality Assurance",
-      sharedWith: [1, 2],
       department: "Consultant",
     },
     // SUBTASKS FOR TASK 39: Integration Testing Automation
@@ -549,7 +528,6 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "Quality Assurance",
-      sharedWith: [1],
       parentTaskId: 39,
       department: "Consultant",
     },
@@ -575,7 +553,6 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "Quality Assurance",
-      sharedWith: [6],
       parentTaskId: 39,
       department: "Consultant",
     },
@@ -594,7 +571,6 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Quality Assurance",
-      sharedWith: [1],
       parentTaskId: 39,
       department: "Consultant",
     },
@@ -621,7 +597,6 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "E-Commerce Platform",
-      sharedWith: [],
       department: "IT Team",
     },
     {
@@ -640,7 +615,6 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Development Process Improvement",
-      sharedWith: [1, 2, 3],
       department: "Consultant",
     },
     {
@@ -665,7 +639,6 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "Performance Enhancement",
-      sharedWith: [],
       department: "Consultant",
     },
     {
@@ -683,7 +656,6 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Security Enhancement",
-      sharedWith: [1, 3],
       department: "Sales Manager",
     },
     {
@@ -708,7 +680,6 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "API Gateway Project",
-      sharedWith: [2],
       department: "Support Team",
     },
     {
@@ -726,7 +697,6 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Documentation Initiative",
-      sharedWith: [2],
       department: "Consultant",
     },
   ]

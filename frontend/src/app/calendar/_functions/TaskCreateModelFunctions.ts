@@ -2,6 +2,8 @@ import dayjs from 'dayjs';
 import { CurrentUser, User, Task, Comment, taskMockData } from '@/mocks/staff/taskMockData';
 import IFormData from "@/types/IFormData";
 import DefaultFormData from '@/constants/DefaultFormData';
+import Priority from '@/types/TPriority';
+import Status from '@/types/TStatus';
 
 // Filter out already assigned users from available options
 export const getAvailableUsers = (allUsers: User[], assignedUsers: User[]): User[] => {
@@ -74,7 +76,7 @@ export const handleSubmit = async (params: {
     onClose: () => void;
     allTasks: Task[]; // New
 }) => {
-    const { isEditMode, existingTaskDetails, formData, newComment, currentUser, 
+    const { isEditMode, existingTaskDetails, formData, newComment, currentUser,
         onTaskCreated, onTaskUpdated, setErrors, setSubmitStatus, setSubmitMessage, handleReset, onClose, allTasks } = params;
 
     // Validate form
@@ -106,13 +108,12 @@ export const handleSubmit = async (params: {
                 startDate: formData.startDate!.format('YYYY-MM-DD'),
                 completedDate: formData.completedDate?.format('YYYY-MM-DD') || null,
                 dueDate: formData.dueDate!.format('YYYY-MM-DD'),
-                priority: formData.priority as 'Low' | 'Medium' | 'High',
+                priority: formData.priority as Priority,
                 assignedUsers: formData.assignedUsers,
                 tags: formData.tags,
-                status: formData.status as 'To Do' | 'In Progress' | 'Completed' | 'Blocked',
+                status: formData.status as Status,
                 comments: updatedComments,
                 projectName: formData.projectName.trim(),
-                sharedWith: formData.assignedUsers.map(user => user.userId).filter(id => id !== existingTaskDetails.ownerId),
             };
 
             onTaskUpdated?.(updatedTask);
@@ -120,8 +121,8 @@ export const handleSubmit = async (params: {
             setSubmitMessage('Task updated successfully!');
         } else {
             // Create new task with proper ID generation from live state (Updated)
-            const newTaskId = allTasks.length > 0 
-                ? Math.max(...allTasks.map(t => t.taskId), 0) + 1 
+            const newTaskId = allTasks.length > 0
+                ? Math.max(...allTasks.map(t => t.taskId), 0) + 1
                 : 1;
             const comments = formData.comments.trim()
                 ? [{
@@ -139,14 +140,13 @@ export const handleSubmit = async (params: {
                 startDate: formData.startDate!.format('YYYY-MM-DD'),
                 completedDate: formData.completedDate?.format('YYYY-MM-DD') || null,
                 dueDate: formData.dueDate!.format('YYYY-MM-DD'),
-                priority: formData.priority as 'Low' | 'Medium' | 'High',
+                department: formData.department,
+                priority: formData.priority as Priority,
                 assignedUsers: formData.assignedUsers,
                 tags: formData.tags,
-                status: formData.status as 'To Do' | 'In Progress' | 'Completed' | 'Blocked',
+                status: formData.status as Status,
                 comments: comments,
                 projectName: formData.projectName.trim(),
-                ownerId: currentUser.userId,
-                sharedWith: formData.assignedUsers.map(user => user.userId).filter(id => id !== currentUser.userId),
                 parentTaskId: (formData as any).parentTaskId || null, // New 
             };
 
