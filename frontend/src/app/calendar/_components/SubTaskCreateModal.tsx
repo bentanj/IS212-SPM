@@ -18,9 +18,8 @@ import IFormData from "@/types/IFormData";
 import DefaultFormData, { PriorityOptions, StatusOptions } from '@/constants/DefaultFormData';
 
 // Components
-import NoPermission from './_TaskCreateModal/NoPermission';
 import ModalTitle from './_TaskCreateModal/ModalTitle';
-import DateRow from './_TaskCreateModal/DateRow';
+import SubTaskDateRow from './_TaskCreateModal/SubTaskDateRow';
 import DropDownMenu from './_TaskCreateModal/DropDownMenu';
 import Tags from './_TaskCreateModal/Tags';
 import AssignedUsersAutocomplete from './_TaskCreateModal/AssignedUsers';
@@ -216,7 +215,7 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
           )} />
 
         {/* Dates Row */}
-        <DateRow formData={formData} setFormData={setFormData} errors={errors} />
+        <SubTaskDateRow formData={formData} setFormData={setFormData} errors={errors} parentTask={parentTask as Task} />
 
         {/* Priority and Status Row */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }}>

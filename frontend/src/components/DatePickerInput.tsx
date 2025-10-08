@@ -12,6 +12,7 @@ type DatePickerInputProps = {
     onChange: (date: Date | null) => void;
     // Optional props
     minSelectableDate?: Date | null;
+    maxSelectableDate?: Date | null;
     textFieldProps?: Partial<TextFieldProps>;
 }
 
@@ -21,6 +22,7 @@ const DatePickerInput: React.FC<DatePickerInputProps> = ({
     onChange,
     // Default values for optional props
     minSelectableDate = new Date(),
+    maxSelectableDate = null,
     textFieldProps,
 }) => {
     // Handles dates with 16:00 UTC as the default time
@@ -37,6 +39,7 @@ const DatePickerInput: React.FC<DatePickerInputProps> = ({
             label={label}
             sx={{ mt: 1, width: "100%", bgcolor: "white" }}
             minDate={dayjs(minSelectableDate)}
+            maxDate={dayjs(maxSelectableDate)}
             value={value ? dayjs(value) : null}
             onChange={handleDateChange}
             slotProps={{
