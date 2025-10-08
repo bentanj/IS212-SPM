@@ -10,6 +10,7 @@ export const getPriorityColor = (priority: Priority) => {
 };
 
 export const getTaskTypeColor = (task: Task) => {
+    if (isTaskOverdue(task)) return '#A31414';
     if (task.parentTaskId) return '#ffeb3b';
     return getPriorityColor(task.priority);
 };
@@ -23,3 +24,9 @@ export const getStatusColor = (status: string) => {
         default: return 'default';
     }
 };
+
+export const isTaskOverdue = (task: Task) => {
+    const today = new Date();
+    const dueDate = new Date(task.dueDate);
+    return task.status !== 'Completed' && dueDate < today;
+}
