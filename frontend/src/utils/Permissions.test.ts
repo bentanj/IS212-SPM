@@ -14,7 +14,7 @@ const mockTask = {
     startDate: "2025-09-15",
     completedDate: null,
     dueDate: "2025-10-01",
-    priority: "High",
+    priority: 7,
     assignedUsers: [
         { userId: 1, name: "Staff 1" },
         { userId: 3, name: "Staff 3" }

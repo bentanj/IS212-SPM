@@ -59,7 +59,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-15",
       completedDate: null,
       dueDate: "2025-10-01",
-      priority: "High",
+      priority: 7,
       assignedUsers: [
         { userId: 1, name: "John Smith" },
         { userId: 3, name: "Alice Johnson" }
@@ -91,7 +91,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-16",
       completedDate: null,
       dueDate: "2025-09-25",
-      priority: "High",
+      priority: 7,
       assignedUsers: [
         { userId: 1, name: "John Smith" }
       ],
@@ -116,7 +116,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-17",
       completedDate: null,
       dueDate: "2025-09-28",
-      priority: "Medium",
+      priority: 4,
       assignedUsers: [
         { userId: 3, name: "Alice Johnson" }
       ],
@@ -135,7 +135,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-20",
       completedDate: null,
       dueDate: "2025-09-30",
-      priority: "High",
+      priority: 7,
       assignedUsers: [
         { userId: 3, name: "Alice Johnson" }
       ],
@@ -153,7 +153,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-25",
       completedDate: null,
       dueDate: "2025-10-01",
-      priority: "Medium",
+      priority: 4,
       assignedUsers: [
         { userId: 1, name: "John Smith" }
       ],
@@ -171,7 +171,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-20",
       completedDate: null,
       dueDate: "2025-09-25",
-      priority: "Medium",
+      priority: 4,
       assignedUsers: [
         { userId: 2, name: "Sarah Davis" }
       ],
@@ -203,7 +203,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-21",
       completedDate: null,
       dueDate: "2025-09-23",
-      priority: "High",
+      priority: 7,
       assignedUsers: [
         { userId: 1, name: "John Smith" }
       ],
@@ -228,7 +228,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-22",
       completedDate: null,
       dueDate: "2025-09-24",
-      priority: "High",
+      priority: 7,
       assignedUsers: [
         { userId: 2, name: "Sarah Davis" }
       ],
@@ -246,7 +246,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-24",
       completedDate: null,
       dueDate: "2025-09-26",
-      priority: "Medium",
+      priority: 4,
       assignedUsers: [
         { userId: 3, name: "Alice Johnson" }
       ],
@@ -264,7 +264,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-15",
       completedDate: null,
       dueDate: "2025-09-28",
-      priority: "Medium",
+      priority: 4,
       assignedUsers: [
         { userId: 3, name: "Alice Johnson" }
       ],
@@ -289,7 +289,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-15",
       completedDate: "2025-09-18",
       dueDate: "2025-09-17",
-      priority: "Medium",
+      priority: 4,
       assignedUsers: [
         { userId: 3, name: "Alice Johnson" }
       ],
@@ -314,7 +314,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-16",
       completedDate: "2025-09-19",
       dueDate: "2025-09-20",
-      priority: "High",
+      priority: 7,
       assignedUsers: [
         { userId: 3, name: "Alice Johnson" }
       ],
@@ -339,7 +339,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-20",
       completedDate: null,
       dueDate: "2025-09-26",
-      priority: "High",
+      priority: 7,
       assignedUsers: [
         { userId: 3, name: "Alice Johnson" }
       ],
@@ -364,7 +364,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-24",
       completedDate: null,
       dueDate: "2025-09-28",
-      priority: "Medium",
+      priority: 4,
       assignedUsers: [
         { userId: 3, name: "Alice Johnson" }
       ],
@@ -382,7 +382,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-20",
       completedDate: null,
       dueDate: "2025-09-30",
-      priority: "Medium",
+      priority: 4,
       assignedUsers: [
         { userId: 4, name: "Mike Wilson" },
         { userId: 6, name: "David Chen" }
@@ -401,7 +401,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-20",
       completedDate: "2025-09-21",
       dueDate: "2025-09-21",
-      priority: "High",
+      priority: 7,
       assignedUsers: [
         { userId: 4, name: "Mike Wilson" }
       ],
@@ -426,7 +426,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-21",
       completedDate: null,
       dueDate: "2025-09-24",
-      priority: "High",
+      priority: 7,
       assignedUsers: [
         { userId: 6, name: "David Chen" }
       ],
@@ -451,7 +451,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-24",
       completedDate: null,
       dueDate: "2025-09-28",
-      priority: "High",
+      priority: 7,
       assignedUsers: [
         { userId: 4, name: "Mike Wilson" }
       ],
@@ -469,7 +469,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-26",
       completedDate: null,
       dueDate: "2025-09-30",
-      priority: "Medium",
+      priority: 4,
       assignedUsers: [
         { userId: 6, name: "David Chen" }
       ],
@@ -487,7 +487,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-22",
       completedDate: null,
       dueDate: "2025-10-01",
-      priority: "High",
+      priority: 7,
       assignedUsers: [
         { userId: 6, name: "David Chen" },
         { userId: 1, name: "John Smith" }
@@ -513,7 +513,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-22",
       completedDate: "2025-09-24",
       dueDate: "2025-09-24",
-      priority: "High",
+      priority: 7,
       assignedUsers: [
         { userId: 6, name: "David Chen" }
       ],
@@ -538,7 +538,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-24",
       completedDate: null,
       dueDate: "2025-09-30",
-      priority: "High",
+      priority: 7,
       assignedUsers: [
         { userId: 1, name: "John Smith" }
       ],
@@ -563,7 +563,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-25",
       completedDate: null,
       dueDate: "2025-10-01",
-      priority: "Medium",
+      priority: 4,
       assignedUsers: [
         { userId: 6, name: "David Chen" }
       ],
@@ -582,7 +582,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-10",
       completedDate: "2025-09-18",
       dueDate: "2025-09-20",
-      priority: "Medium",
+      priority: 4,
       assignedUsers: [
         { userId: 1, name: "John Smith" }
       ],
@@ -606,7 +606,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-12",
       completedDate: null,
       dueDate: "2025-09-28",
-      priority: "Low",
+      priority: 1,
       assignedUsers: [
         { userId: 1, name: "John Smith" },
         { userId: 4, name: "Mike Wilson" }
@@ -624,7 +624,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-05",
       completedDate: "2025-09-14",
       dueDate: "2025-09-15",
-      priority: "High",
+      priority: 7,
       assignedUsers: [
         { userId: 1, name: "John Smith" }
       ],
@@ -648,7 +648,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-15",
       completedDate: null,
       dueDate: "2025-10-05",
-      priority: "High",
+      priority: 7,
       assignedUsers: [
         { userId: 2, name: "Sarah Davis" }
       ],
@@ -665,7 +665,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-20",
       completedDate: null,
       dueDate: "2025-09-27",
-      priority: "High",
+      priority: 7,
       assignedUsers: [
         { userId: 1, name: "John Smith" }
       ],
@@ -689,7 +689,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-20",
       completedDate: null,
       dueDate: "2025-10-01",
-      priority: "Low",
+      priority: 1,
       assignedUsers: [
         { userId: 3, name: "Alice Johnson" }
       ],
