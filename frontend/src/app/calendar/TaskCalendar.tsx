@@ -414,6 +414,7 @@ const TaskCalendar: React.FC = () => {
         currentUser={mockJWT}
         setSnackbarContent={setSnackbarContent}
         onCreateSubtask={handleCreateSubtask}
+        onSubtaskClick={handleTaskClick}
       />
 
       {/* Task Create Modal */}
