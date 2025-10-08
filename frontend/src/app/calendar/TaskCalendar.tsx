@@ -31,7 +31,7 @@ import TaskCreateModal from './_components/TaskCreateModal';
 import SubtaskCreateModal from './_components/SubTaskCreateModal'; // New import
 import DayTasksModal from './DayTasksModal';
 import DayHeaders from './_components/_TaskCalendar/DayHeaders';
-import { getTaskTypeColor } from './_functions/TaskRenderingFunctions';
+import { getTaskTypeColor, isTaskOverdue } from './_functions/TaskRenderingFunctions';
 
 const TaskCalendar: React.FC = () => {
   // Mock Data
@@ -307,58 +307,80 @@ const TaskCalendar: React.FC = () => {
                               minWidth: 0
                             }}>
                               {/* Only show tasks that fit within the cell */}
-                              {dayTasks.slice(0, isMobile ? 1 : 2).map((task) => (
-                                <Card
-                                  key={task.taskId}
-                                  sx={{
-                                    mb: 0.5,
-                                    cursor: 'pointer',
-                                    bgcolor: `${getTaskTypeColor(task)}20`,
-                                    borderLeft: task.parentTaskId
-                                      ? `2px dashed ${getTaskTypeColor(task)}`
-                                      : `3px solid ${getTaskTypeColor(task)}`,
-                                    // Add subtle styling for subtasks
-                                    borderLeftWidth: task.parentTaskId ? '2px' : '3px',
-                                    borderLeftStyle: task.parentTaskId ? 'dashed' : 'solid',
-                                    ml: task.parentTaskId ? 0.5 : 0,
-                                    '&:hover': {
-                                      bgcolor: `${getTaskTypeColor(task)}30`,
-                                    },
-                                    minHeight: 0,
-                                    flexShrink: 0,
-                                    height: { xs: '16px', sm: '20px' },
-                                    minWidth: 0,
-                                    width: '100%'
-                                  }}
-                                  onClick={() => handleTaskClick(task)}
-                                >
-                                  <CardContent sx={{
-                                    p: '2px 4px !important',
-                                    '&:last-child': { pb: '2px !important' },
-                                    height: '100%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    minWidth: 0,
-                                    width: '100%'
-                                  }}>
-                                    <Typography
-                                      variant="caption"
-                                      noWrap
-                                      sx={{
-                                        display: 'block',
-                                        lineHeight: 1,
-                                        fontSize: { xs: '0.6rem', sm: '0.7rem' },
-                                        width: '100%',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        fontStyle: task.parentTaskId ? 'italic' : 'normal'
-                                      }}
-                                    >
-                                      {task.parentTaskId ? '└ ' : ''}{task.title}
-                                    </Typography>
-                                  </CardContent>
-                                </Card>
-                              ))}
+                              {dayTasks.slice(0, isMobile ? 1 : 2).map((task) => {
+                                const isOverdue = isTaskOverdue(task);
+                                
+                                return (
+                                  <Card
+                                    key={task.taskId}
+                                    sx={{
+                                      mb: 0.5,
+                                      cursor: 'pointer',
+                                      // Apply overdue styles if overdue, otherwise normal
+                                      ...(isOverdue 
+                                        ? {
+                                            background: `repeating-linear-gradient(
+                                              45deg,
+                                              ${getTaskTypeColor(task)}20,
+                                              ${getTaskTypeColor(task)}20 10px,
+                                              ${getTaskTypeColor(task)}35 10px,
+                                              ${getTaskTypeColor(task)}35 20px
+                                            )`,
+                                            borderLeft: task.parentTaskId
+                                              ? `2px dashed ${getTaskTypeColor(task)}`
+                                              : `3px solid ${getTaskTypeColor(task)}`,
+                                            opacity: 0.95,
+                                          }
+                                        : {
+                                            bgcolor: `${getTaskTypeColor(task)}20`,
+                                            borderLeft: task.parentTaskId
+                                              ? `2px dashed ${getTaskTypeColor(task)}`
+                                              : `3px solid ${getTaskTypeColor(task)}`,
+                                          }
+                                      ),
+                                      ml: task.parentTaskId ? 0.5 : 0,
+                                      '&:hover': {
+                                        bgcolor: isOverdue 
+                                          ? `${getTaskTypeColor(task)}40`
+                                          : `${getTaskTypeColor(task)}30`,
+                                      },
+                                      minHeight: 0,
+                                      flexShrink: 0,
+                                      height: { xs: '16px', sm: '20px' },
+                                      minWidth: 0,
+                                      width: '100%'
+                                    }}
+                                    onClick={() => handleTaskClick(task)}
+                                  >
+                                    <CardContent sx={{
+                                      p: '2px 4px !important',
+                                      '&:last-child': { pb: '2px !important' },
+                                      height: '100%',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      minWidth: 0,
+                                      width: '100%'
+                                    }}>
+                                      <Typography
+                                        variant="caption"
+                                        noWrap
+                                        sx={{
+                                          display: 'block',
+                                          lineHeight: 1,
+                                          fontSize: { xs: '0.6rem', sm: '0.7rem' },
+                                          width: '100%',
+                                          overflow: 'hidden',
+                                          textOverflow: 'ellipsis',
+                                          fontStyle: task.parentTaskId ? 'italic' : 'normal',
+                                          fontWeight: isOverdue ? 600 : 400,
+                                        }}
+                                      >
+                                        {isOverdue ? '⚠️ ' : ''}{task.parentTaskId ? '└ ' : ''}{task.title}
+                                      </Typography>
+                                    </CardContent>
+                                  </Card>
+                                );
+                              })}
 
                               {/* Show more indicator only if it fits - MAKE IT CLICKABLE */}
                               {dayTasks.length > (isMobile ? 1 : 2) && (
