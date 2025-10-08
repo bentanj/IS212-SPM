@@ -1,5 +1,5 @@
 import { CurrentUser, Task } from '@/mocks/staff/taskMockData';
-import { ORGANISATION } from './Organisation';
+import { ORGANISATION } from '@/constants/Organisation';
 
 const AllowEditTask = ['HR/Admin', "Manager"]
 

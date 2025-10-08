@@ -24,7 +24,7 @@ import { Edit, Add } from '@mui/icons-material';
 import { CurrentUser, Task, taskMockData } from '@/mocks/staff/taskMockData';
 import dayjs from 'dayjs';
 import TaskCreateModal from './_components/TaskCreateModal';
-import { canEditTask } from '@/constants/Permissions';
+import { canEditTask } from '@/utils/Permissions';
 import { getPriorityColor, getStatusColor } from './_functions/TaskRenderingFunctions';
 
 interface TaskDetailModalProps {

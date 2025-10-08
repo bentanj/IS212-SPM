@@ -1,7 +1,7 @@
 import { User, CurrentUser } from '@/mocks/staff/taskMockData';
 import Chip from '@mui/material/Chip';
 import LockIcon from '@mui/icons-material/Lock';
-import { canEditTaskAssignees } from '@/constants/Permissions';
+import { canEditTaskAssignees } from '@/utils/Permissions';
 
 // Custom render for assigned user tags
 const renderAssignedUserTags = (
