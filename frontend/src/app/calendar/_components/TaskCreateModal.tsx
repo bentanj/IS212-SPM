@@ -26,6 +26,9 @@ import Tags from './_TaskCreateModal/Tags';
 import AssignedUsersAutocomplete from './_TaskCreateModal/AssignedUsers';
 import Comments from './_TaskCreateModal/Comments';
 import FileUpload from './_TaskCreateModal/FileUpload';
+import { Departments } from '@/types/TOrganisation';
+import Priority from '@/types/TPriority';
+import Status from '@/types/TStatus';
 
 interface TaskCreateModalProps {
   open: boolean;
@@ -154,7 +157,6 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
 
         {/* Project Name */}
         <Autocomplete
-          freeSolo
           options={existingProjects}
           value={formData.projectName}
           onChange={(event: React.SyntheticEvent, value: string | null) => setFormData(prev => ({ ...prev, projectName: value || '' }))}
@@ -174,7 +176,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
           <DropDownMenu
             label="Department"
             value={formData.department}
-            onChange={(val) => setFormData((prev) => ({ ...prev, department: val as string }))}
+            onChange={(val) => setFormData((prev) => ({ ...prev, department: val as Departments }))}
             options={ALL_DEPARTMENTS}
             error={!!errors.department}
             helperText={errors.department}
@@ -183,7 +185,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
           <DropDownMenu
             label="Priority"
             value={formData.priority}
-            onChange={(val) => setFormData((prev) => ({ ...prev, priority: val }))}
+            onChange={(val) => setFormData((prev) => ({ ...prev, priority: val as Priority }))}
             options={PriorityOptions}
             error={!!errors.priority}
             helperText={errors.priority}
@@ -192,7 +194,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
           <DropDownMenu
             label="Status"
             value={formData.status}
-            onChange={(val) => setFormData((prev) => ({ ...prev, status: val as string }))}
+            onChange={(val) => setFormData((prev) => ({ ...prev, status: val as Status }))}
             options={StatusOptions}
             error={!!errors.status}
             helperText={errors.status}

@@ -44,7 +44,6 @@ const DateRow: React.FC<DateRowProps> = ({
                     onChange={(date) => setFormData(prev => ({ ...prev, completedDate: date ? dayjs(date) : null }))}
                     minSelectableDate={formData.startDate ? formData.startDate.toDate() : null}
                     textFieldProps={{
-                        required: true,
                         error: !!errors.completedDate,
                         helperText: errors.completedDate,
                     }}
