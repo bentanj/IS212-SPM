@@ -3,10 +3,9 @@ type Organisation = {
 };
 
 export const ORGANISATION: Organisation = {
-    // Division > Department > Section
     "Sales Division": ["Sales Manager", "Account Managers"],
     "Sales Manager": ["Account Managers"],
-    "Account Manager": [],
+    "Account Managers": [],
     "Consultancy Division": ["Consultant"],
     "Consultant": [],
     "System Solutioning Division": ["Developers", "Support Team"],
