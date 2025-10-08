@@ -83,7 +83,7 @@ export const handleSubmit = async (params: {
     // Validate form
     if (!validateForm(formData, setErrors)) {
         setSubmitStatus('error');
-        setSubmitMessage('Please fix the errors above');
+        setSubmitMessage('Please fix the errors');
         return;
     }
 
