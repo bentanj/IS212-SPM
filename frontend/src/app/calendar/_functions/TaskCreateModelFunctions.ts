@@ -39,6 +39,7 @@ const validateForm = (formData: IFormData, setErrors: React.Dispatch<React.SetSt
     if (formData.assignedUsers.length > 5) newErrors.assignedUsers = 'Maximum 5 users can be assigned to a task';
     if (!formData.status) newErrors.status = 'Status is required';
     if (!formData.projectName.trim()) newErrors.projectName = 'Project name is required';
+    if (!formData.department) newErrors.department = 'Department is required';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -248,4 +249,6 @@ export const handleAssignedUsersChange = (
     setFormData(prev => ({ ...prev, assignedUsers: updatedUsers }));
 };
 
-
+export const canAddMoreUsers = (assignedUsers: User[]) => {
+    return assignedUsers.length < 5;
+};

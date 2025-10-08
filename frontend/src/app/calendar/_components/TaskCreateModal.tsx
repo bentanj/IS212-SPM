@@ -10,7 +10,7 @@ import {
 import dayjs from 'dayjs';
 
 // Functions
-import { getAvailableUsers, handleAddTag, handleRemoveTag, resetForm, handleSubmit } from '../_functions/TaskCreateModelFunctions';
+import { getAvailableUsers, handleAddTag, handleRemoveTag, resetForm, handleSubmit, canAddMoreUsers } from '../_functions/TaskCreateModelFunctions';
 
 // Types and Constants
 import { Task, taskMockData, allUsers, CurrentUser } from '@/mocks/staff/taskMockData';
@@ -108,7 +108,8 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   const onSubmit = () => {
     handleSubmit({
       isEditMode, existingTaskDetails, formData, newComment, currentUser,
-      onTaskCreated, onTaskUpdated, setSubmitStatus, setSubmitMessage, setErrors, handleReset, onClose, allTasks
+      onTaskCreated, onTaskUpdated, setSubmitStatus, setSubmitMessage, setErrors, handleReset, onClose,
+      allTasks
     });
     // Placeholder. To replace with actual success condition
     if (existingTaskDetails) setSnackbarContent('Task updated successfully', 'success');
@@ -116,8 +117,6 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
     else setSnackbarContent('Failed to create task', 'error');
   };
 
-  // Check if user can add more assignees
-  const canAddMoreUsers = formData.assignedUsers.length < 5;
 
   // Get available users for assignment (excluding already assigned)
   const availableUsers = getAvailableUsers(allUsers, formData.assignedUsers);
@@ -212,7 +211,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
           currentUserObj={currentUserObj}
           error={!!errors.assignedUsers}
           helperText={errors.assignedUsers}
-          canAddMoreUsers={canAddMoreUsers} />
+          canAddMoreUsers={canAddMoreUsers(formData.assignedUsers)} />
 
         {/* Tags */}
         <Tags
