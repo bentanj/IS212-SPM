@@ -1,5 +1,6 @@
 import { Task } from '@/mocks/staff/taskMockData';
 import Priority from '@/types/TPriority';
+import dayjs from 'dayjs';
 
 export const getPriorityColor = (priority: Priority) => {
     if (typeof priority !== 'number') return '#9e9e9e';
@@ -25,8 +26,14 @@ export const getStatusColor = (status: string) => {
     }
 };
 
-export const isTaskOverdue = (task: Task) => {
-    const today = new Date();
-    const dueDate = new Date(task.dueDate);
-    return task.status !== 'Completed' && dueDate < today;
-}
+export const isTaskOverdue = (task: Task): boolean => {
+    // Don't mark completed tasks as overdue
+    if (task.status === 'Completed') return false;
+    
+    if (!task.dueDate) return false;
+    
+    const today = dayjs().startOf('day');
+    const due = dayjs(task.dueDate).startOf('day');
+    
+    return due.isBefore(today);
+};
