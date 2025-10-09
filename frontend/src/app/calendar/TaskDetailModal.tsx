@@ -1,29 +1,14 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
-  AlertColor,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  Box,
-  Chip,
-  Avatar,
-  Divider,
-  List,
-  ListItem,
-  Paper,
-  Stack,
-  useTheme,
-  useMediaQuery
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  Button, Typography, Box, Chip, Avatar, Divider, List, ListItem, Paper, Stack,
+  useTheme, useMediaQuery
 } from '@mui/material';
 import { Edit, Add } from '@mui/icons-material';
 import { CurrentUser, Task, taskMockData } from '@/mocks/staff/taskMockData';
 import dayjs from 'dayjs';
-import TaskCreateModal from './_components/TaskCreateModal';
 import { canEditTask } from '@/utils/Permissions';
 import { getPriorityColor, getStatusColor } from './_functions/TaskRenderingFunctions';
 
@@ -31,11 +16,10 @@ interface TaskDetailModalProps {
   task: Task | null;
   open: boolean;
   onClose: () => void;
-  setSnackbarContent: (message: string, severity: AlertColor) => void;
-  onTaskUpdated?: (task: Task) => void;
   currentUser: CurrentUser;
   onCreateSubtask?: (parentTask: Task) => void;
   onSubtaskClick?: (subtask: Task) => void;
+  onEditButtonClick?: () => void; // New
   allTasks?: Task[]; // New
 }
 
@@ -43,18 +27,15 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   task,
   open,
   onClose,
-  onTaskUpdated,
-  setSnackbarContent,
   onCreateSubtask,
   onSubtaskClick,
+  onEditButtonClick,
   allTasks, // New
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const { currentUser } = taskMockData;
 
-  const [editModalOpen, setEditModalOpen] = useState(false);
 
   const relatedSubtasks = useMemo(() => {
     // Return empty array if task is null/undefined
@@ -76,19 +57,6 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   // Check if current user can edit this task
   const canEdit = canEditTask(currentUser, task);
 
-  const handleEditClick = () => {
-    setEditModalOpen(true);
-  };
-
-  const handleEditClose = () => {
-    setEditModalOpen(false);
-  };
-
-  const handleTaskUpdated = (updatedTask: Task) => {
-    onTaskUpdated?.(updatedTask);
-    setEditModalOpen(false);
-  };
-
   // New handler for subtask creation
   const handleCreateSubtask = () => {
     onCreateSubtask?.(task);
@@ -97,16 +65,14 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 
   return (
     <>
-      <Dialog
-        open={open}
-        onClose={onClose}
-        maxWidth="md"
-        fullWidth
-        fullScreen={isMobile}
-        PaperProps={{
-          sx: {
-            maxHeight: '90vh',
-            margin: isMobile ? 0 : 2,
+      <Dialog open={open} onClose={onClose}
+        maxWidth="md" fullWidth fullScreen={isMobile}
+        slotProps={{
+          paper: {
+            sx: {
+              maxHeight: '90vh',
+              margin: isMobile ? 0 : 2,
+            }
           }
         }}
       >
@@ -119,12 +85,12 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
               <Chip
                 label={task.priority}
-                sx = {{color: getPriorityColor(task.priority)}}
+                sx={{ color: getPriorityColor(task.priority) }}
                 size={isMobile ? 'small' : 'medium'}
               />
               <Chip
                 label={task.status}
-                sx = {{color: getStatusColor(task.status)}}
+                sx={{ color: getStatusColor(task.status) }}
                 size={isMobile ? 'small' : 'medium'}
               />
             </Stack>
@@ -363,7 +329,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 
           {canEdit && (
             <Button
-              onClick={handleEditClick}
+              onClick={onEditButtonClick}
               variant="contained"
               startIcon={<Edit />}
             >
@@ -372,16 +338,6 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
           )}
         </DialogActions>
       </Dialog>
-
-      {/* Edit Modal */}
-      <TaskCreateModal
-        open={editModalOpen}
-        onClose={handleEditClose}
-        onTaskUpdated={handleTaskUpdated}
-        setSnackbarContent={setSnackbarContent}
-        currentUser={currentUser}
-        existingTaskDetails={task}
-        allTasks={[]} />
     </>
   );
 };

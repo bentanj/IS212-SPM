@@ -95,6 +95,7 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
         setFormData({
           title: existingTaskDetails.title,
           description: existingTaskDetails.description,
+          parentTaskId: existingTaskDetails.parentTaskId,
           department: existingTaskDetails.department,
           priority: existingTaskDetails.priority,
           status: existingTaskDetails.status,
@@ -165,6 +166,8 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
         isEditMode={isEditMode}
         onClose={onClose}
       />
+
+      Subtask Modal
 
       <DialogContent dividers>
         {submitStatus !== 'idle' && (

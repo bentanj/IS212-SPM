@@ -2,16 +2,8 @@
 
 import { useState, useMemo } from 'react';
 import {
-  Alert, AlertColor,
-  Box,
-  Paper,
-  Typography,
-  Card,
-  CardContent,
-  Stack,
-  useTheme,
-  useMediaQuery,
-  Snackbar
+  Alert, AlertColor, Box, Paper, Typography, Card, CardContent, Stack,
+  useTheme, useMediaQuery, Snackbar
 } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -22,13 +14,11 @@ dayjs.extend(isBetween);
 dayjs.extend(weekOfYear);
 
 import { taskMockData, Task } from '@/mocks/staff/taskMockData';
-import Priority from '@/types/TPriority';
 import SideBar from './_components/SideBar';
 import Header from './_components/Header';
 import MonthHeader from './_components/_TaskCalendar/MonthHeader';
 import TaskDetailModal from './TaskDetailModal';
 import TaskCreateModal from './_components/TaskCreateModal';
-import SubtaskCreateModal from './_components/SubTaskCreateModal'; // New import
 import DayTasksModal from './DayTasksModal';
 import DayHeaders from './_components/_TaskCalendar/DayHeaders';
 import { getTaskTypeColor, isTaskOverdue } from './_functions/TaskRenderingFunctions';
@@ -39,15 +29,12 @@ const TaskCalendar: React.FC = () => {
   const [mockJWT, setMockJWT] = useState(taskMockData.currentUser);
 
   const [currentDate, setCurrentDate] = useState<Dayjs>(dayjs());
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [taskDetailModalOpen, setTaskDetailModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Create Tasks
   const [createModalOpen, setCreateModalOpen] = useState(false);
-
-  // Create Subtasks - NEW STATE
-  const [subtaskModalOpen, setSubtaskModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [selectedParentTask, setSelectedParentTask] = useState<Task | null>(null);
 
   // Task Day
@@ -117,11 +104,11 @@ const TaskCalendar: React.FC = () => {
 
   const handleTaskClick = (task: Task) => {
     setSelectedTask(task);
-    setModalOpen(true);
+    setTaskDetailModalOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setModalOpen(false);
+  const handleCloseTaskDetailModal = () => {
+    setTaskDetailModalOpen(false);
     setSelectedTask(null);
   };
 
@@ -134,21 +121,14 @@ const TaskCalendar: React.FC = () => {
   };
 
   const handleTaskCreated = (newTask: Task) => {
-    setTasks(prev => [...prev, newTask]);
+    setTasks(prev => [...prev, newTask]);   // To be replaced with POST API endpoint
     setCreateModalOpen(false);
-  };
-
-  // NEW FUNCTION: Handle subtask creation
-  const handleSubtaskCreated = (newSubtask: Task) => {
-    setTasks(prev => [...prev, newSubtask]);
-    setSubtaskModalOpen(false);
-    setSelectedParentTask(null);
   };
 
   // NEW FUNCTION: Open subtask modal with parent
   const handleCreateSubtask = (parentTask: Task) => {
     setSelectedParentTask(parentTask);
-    setSubtaskModalOpen(true);
+    setCreateModalOpen(true);
   };
 
   const handleMoreTasksClick = (date: Dayjs, tasks: Task[]) => {
@@ -170,7 +150,7 @@ const TaskCalendar: React.FC = () => {
         task.taskId === updatedTask.taskId ? updatedTask : task
       )
     );
-    setModalOpen(false);
+    setTaskDetailModalOpen(false);
   };
 
   // Create weeks array for better calendar rendering
@@ -309,7 +289,7 @@ const TaskCalendar: React.FC = () => {
                               {/* Only show tasks that fit within the cell */}
                               {dayTasks.slice(0, isMobile ? 1 : 2).map((task) => {
                                 const isOverdue = isTaskOverdue(task);
-                                
+
                                 return (
                                   <Card
                                     key={task.taskId}
@@ -317,30 +297,30 @@ const TaskCalendar: React.FC = () => {
                                       mb: 0.5,
                                       cursor: 'pointer',
                                       // Apply overdue styles if overdue, otherwise normal
-                                      ...(isOverdue 
+                                      ...(isOverdue
                                         ? {
-                                            background: `repeating-linear-gradient(
+                                          background: `repeating-linear-gradient(
                                               45deg,
                                               ${getTaskTypeColor(task)}20,
                                               ${getTaskTypeColor(task)}20 10px,
                                               ${getTaskTypeColor(task)}35 10px,
                                               ${getTaskTypeColor(task)}35 20px
                                             )`,
-                                            borderLeft: task.parentTaskId
-                                              ? `2px dashed ${getTaskTypeColor(task)}`
-                                              : `3px solid ${getTaskTypeColor(task)}`,
-                                            opacity: 0.95,
-                                          }
+                                          borderLeft: task.parentTaskId
+                                            ? `2px dashed ${getTaskTypeColor(task)}`
+                                            : `3px solid ${getTaskTypeColor(task)}`,
+                                          opacity: 0.95,
+                                        }
                                         : {
-                                            bgcolor: `${getTaskTypeColor(task)}20`,
-                                            borderLeft: task.parentTaskId
-                                              ? `2px dashed ${getTaskTypeColor(task)}`
-                                              : `3px solid ${getTaskTypeColor(task)}`,
-                                          }
+                                          bgcolor: `${getTaskTypeColor(task)}20`,
+                                          borderLeft: task.parentTaskId
+                                            ? `2px dashed ${getTaskTypeColor(task)}`
+                                            : `3px solid ${getTaskTypeColor(task)}`,
+                                        }
                                       ),
                                       ml: task.parentTaskId ? 0.5 : 0,
                                       '&:hover': {
-                                        bgcolor: isOverdue 
+                                        bgcolor: isOverdue
                                           ? `${getTaskTypeColor(task)}40`
                                           : `${getTaskTypeColor(task)}30`,
                                       },
@@ -430,13 +410,13 @@ const TaskCalendar: React.FC = () => {
       {/* Task Detail Modal */}
       <TaskDetailModal
         task={selectedTask}
-        open={modalOpen}
-        onClose={handleCloseModal}
-        onTaskUpdated={handleTaskUpdated}
+        open={taskDetailModalOpen}
+        onClose={handleCloseTaskDetailModal}
         currentUser={mockJWT}
-        setSnackbarContent={setSnackbarContent}
         onCreateSubtask={handleCreateSubtask}
         onSubtaskClick={handleTaskClick}
+        onEditButtonClick={() => setCreateModalOpen(true)}
+        allTasks={tasks}
       />
 
       {/* Task Create Modal */}
@@ -446,17 +426,7 @@ const TaskCalendar: React.FC = () => {
         onTaskCreated={handleTaskCreated}
         setSnackbarContent={setSnackbarContent}
         currentUser={mockJWT}
-        allTasks={tasks}
-      />
-
-      <SubtaskCreateModal
-        open={subtaskModalOpen}
-        onClose={() => {
-          setSubtaskModalOpen(false);
-          setSelectedParentTask(null);
-        }}
-        onTaskCreated={handleSubtaskCreated}
-        setSnackbarContent={setSnackbarContent}
+        existingTaskDetails={selectedTask || null}
         preselectedParentTask={selectedParentTask}
         allTasks={tasks}
       />

@@ -20,6 +20,7 @@ import { ALL_DEPARTMENTS } from '@/constants/Organisation';
 
 // Components
 import ModalTitle from './_TaskCreateModal/ModalTitle';
+import ParentTaskField from './_TaskCreateModal/ParentTaskField';
 import DateRow from './_TaskCreateModal/DateRow';
 import DropDownMenu from './_TaskCreateModal/DropDownMenu';
 import Tags from './_TaskCreateModal/Tags';
@@ -37,7 +38,8 @@ interface TaskCreateModalProps {
   onTaskUpdated?: (task: Task) => void;
   setSnackbarContent: (message: string, severity: AlertColor) => void;
   currentUser: CurrentUser;
-  existingTaskDetails?: Task;
+  existingTaskDetails?: Task | null;
+  preselectedParentTask?: Task | null;
   allTasks: Task[];
 };
 
@@ -49,6 +51,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   setSnackbarContent,
   currentUser,
   existingTaskDetails = null,
+  preselectedParentTask = null,
   allTasks,
 }) => {
   const theme = useTheme();
@@ -65,6 +68,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
 
   // Form state
   const [formData, setFormData] = useState<IFormData>(DefaultFormData);
+  const [parentTask, setParentTask] = useState<Task | null>(null);
 
   // UI state
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -73,41 +77,66 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   const [tagInput, setTagInput] = useState('');
   const [newComment, setNewComment] = useState('');
 
+  // Get available parent tasks (exclude subtasks and the task being edited)
+  // To be replaced by API call to fetch all tasks where parentTaskId not null
+  const availableParentTasks = allTasks.filter(task =>
+    !task.parentTaskId && // Only allow main tasks as parents
+    (!isEditMode || task.taskId !== existingTaskDetails!.taskId) // Exclude current task in edit mode
+  );
+
+
   // Initialize form data when editing
   useEffect(() => {
     setErrors({});
     setSubmitMessage('')
     setSubmitStatus('idle');
+    setParentTask(preselectedParentTask);
     if (open) {
       if (isEditMode && existingTaskDetails) {
         // Pre-populate form with existing task data
         setFormData({
           title: existingTaskDetails.title,
           description: existingTaskDetails.description,
+          parentTaskId: existingTaskDetails.parentTaskId,
+          department: existingTaskDetails.department,
+          priority: existingTaskDetails.priority,
+          status: existingTaskDetails.status,
           startDate: dayjs(existingTaskDetails.startDate),
           completedDate: existingTaskDetails.completedDate ? dayjs(existingTaskDetails.completedDate) : null,
           dueDate: dayjs(existingTaskDetails.dueDate),
-          priority: existingTaskDetails.priority,
           assignedUsers: [...existingTaskDetails.assignedUsers],
           tags: [...existingTaskDetails.tags],
-          status: existingTaskDetails.status,
           comments: '',
           projectName: existingTaskDetails.projectName,
           attachedFile: null,
-          department: existingTaskDetails.department,
         });
+
+        if (existingTaskDetails.parentTaskId) {
+          const parentTaskObj = allTasks.find(t => t.taskId === existingTaskDetails.parentTaskId);
+          setParentTask(parentTaskObj || null);
+        }
       }
     }
-  }, [open, isEditMode, existingTaskDetails]);
+    else {
+      setFormData(DefaultFormData);
+    }
+  }, [open, isEditMode, existingTaskDetails, allTasks]);
 
   const handleReset = () => {
     resetForm(setFormData, setErrors, setSubmitStatus, setSubmitMessage, setTagInput, setNewComment)
+    setParentTask(null);
   }
 
   // Function to Trigger when Submit Button is Clicked
   const onSubmit = () => {
+
+    const taskWithParent = {
+      ...formData,
+      parentTaskId: parentTask?.taskId,
+    };
+
     handleSubmit({
-      isEditMode, existingTaskDetails, formData, newComment, currentUser,
+      isEditMode, existingTaskDetails, formData: taskWithParent, newComment, currentUser,
       onTaskCreated, onTaskUpdated, setSubmitStatus, setSubmitMessage, setErrors, handleReset, onClose,
       allTasks
     });
@@ -117,12 +146,12 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
     else setSnackbarContent('Failed to create task', 'error');
   };
 
-
   // Get available users for assignment (excluding already assigned)
   const availableUsers = getAvailableUsers(allUsers, formData.assignedUsers);
 
   // Get unique project names from existing tasks
   const existingProjects = Array.from(new Set(taskMockData.tasks.map(t => t.projectName)));
+
 
   return (
     <Dialog open={open} onClose={onClose}
@@ -130,12 +159,24 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
     >
       <ModalTitle isEditMode={isEditMode} onClose={onClose} />
 
+      Task Modal
+
       <DialogContent dividers>
         {submitStatus !== 'idle' && (
           <Alert sx={{ mb: 2 }} severity={submitStatus === 'success' ? 'success' : 'error'}>
             {submitMessage}
           </Alert>
         )}
+
+        {/* Parent Task Selection */}
+        <ParentTaskField
+          parentTask={parentTask}
+          availableParentTasks={availableParentTasks}
+          onChange={setParentTask}
+          error={!!errors.parentTaskId}
+          helperText={errors.parentTaskId}
+          disabled={isEditMode} // Disable editing parent in edit mode
+        />
 
         {/* Title */}
         <TextField label="Title"
