@@ -13,23 +13,23 @@ import dayjs from 'dayjs';
 import { getAvailableUsers, handleAddTag, handleRemoveTag, resetForm, handleSubmit, canAddMoreUsers } from '../_functions/TaskCreateModelFunctions';
 
 // Types and Constants
-import { Task, taskMockData, allUsers } from '@/mocks/staff/taskMockData';
+import { Task, taskMockData, allUsers, CurrentUser } from '@/mocks/staff/taskMockData';
 import IFormData from "@/types/IFormData";
 import DefaultFormData, { PriorityOptions, StatusOptions } from '@/constants/DefaultFormData';
+import { ALL_DEPARTMENTS } from '@/constants/Organisation';
 
 // Components
 import ModalTitle from './_TaskCreateModal/ModalTitle';
-import SubTaskDateRow from './_TaskCreateModal/SubTaskDateRow';
+import DateRow from './_TaskCreateModal/DateRow';
 import DropDownMenu from './_TaskCreateModal/DropDownMenu';
 import Tags from './_TaskCreateModal/Tags';
 import AssignedUsersAutocomplete from './_TaskCreateModal/AssignedUsers';
 import Comments from './_TaskCreateModal/Comments';
 import FileUpload from './_TaskCreateModal/FileUpload';
 import ParentTaskField from './_TaskCreateModal/ParentTaskField';
-import { ALL_DEPARTMENTS } from '@/constants/Organisation';
-import Status from '@/types/TStatus';
 import { Departments } from '@/types/TOrganisation';
 import Priority from '@/types/TPriority';
+import Status from '@/types/TStatus';
 
 interface SubtaskCreateModalProps {
   open: boolean;
@@ -37,6 +37,7 @@ interface SubtaskCreateModalProps {
   onTaskCreated?: (task: Task) => void;
   onTaskUpdated?: (task: Task) => void;
   setSnackbarContent: (message: string, severity: AlertColor) => void;
+  currentUser: CurrentUser;
   existingTaskDetails?: Task | null;
   preselectedParentTask?: Task | null; // New prop for pre-selecting parent
   allTasks: Task[]; // All tasks for parent selection
@@ -48,15 +49,13 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
   onTaskCreated,
   onTaskUpdated,
   setSnackbarContent,
+  currentUser,
   existingTaskDetails = null,
   preselectedParentTask = null,
   allTasks,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-  // Mock current user details
-  const { currentUser } = taskMockData;
 
   // Determine if in edit mode
   const isEditMode = existingTaskDetails !== null;
@@ -215,7 +214,7 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
           )} />
 
         {/* Dates Row */}
-        <SubTaskDateRow formData={formData} setFormData={setFormData} errors={errors} parentTask={parentTask as Task} />
+        <DateRow formData={formData} setFormData={setFormData} errors={errors} parentTask={parentTask as Task} />
 
         {/* Priority and Status Row */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }}>
