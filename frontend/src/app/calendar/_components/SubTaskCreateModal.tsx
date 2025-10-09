@@ -139,8 +139,7 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
 
     // Use existing submit logic but with modified data
     handleSubmit({
-      isEditMode, existingTaskDetails, formData: taskWithParent,
-      newComment, currentUser, onTaskCreated, onTaskUpdated,
+      isEditMode, existingTaskDetails, formData: taskWithParent, newComment, currentUser,
       setSubmitStatus, setSubmitMessage, setErrors, handleReset, onClose,
       allTasks,
     });

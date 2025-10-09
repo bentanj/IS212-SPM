@@ -34,8 +34,6 @@ import Status from '@/types/TStatus';
 interface TaskCreateModalProps {
   open: boolean;
   onClose: () => void;
-  onTaskCreated?: (task: Task) => void;
-  onTaskUpdated?: (task: Task) => void;
   setSnackbarContent: (message: string, severity: AlertColor) => void;
   currentUser: CurrentUser;
   existingTaskDetails?: Task | null;
@@ -46,8 +44,6 @@ interface TaskCreateModalProps {
 const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   open,
   onClose,
-  onTaskCreated,
-  onTaskUpdated,
   setSnackbarContent,
   currentUser,
   existingTaskDetails = null,
@@ -137,7 +133,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
 
     handleSubmit({
       isEditMode, existingTaskDetails, formData: taskWithParent, newComment, currentUser,
-      onTaskCreated, onTaskUpdated, setSubmitStatus, setSubmitMessage, setErrors, handleReset, onClose,
+      setSubmitStatus, setSubmitMessage, setErrors, handleReset, onClose,
       allTasks
     });
     // Placeholder. To replace with actual success condition

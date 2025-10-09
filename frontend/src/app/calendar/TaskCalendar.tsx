@@ -120,11 +120,6 @@ const TaskCalendar: React.FC = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  const handleTaskCreated = (newTask: Task) => {
-    setTasks(prev => [...prev, newTask]);   // To be replaced with POST API endpoint
-    setCreateModalOpen(false);
-  };
-
   // NEW FUNCTION: Open subtask modal with parent
   const handleCreateSubtask = (parentTask: Task) => {
     setSelectedParentTask(parentTask);
@@ -141,6 +136,12 @@ const TaskCalendar: React.FC = () => {
     setDayTasksModalOpen(false);
     setSelectedDate(null);
     setSelectedDayTasks([]);
+  };
+
+  // Handle Task Creation
+  const handleTaskCreated = (newTask: Task) => {
+    setTasks(prev => [...prev, newTask]);   // To be replaced with POST API endpoint
+    setCreateModalOpen(false);
   };
 
   // Handle Task Updates
@@ -423,7 +424,6 @@ const TaskCalendar: React.FC = () => {
       <TaskCreateModal
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
-        onTaskCreated={handleTaskCreated}
         setSnackbarContent={setSnackbarContent}
         currentUser={mockJWT}
         existingTaskDetails={selectedTask || null}

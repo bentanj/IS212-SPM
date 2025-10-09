@@ -4,6 +4,8 @@ import IFormData from "@/types/IFormData";
 import DefaultFormData from '@/constants/DefaultFormData';
 import Priority from '@/types/TPriority';
 import Status from '@/types/TStatus';
+import updateTask from '@/utils/Tasks/updateTask';
+import createTask from '@/utils/Tasks/createTask';
 
 // Filter out already assigned users from available options
 export const getAvailableUsers = (allUsers: User[], assignedUsers: User[]): User[] => {
@@ -68,8 +70,6 @@ export const handleSubmit = async (params: {
     formData: IFormData;
     newComment: string;
     currentUser: User;
-    onTaskCreated?: (task: Task) => void;
-    onTaskUpdated?: (task: Task) => void;
     setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
     setSubmitStatus: React.Dispatch<React.SetStateAction<'idle' | 'success' | 'error'>>;
     setSubmitMessage: React.Dispatch<React.SetStateAction<string>>;
@@ -78,7 +78,7 @@ export const handleSubmit = async (params: {
     allTasks: Task[]; // New
 }) => {
     const { isEditMode, existingTaskDetails, formData, newComment, currentUser,
-        onTaskCreated, onTaskUpdated, setErrors, setSubmitStatus, setSubmitMessage, handleReset, onClose, allTasks } = params;
+        setErrors, setSubmitStatus, setSubmitMessage, handleReset, onClose, allTasks } = params;
 
     // Validate form
     if (!validateForm(formData, setErrors)) {
@@ -117,7 +117,7 @@ export const handleSubmit = async (params: {
                 projectName: formData.projectName.trim(),
             };
 
-            onTaskUpdated?.(updatedTask);
+            updateTask(updatedTask);
             setSubmitStatus('success');
             setSubmitMessage('Task updated successfully!');
         } else {
@@ -151,7 +151,7 @@ export const handleSubmit = async (params: {
                 parentTaskId: (formData as any).parentTaskId || null, // New 
             };
 
-            onTaskCreated?.(newTask);
+            createTask(newTask);
             setSubmitStatus('success');
             setSubmitMessage('Task created successfully!');
         }
