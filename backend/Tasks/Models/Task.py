@@ -16,7 +16,7 @@ class Task(Base):
     status = Column(Text, nullable=True)
     project_name = Column(Text, nullable=True)
     assigned_users = Column(ARRAY(UUID), nullable=True)
-    parent_id = Column(BigInteger, nullable=True)
+    parent_id = Column('parentID', BigInteger, nullable=True)
     departments = Column(ARRAY(Text), nullable=True)
 
     def to_dict(self):

@@ -77,6 +77,9 @@ class TaskRepository:
             query = query.filter(Task.start_date <= filters['start_date_before'])
         if 'parent_id' in filters:
             query = query.filter(Task.parent_id == filters['parent_id'])
+        if 'departments' in filters:
+            # Use PostgreSQL array overlap operator &&
+            query = query.filter(Task.departments.op('&&')(filters['departments']))
 
         return query.all()
 

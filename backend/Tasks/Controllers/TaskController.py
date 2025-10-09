@@ -267,6 +267,13 @@ def _parse_filter_data(data: dict):
     if 'parent_id' in data and data['parent_id'] is not None:
         filters['parent_id'] = int(data['parent_id'])
 
+    # Array filters
+    if 'departments' in data and data['departments']:
+        if isinstance(data['departments'], list):
+            filters['departments'] = data['departments']
+        else:
+            raise ValueError("departments must be an array")
+
     # Date filters
     for date_field in ['due_before', 'due_after', 'start_date_after', 'start_date_before']:
         if date_field in data and data[date_field]:
@@ -286,6 +293,12 @@ def _parse_task_data(data: dict, is_update: bool = False):
 
     if 'parent_id' in data:
         task_data['parent_id'] = data['parent_id']
+
+    if 'departments' in data:
+        if isinstance(data['departments'], list):
+            task_data['departments'] = data['departments']
+        else:
+            raise ValueError("departments must be an array")
 
     for date_field in ['start_date', 'completed_date', 'due_date']:
         if date_field in data and data[date_field]:
