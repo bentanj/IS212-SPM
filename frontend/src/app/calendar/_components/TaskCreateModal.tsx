@@ -155,8 +155,6 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
     >
       <ModalTitle isEditMode={isEditMode} onClose={onClose} />
 
-      Task Modal
-
       <DialogContent dividers>
         {submitStatus !== 'idle' && (
           <Alert sx={{ mb: 2 }} severity={submitStatus === 'success' ? 'success' : 'error'}>
@@ -205,7 +203,7 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
           )} />
 
         {/* Dates Row */}
-        <DateRow formData={formData} setFormData={setFormData} errors={errors} parentTask={parentTask}/>
+        <DateRow formData={formData} setFormData={setFormData} errors={errors} parentTask={parentTask} />
 
         {/* Department, Priority and Status Row */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }}>

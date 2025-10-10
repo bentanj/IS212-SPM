@@ -102,6 +102,14 @@ const TaskCalendar: React.FC = () => {
     return monthTasks.filter(task => dayjs(task.startDate).isSame(date, 'day'));
   };
 
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    setCurrentDate(prev => direction === 'prev' ? prev.subtract(1, 'month') : prev.add(1, 'month'));
+  };
+
   const handleTaskClick = (task: Task) => {
     setSelectedTask(task);
     setTaskDetailModalOpen(true);
@@ -112,19 +120,18 @@ const TaskCalendar: React.FC = () => {
     setSelectedTask(null);
   };
 
-  const navigateMonth = (direction: 'prev' | 'next') => {
-    setCurrentDate(prev => direction === 'prev' ? prev.subtract(1, 'month') : prev.add(1, 'month'));
-  };
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
   // NEW FUNCTION: Open subtask modal with parent
   const handleCreateSubtask = (parentTask: Task) => {
     setSelectedParentTask(parentTask);
+    setSelectedTask(null);
     setCreateModalOpen(true);
   };
+
+  const handleCloseCreateTaskModal = () => {
+    setCreateModalOpen(false);
+    setSelectedParentTask(null);
+    setSelectedTask(null);
+  }
 
   const handleMoreTasksClick = (date: Dayjs, tasks: Task[]) => {
     setSelectedDate(date);
@@ -423,7 +430,7 @@ const TaskCalendar: React.FC = () => {
       {/* Task Create Modal */}
       <TaskCreateModal
         open={createModalOpen}
-        onClose={() => setCreateModalOpen(false)}
+        onClose={handleCloseCreateTaskModal}
         setSnackbarContent={setSnackbarContent}
         currentUser={mockJWT}
         existingTaskDetails={selectedTask || null}

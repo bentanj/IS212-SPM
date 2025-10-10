@@ -57,12 +57,6 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   // Check if current user can edit this task
   const canEdit = canEditTask(currentUser, task);
 
-  // New handler for subtask creation
-  const handleCreateSubtask = () => {
-    onCreateSubtask?.(task);
-  };
-
-
   return (
     <>
       <Dialog open={open} onClose={onClose}
@@ -311,7 +305,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
           {/* Create Subtask Button - Only show if onCreateSubtask prop is provided and task is not already a subtask */}
           {onCreateSubtask && !task.parentTaskId && (
             <Button
-              onClick={handleCreateSubtask}
+              onClick={() => { onCreateSubtask(task); }}
               variant="outlined"
               startIcon={<Add />}
               sx={{ mr: 'auto' }} // Pushes button to the left
@@ -337,7 +331,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             </Button>
           )}
         </DialogActions>
-      </Dialog>
+      </Dialog >
     </>
   );
 };

@@ -18,6 +18,7 @@ const DefaultFormData: IFormData = {
     tags: [],
     comments: '',
     attachedFile: null,
+    parentTaskId: null,
 }
 
 export default DefaultFormData;
