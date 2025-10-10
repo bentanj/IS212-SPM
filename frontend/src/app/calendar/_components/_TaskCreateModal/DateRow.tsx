@@ -10,11 +10,11 @@ interface DateRowProps {
     formData: IFormData
     setFormData: React.Dispatch<React.SetStateAction<IFormData>>
     errors: Record<string, string>
-    parentTask?: Task
+    parentTask?: Task | null
 }
 
 const DateRow: React.FC<DateRowProps> = ({
-    formData, setFormData, errors, parentTask
+    formData, setFormData, errors, parentTask = null
 }) => {
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
