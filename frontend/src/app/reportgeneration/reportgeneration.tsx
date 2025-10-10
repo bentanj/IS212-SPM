@@ -23,7 +23,13 @@ import {
 } from '@mui/icons-material';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { Chart, ChartConfiguration, registerables } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+import html2canvas from 'html2canvas';
 import { taskMockData } from '@/mocks/staff/taskMockData';
+
+// Register Chart.js components
+Chart.register(...registerables, ChartDataLabels);
 
 interface ReportType {
   id: string;
@@ -57,6 +63,9 @@ export default function ReportGeneration() {
   const blockedTasks = taskMockData.tasks.filter(
     (task) => task.status === 'Blocked'
   ).length;
+  const toDoTasks = taskMockData.tasks.filter(
+    (task) => task.status === 'To Do'
+  ).length;
   const uniqueProjects = new Set(
     taskMockData.tasks.map((task) => task.projectName)
   ).size;
@@ -66,8 +75,70 @@ export default function ReportGeneration() {
     )
   ).size;
 
+  // Helper function to create chart and return image
+  const createChartImageFromDiv = async (
+    chartConfig: ChartConfiguration,
+    width: number = 500,
+    height: number = 500
+  ): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      // Create temporary container
+      const tempDiv = document.createElement('div');
+      tempDiv.style.position = 'fixed';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.top = '0';
+      tempDiv.style.width = `${width}px`;
+      tempDiv.style.height = `${height}px`;
+      tempDiv.style.backgroundColor = '#ffffff';
+      tempDiv.style.padding = '20px';
+      
+      // Create canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      tempDiv.appendChild(canvas);
+      
+      // Append to body
+      document.body.appendChild(tempDiv);
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        document.body.removeChild(tempDiv);
+        reject('Could not get canvas context');
+        return;
+      }
+      
+      // Create chart
+      const chart = new Chart(ctx, chartConfig);
+      
+      // Wait for animation and render
+      setTimeout(async () => {
+        try {
+          // Use html2canvas to capture the div
+          const capturedCanvas = await html2canvas(tempDiv, {
+            backgroundColor: '#ffffff',
+            scale: 2,
+            logging: false,
+          });
+          
+          const imageData = capturedCanvas.toDataURL('image/png', 1.0);
+          
+          // Cleanup
+          chart.destroy();
+          document.body.removeChild(tempDiv);
+          
+          resolve(imageData);
+        } catch (error) {
+          chart.destroy();
+          document.body.removeChild(tempDiv);
+          reject(error);
+        }
+      }, 1000);
+    });
+  };
+
   // PDF Export Functions
-  const generateTaskCompletionPDF = () => {
+  const generateTaskCompletionPDF = async () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     let yPos = 20;
@@ -96,6 +167,7 @@ export default function ReportGeneration() {
       ['Completed Tasks', `${completedTasks} (${((completedTasks / totalTasks) * 100).toFixed(1)}%)`],
       ['In Progress Tasks', `${inProgressTasks} (${((inProgressTasks / totalTasks) * 100).toFixed(1)}%)`],
       ['Blocked Tasks', `${blockedTasks} (${((blockedTasks / totalTasks) * 100).toFixed(1)}%)`],
+      ['To Do Tasks', `${toDoTasks} (${((toDoTasks / totalTasks) * 100).toFixed(1)}%)`],
       ['Active Projects', uniqueProjects.toString()],
       ['Departments', uniqueDepartments.toString()],
     ];
@@ -111,6 +183,84 @@ export default function ReportGeneration() {
     });
 
     yPos = (doc as any).lastAutoTable.finalY + 15;
+
+    // Create Status Distribution Chart
+    const chartConfig: ChartConfiguration = {
+      type: 'pie',
+      data: {
+        labels: ['Completed', 'In Progress', 'To Do', 'Blocked'],
+        datasets: [{
+          data: [completedTasks, inProgressTasks, toDoTasks, blockedTasks],
+          backgroundColor: [
+            '#4CAF50',
+            '#2196F3',
+            '#FFC107',
+            '#F44336',
+          ],
+          borderColor: '#ffffff',
+          borderWidth: 2,
+          borderAlign: 'center',
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        animation: {
+          duration: 0,
+        },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              font: { size: 16 },
+              padding: 20,
+              boxWidth: 20,
+            },
+          },
+          title: {
+            display: true,
+            text: 'Task Status Distribution',
+            font: { size: 20, weight: 'bold' },
+            padding: { bottom: 20 },
+          },
+          datalabels: {
+            color: '#ffffff',
+            font: {
+              weight: 'bold',
+              size: 18,
+            },
+            formatter: (value: number, context: any) => {
+              const dataset = context.chart.data.datasets[0];
+              const total = dataset.data.reduce((acc: number, curr: number) => acc + curr, 0);
+              const percentage = ((value / total) * 100).toFixed(1);
+              return `${percentage}%`;
+            },
+          },
+        },
+      },
+    };
+
+    try {
+      const chartImage = await createChartImageFromDiv(chartConfig, 500, 500);
+      
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Task Status Distribution', 14, yPos);
+      yPos += 10;
+
+      doc.addImage(chartImage, 'PNG', 50, yPos, 110, 110);
+      yPos += 120;
+
+    } catch (error) {
+      console.error('Error creating chart:', error);
+      doc.setFontSize(10);
+      doc.text('Chart generation failed', 14, yPos);
+      yPos += 10;
+    }
+
+    // Add new page for task details
+    doc.addPage();
+    yPos = 20;
 
     // Task Details by Status
     doc.setFontSize(14);
@@ -149,7 +299,7 @@ export default function ReportGeneration() {
     doc.save(`Task-Completion-Report-${Date.now()}.pdf`);
   };
 
-  const generateProjectPerformancePDF = () => {
+  const generateProjectPerformancePDF = async () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     let yPos = 20;
@@ -177,33 +327,216 @@ export default function ReportGeneration() {
     const projectData = Array.from(projectMap.entries()).map(([projectName, tasks]) => {
       const completed = tasks.filter((t) => t.status === 'Completed').length;
       const inProgress = tasks.filter((t) => t.status === 'In Progress').length;
+      const toDo = tasks.filter((t) => t.status === 'To Do').length;
       const blocked = tasks.filter((t) => t.status === 'Blocked').length;
       const completionRate = ((completed / tasks.length) * 100).toFixed(1);
 
-      return [
-        projectName,
-        tasks.length.toString(),
-        completed.toString(),
-        inProgress.toString(),
-        blocked.toString(),
-        `${completionRate}%`,
-      ];
+      return {
+        name: projectName,
+        total: tasks.length,
+        completed,
+        inProgress,
+        toDo,
+        blocked,
+        rate: parseFloat(completionRate),
+      };
     });
+
+    // Sort by total tasks (descending) to show most active projects first
+    projectData.sort((a, b) => b.total - a.total);
+
+    // Create Horizontal Stacked Bar Chart
+    const chartConfig: ChartConfiguration = {
+      type: 'bar',
+      data: {
+        labels: projectData.map((p) => {
+          // Truncate long project names
+          const name = p.name.length > 25 ? p.name.substring(0, 25) + '...' : p.name;
+          return name;
+        }),
+        datasets: [
+          {
+            label: 'Completed',
+            data: projectData.map((p) => p.completed),
+            backgroundColor: '#4CAF50',
+            borderColor: '#4CAF50',
+            borderWidth: 1,
+          },
+          {
+            label: 'In Progress',
+            data: projectData.map((p) => p.inProgress),
+            backgroundColor: '#2196F3',
+            borderColor: '#2196F3',
+            borderWidth: 1,
+          },
+          {
+            label: 'To Do',
+            data: projectData.map((p) => p.toDo),
+            backgroundColor: '#FFC107',
+            borderColor: '#FFC107',
+            borderWidth: 1,
+          },
+          {
+            label: 'Blocked',
+            data: projectData.map((p) => p.blocked),
+            backgroundColor: '#F44336',
+            borderColor: '#F44336',
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        indexAxis: 'y', // THIS MAKES IT HORIZONTAL
+        animation: {
+          duration: 0,
+        },
+        scales: {
+          x: {
+            stacked: true, // ENABLE STACKING
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1,
+              font: {
+                size: 11,
+              },
+            },
+            grid: {
+              display: true,
+            },
+          },
+          y: {
+            stacked: true, // ENABLE STACKING
+            ticks: {
+              font: {
+                size: 10,
+              },
+            },
+            grid: {
+              display: false,
+            },
+          },
+        },
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: {
+              font: { size: 12 },
+              padding: 10,
+              boxWidth: 15,
+            },
+          },
+          title: {
+            display: true,
+            text: 'Project Task Status Distribution',
+            font: { size: 16, weight: 'bold' },
+            padding: { bottom: 15 },
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false,
+            callbacks: {
+              footer: (tooltipItems: any) => {
+                let total = 0;
+                tooltipItems.forEach((item: any) => {
+                  total += item.parsed.x;
+                });
+                return `Total: ${total} tasks`;
+              },
+            },
+          },
+          datalabels: {
+            display: true,
+            color: '#ffffff',
+            font: {
+              weight: 'bold',
+              size: 10,
+            },
+            formatter: (value: number) => {
+              // Only show label if value > 0
+              return value > 0 ? value : '';
+            },
+          },
+        },
+      },
+    };
+
+    try {
+      // Adjust height based on number of projects (more projects = taller chart)
+      const chartHeight = Math.max(400, projectData.length * 40);
+      const chartImage = await createChartImageFromDiv(chartConfig, 700, chartHeight);
+
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Project Performance Overview', 14, yPos);
+      yPos += 10;
+
+      // Calculate appropriate image dimensions for PDF
+      const imageWidth = 180;
+      const imageHeight = (chartHeight / 700) * imageWidth;
+
+      doc.addImage(chartImage, 'PNG', 15, yPos, imageWidth, Math.min(imageHeight, 150));
+      yPos += Math.min(imageHeight, 150) + 10;
+
+    } catch (error) {
+      console.error('Error creating chart:', error);
+    }
+
+    // Add new page if needed
+    if (yPos > 200) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    // Project Statistics Table
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Detailed Project Statistics', 14, yPos);
+    yPos += 10;
+
+    const tableData = projectData.map((p) => [
+      p.name,
+      p.total.toString(),
+      p.completed.toString(),
+      p.inProgress.toString(),
+      p.toDo.toString(),
+      p.blocked.toString(),
+      `${p.rate}%`,
+    ]);
 
     autoTable(doc, {
       startY: yPos,
-      head: [['Project Name', 'Total Tasks', 'Completed', 'In Progress', 'Blocked', 'Completion Rate']],
-      body: projectData,
+      head: [['Project Name', 'Total', 'Completed', 'In Progress', 'To Do', 'Blocked', 'Rate']],
+      body: tableData,
       theme: 'grid',
-      headStyles: { fillColor: [76, 175, 80], fontSize: 10 },
-      styles: { fontSize: 9, halign: 'center' },
+      headStyles: { 
+        fillColor: [76, 175, 80], 
+        fontSize: 9,
+        fontStyle: 'bold',
+      },
+      styles: { 
+        fontSize: 8, 
+        halign: 'center',
+        cellPadding: 2,
+      },
+      columnStyles: {
+        0: { halign: 'left', cellWidth: 60 },
+        1: { cellWidth: 15 },
+        2: { cellWidth: 20, fillColor: [232, 245, 233] },
+        3: { cellWidth: 22, fillColor: [227, 242, 253] },
+        4: { cellWidth: 15, fillColor: [255, 248, 225] },
+        5: { cellWidth: 17, fillColor: [255, 235, 238] },
+        6: { cellWidth: 18, fontStyle: 'bold' },
+      },
       margin: { left: 14, right: 14 },
     });
 
     doc.save(`Project-Performance-Report-${Date.now()}.pdf`);
   };
 
-  const generateTeamProductivityPDF = () => {
+
+  const generateTeamProductivityPDF = async () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     let yPos = 20;
@@ -237,21 +570,101 @@ export default function ReportGeneration() {
         .flatMap((t) => t.assignedUsers)
         .find((u) => u.name === userName);
 
-      return [
-        userName,
-        userInfo?.department || 'N/A',
-        userInfo?.role || 'N/A',
-        tasks.length.toString(),
-        completed.toString(),
-        inProgress.toString(),
-        ((completed / tasks.length) * 100).toFixed(1) + '%',
-      ];
+      return {
+        name: userName,
+        department: userInfo?.department || 'N/A',
+        role: userInfo?.role || 'N/A',
+        total: tasks.length,
+        completed,
+        inProgress,
+        rate: ((completed / tasks.length) * 100).toFixed(1),
+      };
     });
+
+    // Create Team Productivity Chart
+    const topUsers = userData.slice(0, 10);
+
+    const chartConfig: ChartConfiguration = {
+      type: 'bar',
+      data: {
+        labels: topUsers.map((u) => u.name.length > 12 ? u.name.substring(0, 12) + '...' : u.name),
+        datasets: [{
+          label: 'Completion Rate (%)',
+          data: topUsers.map((u) => parseFloat(u.rate)),
+          backgroundColor: '#2196F3',
+          borderColor: '#2196F3',
+          borderWidth: 2,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        animation: {
+          duration: 0,
+        },
+        indexAxis: 'y',
+        scales: {
+          x: {
+            beginAtZero: true,
+            max: 100,
+            ticks: {
+              callback: function(value) {
+                return value + '%';
+              },
+            },
+          },
+        },
+        plugins: {
+          legend: {
+            display: false,
+          },
+          title: {
+            display: true,
+            text: 'Top 10 Team Members by Completion Rate',
+            font: { size: 16, weight: 'bold' },
+          },
+          datalabels: {
+            display: false,
+          },
+        },
+      },
+    };
+
+    try {
+      const chartImage = await createChartImageFromDiv(chartConfig, 600, 400);
+
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Team Productivity Visualization', 14, yPos);
+      yPos += 10;
+
+      doc.addImage(chartImage, 'PNG', 20, yPos, 170, 120);
+      yPos += 130;
+
+    } catch (error) {
+      console.error('Error creating chart:', error);
+    }
+
+    // Add new page for detailed table
+    if (yPos > 200) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    const tableData = userData.map((u) => [
+      u.name,
+      u.department,
+      u.role,
+      u.total.toString(),
+      u.completed.toString(),
+      u.inProgress.toString(),
+      u.rate + '%',
+    ]);
 
     autoTable(doc, {
       startY: yPos,
       head: [['Team Member', 'Department', 'Role', 'Total Tasks', 'Completed', 'In Progress', 'Completion Rate']],
-      body: userData,
+      body: tableData,
       theme: 'striped',
       headStyles: { fillColor: [33, 150, 243], fontSize: 9 },
       styles: { fontSize: 8 },
@@ -298,18 +711,18 @@ export default function ReportGeneration() {
     setSelectedReport(reportId);
     setExportType(type);
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 800));
 
     if (type === 'pdf') {
       switch (reportId) {
         case 'task-completion-status':
-          generateTaskCompletionPDF();
+          await generateTaskCompletionPDF();
           break;
         case 'project-performance':
-          generateProjectPerformancePDF();
+          await generateProjectPerformancePDF();
           break;
         case 'team-productivity':
-          generateTeamProductivityPDF();
+          await generateTeamProductivityPDF();
           break;
       }
     } else {
