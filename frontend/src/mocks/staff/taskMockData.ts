@@ -1,10 +1,14 @@
 import Priority from '@/types/TPriority';
 import Status from '@/types/TStatus';
+import Roles from '@/types/TRoles';
 import { Departments } from '@/types/TOrganisation';
 
 export interface User {
   userId: number;
   name: string;
+  email: string;
+  role: Roles;
+  department: string;
 }
 
 export interface Comment {
@@ -31,15 +35,8 @@ export interface Task {
   parentTaskId?: number;
 }
 
-export interface CurrentUser {
-  userId: number;
-  name: string;
-  systemRole: string;
-  department: Departments;
-}
-
 export interface MockData {
-  currentUser: CurrentUser;
+  currentUser: User;
   tasks: Task[];
 }
 
@@ -47,7 +44,8 @@ export const taskMockData: MockData = {
   currentUser: {
     userId: 1,
     name: "John Smith",
-    systemRole: "Staff",
+    email: "john.smith@company.com",
+    role: "Staff",
     department: "Sales Manager",
   },
   tasks: [
@@ -61,8 +59,8 @@ export const taskMockData: MockData = {
       dueDate: "2025-10-01",
       priority: 7,
       assignedUsers: [
-        { userId: 1, name: "John Smith" },
-        { userId: 3, name: "Alice Johnson" }
+        { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Developers" }, // Engineering→Developers
+        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Developers" }
       ],
       tags: ["authentication", "security", "backend"],
       status: "In Progress",
@@ -83,7 +81,6 @@ export const taskMockData: MockData = {
       projectName: "E-Commerce Platform",
       department: "IT Team",
     },
-    // SUBTASKS FOR TASK 1: User Authentication System
     {
       taskId: 101,
       title: "OAuth2 Provider Integration",
@@ -93,7 +90,7 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-25",
       priority: 7,
       assignedUsers: [
-        { userId: 1, name: "John Smith" }
+        { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Developers" }, // Engineering→Developers
       ],
       tags: ["oauth2", "integration", "google", "facebook"],
       status: "In Progress",
@@ -118,14 +115,13 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-28",
       priority: 4,
       assignedUsers: [
-        { userId: 3, name: "Alice Johnson" }
+        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" }
       ],
       tags: ["password-reset", "email", "security", "tokens"],
       status: "To Do",
       comments: [],
       projectName: "E-Commerce Platform",
       parentTaskId: 1,
-      // Added missing org attributes (likely IT based on project)
       department: "IT Team",
     },
     {
@@ -137,7 +133,8 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-30",
       priority: 7,
       assignedUsers: [
-        { userId: 3, name: "Alice Johnson" }
+        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" },
+
       ],
       tags: ["unit-tests", "testing", "authentication", "coverage"],
       status: "To Do",
@@ -155,7 +152,7 @@ export const taskMockData: MockData = {
       dueDate: "2025-10-01",
       priority: 4,
       assignedUsers: [
-        { userId: 1, name: "John Smith" }
+        { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Developers" }
       ],
       tags: ["documentation", "api", "authentication", "examples"],
       status: "To Do",
@@ -173,7 +170,7 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-25",
       priority: 4,
       assignedUsers: [
-        { userId: 2, name: "Sarah Davis" }
+        { userId: 2, name: "Sarah Davis", email: "sarah.davis@company.com", role: "Admin", department: "Support Team" } // Security→Support Team
       ],
       tags: ["api", "security", "performance"],
       status: "Blocked",
@@ -192,10 +189,8 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "API Gateway Project",
-      // Added organization fields with assumption (engineering/support)
       department: "Support Team",
     },
-    // SUBTASKS FOR TASK 3: API Rate Limiting
     {
       taskId: 301,
       title: "Redis Configuration Setup",
@@ -205,7 +200,8 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-23",
       priority: 7,
       assignedUsers: [
-        { userId: 1, name: "John Smith" }
+        { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Engineering Operation Division" },
+
       ],
       tags: ["redis", "configuration", "clustering", "persistence"],
       status: "In Progress",
@@ -230,7 +226,8 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-24",
       priority: 7,
       assignedUsers: [
-        { userId: 2, name: "Sarah Davis" }
+        { userId: 2, name: "Sarah Davis", email: "sarah.davis@company.com", role: "Admin", department: "Senior Engineers" },
+
       ],
       tags: ["algorithms", "token-bucket", "sliding-window", "rate-limiting"],
       status: "To Do",
@@ -248,7 +245,8 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-26",
       priority: 4,
       assignedUsers: [
-        { userId: 3, name: "Alice Johnson" }
+        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" },
+
       ],
       tags: ["dashboard", "admin", "configuration", "monitoring"],
       status: "To Do",
@@ -266,7 +264,8 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-28",
       priority: 4,
       assignedUsers: [
-        { userId: 3, name: "Alice Johnson" }
+        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" },
+
       ],
       tags: ["frontend", "components", "login", "ui"],
       status: "In Progress",
@@ -281,7 +280,6 @@ export const taskMockData: MockData = {
       projectName: "E-Commerce Platform",
       department: "IT Team",
     },
-    // SUBTASKS FOR TASK 21: Frontend Login Component
     {
       taskId: 201,
       title: "Login Form UI Design",
@@ -291,7 +289,8 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-17",
       priority: 4,
       assignedUsers: [
-        { userId: 3, name: "Alice Johnson" }
+        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" },
+
       ],
       tags: ["ui-design", "responsive", "accessibility", "mobile"],
       status: "Completed",
@@ -316,7 +315,8 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-20",
       priority: 7,
       assignedUsers: [
-        { userId: 3, name: "Alice Johnson" }
+        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" },
+
       ],
       tags: ["validation", "client-side", "real-time", "error-handling"],
       status: "Completed",
@@ -341,7 +341,8 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-26",
       priority: 7,
       assignedUsers: [
-        { userId: 3, name: "Alice Johnson" }
+        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" },
+
       ],
       tags: ["api-integration", "authentication", "endpoints", "error-handling"],
       status: "In Progress",
@@ -366,7 +367,7 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-28",
       priority: 4,
       assignedUsers: [
-        { userId: 3, name: "Alice Johnson" }
+        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" },
       ],
       tags: ["testing", "unit-tests", "integration", "components"],
       status: "To Do",
@@ -384,8 +385,8 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-30",
       priority: 4,
       assignedUsers: [
-        { userId: 4, name: "Mike Wilson" },
-        { userId: 6, name: "David Chen" }
+        { userId: 4, name: "Mike Wilson", email: "mike.wilson@company.com", role: "Manager", department: "Support Team" }, // QA→Consultant or Support Team
+        { userId: 6, name: "David Chen", email: "david.chen@company.com", role: "Staff", department: "Support Team" }
       ],
       tags: ["load-testing", "infrastructure", "performance", "validation"],
       status: "To Do",
@@ -393,7 +394,6 @@ export const taskMockData: MockData = {
       projectName: "Quality Assurance",
       department: "Consultant",
     },
-    // SUBTASKS FOR TASK 24: Load Testing Infrastructure
     {
       taskId: 401,
       title: "Load Testing Tool Selection",
@@ -403,7 +403,8 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-21",
       priority: 7,
       assignedUsers: [
-        { userId: 4, name: "Mike Wilson" }
+        { userId: 4, name: "Mike Wilson", email: "mike.wilson@company.com", role: "Manager", department: "Support Team" }, // QA→Consultant or Support Team
+
       ],
       tags: ["research", "tools", "k6", "jmeter", "selection"],
       status: "Completed",
@@ -428,7 +429,8 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-24",
       priority: 7,
       assignedUsers: [
-        { userId: 6, name: "David Chen" }
+        { userId: 6, name: "David Chen", email: "david.chen@company.com", role: "Staff", department: "Operation Planning Team" },
+
       ],
       tags: ["environment", "configuration", "infrastructure", "isolation"],
       status: "In Progress",
@@ -453,7 +455,8 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-28",
       priority: 7,
       assignedUsers: [
-        { userId: 4, name: "Mike Wilson" }
+        { userId: 4, name: "Mike Wilson", email: "mike.wilson@company.com", role: "Manager", department: "Operation Planning Team" },
+
       ],
       tags: ["scripts", "scenarios", "endpoints", "user-simulation"],
       status: "To Do",
@@ -471,7 +474,7 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-30",
       priority: 4,
       assignedUsers: [
-        { userId: 6, name: "David Chen" }
+        { userId: 6, name: "David Chen", email: "david.chen@company.com", role: "Staff", department: "Operation Planning Team" },
       ],
       tags: ["dashboard", "metrics", "real-time", "monitoring"],
       status: "To Do",
@@ -489,8 +492,8 @@ export const taskMockData: MockData = {
       dueDate: "2025-10-01",
       priority: 7,
       assignedUsers: [
-        { userId: 6, name: "David Chen" },
-        { userId: 1, name: "John Smith" }
+        { userId: 6, name: "David Chen", email: "david.chen@company.com", role: "Staff", department: "Operation Planning Team" },
+        { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Engineering Operation Division" },
       ],
       tags: ["integration", "testing", "oauth", "automation"],
       status: "In Progress",
@@ -515,7 +518,7 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-24",
       priority: 7,
       assignedUsers: [
-        { userId: 6, name: "David Chen" }
+        { userId: 6, name: "David Chen", email: "david.chen@company.com", role: "Staff", department: "Operation Planning Team" }
       ],
       tags: ["oauth", "test-setup", "mock-services", "providers"],
       status: "Completed",
@@ -540,7 +543,8 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-30",
       priority: 7,
       assignedUsers: [
-        { userId: 1, name: "John Smith" }
+        { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Engineering Operation Division" },
+
       ],
       tags: ["payment", "gateway", "integration", "error-handling"],
       status: "In Progress",
@@ -565,7 +569,7 @@ export const taskMockData: MockData = {
       dueDate: "2025-10-01",
       priority: 4,
       assignedUsers: [
-        { userId: 6, name: "David Chen" }
+        { userId: 6, name: "David Chen", email: "david.chen@company.com", role: "Staff", department: "Operation Planning Team" }
       ],
       tags: ["test-data", "lifecycle", "cleanup", "isolation"],
       status: "To Do",
@@ -584,7 +588,8 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-20",
       priority: 4,
       assignedUsers: [
-        { userId: 1, name: "John Smith" }
+        { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Engineering Operation Division" },
+
       ],
       tags: ["database", "migration", "sql"],
       status: "Completed",
@@ -608,8 +613,8 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-28",
       priority: 1,
       assignedUsers: [
-        { userId: 1, name: "John Smith" },
-        { userId: 4, name: "Mike Wilson" }
+        { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Engineering" },
+        { userId: 4, name: "Mike Wilson", email: "mike.wilson@company.com", role: "Manager", department: "QA" }
       ],
       tags: ["documentation", "process", "guidelines"],
       status: "To Do",
@@ -626,7 +631,7 @@ export const taskMockData: MockData = {
       dueDate: "2025-09-15",
       priority: 7,
       assignedUsers: [
-        { userId: 1, name: "John Smith" }
+        { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Engineering" }
       ],
       tags: ["performance", "optimization", "research"],
       status: "Completed",
@@ -641,74 +646,256 @@ export const taskMockData: MockData = {
       projectName: "Performance Enhancement",
       department: "Consultant",
     },
+    // New tasks with expanded team across more departments
     {
-      taskId: 22,
-      title: "Security Testing Framework Setup",
-      description: "Set up automated security testing tools and penetration testing scripts for the authentication system.",
-      startDate: "2025-09-15",
+      taskId: 40,
+      title: "Mobile App UX Research",
+      description: "Conduct comprehensive UX research for mobile application redesign including user interviews and usability testing.",
+      startDate: "2025-09-25",
       completedDate: null,
-      dueDate: "2025-10-05",
-      priority: 7,
+      dueDate: "2025-10-08",
+      priority: "High",
       assignedUsers: [
-        { userId: 2, name: "Sarah Davis" }
+        { userId: 7, name: "Rachel Green", email: "rachel.green@company.com", role: "Manager", department: "UX/UI Design" },
+        { userId: 8, name: "James Rodriguez", email: "james.rodriguez@company.com", role: "Staff", department: "UX/UI Design" }
       ],
-      tags: ["security", "testing", "penetration", "automation"],
-      status: "To Do",
-      comments: [],
-      projectName: "Security Enhancement",
-      department: "Sales Manager",
-    },
-    {
-      taskId: 23,
-      title: "Redis Cache Implementation",
-      description: "Implement Redis caching layer for API responses to improve performance and support rate limiting functionality.",
-      startDate: "2025-09-20",
-      completedDate: null,
-      dueDate: "2025-09-27",
-      priority: 7,
-      assignedUsers: [
-        { userId: 1, name: "John Smith" }
-      ],
-      tags: ["cache", "redis", "performance", "infrastructure"],
+      tags: ["mobile", "ux", "research", "usability"],
       status: "In Progress",
       comments: [
         {
-          commentId: 18,
-          author: "John Smith",
-          content: "Redis cluster configured. Working on cache invalidation strategies.",
-          timestamp: "2025-09-22T14:30:00Z"
+          commentId: 26,
+          author: "Rachel Green",
+          content: "Completed 12 user interviews. Identifying key pain points in navigation.",
+          timestamp: "2025-09-27T14:20:00Z"
         }
       ],
-      projectName: "API Gateway Project",
-      department: "Support Team",
-    },
-    {
-      taskId: 25,
-      title: "API Documentation Generation",
-      description: "Create automated API documentation generation pipeline for rate limiting endpoints and configuration options.",
-      startDate: "2025-09-20",
-      completedDate: null,
-      dueDate: "2025-10-01",
-      priority: 1,
-      assignedUsers: [
-        { userId: 3, name: "Alice Johnson" }
-      ],
-      tags: ["documentation", "api", "automation", "pipeline"],
-      status: "To Do",
-      comments: [],
-      projectName: "Documentation Initiative",
+      projectName: "Mobile App Redesign",
       department: "Consultant",
     },
+    {
+      taskId: 41,
+      title: "Cloud Migration Strategy",
+      description: "Develop comprehensive cloud migration strategy for legacy systems including cost analysis and risk assessment.",
+      startDate: "2025-09-28",
+      completedDate: null,
+      dueDate: "2025-10-15",
+      priority: "High",
+      assignedUsers: [
+        { userId: 9, name: "Kevin Park", email: "kevin.park@company.com", role: "Manager", department: "Infrastructure" },
+        { userId: 10, name: "Lisa Wang", email: "lisa.wang@company.com", role: "Staff", department: "Infrastructure" },
+        { userId: 11, name: "Robert Johnson", email: "robert.johnson@company.com", role: "Admin", department: "Infrastructure" }
+      ],
+      tags: ["cloud", "migration", "strategy", "infrastructure"],
+      status: "To Do",
+      comments: [],
+      projectName: "Digital Transformation",
+      department: "Consultant",
+    },
+    {
+      taskId: 42,
+      title: "Marketing Campaign Analytics Dashboard",
+      description: "Build real-time analytics dashboard for marketing campaigns with conversion tracking and ROI metrics.",
+      startDate: "2025-09-30",
+      completedDate: null,
+      dueDate: "2025-10-20",
+      priority: "Medium",
+      assignedUsers: [
+        { userId: 12, name: "Amanda Foster", email: "amanda.foster@company.com", role: "Manager", department: "Marketing" },
+        { userId: 13, name: "Ryan Mitchell", email: "ryan.mitchell@company.com", role: "Staff", department: "Data Analytics" }
+      ],
+      tags: ["analytics", "dashboard", "marketing", "metrics"],
+      status: "To Do",
+      comments: [],
+      projectName: "Marketing Intelligence",
+      department: "Consultant",
+    },
+    {
+      taskId: 43,
+      title: "Customer Support Chatbot Enhancement",
+      description: "Enhance AI chatbot with natural language processing improvements and knowledge base integration.",
+      startDate: "2025-09-26",
+      completedDate: null,
+      dueDate: "2025-10-10",
+      priority: "Medium",
+      assignedUsers: [
+        { userId: 14, name: "Jessica Chen", email: "jessica.chen@company.com", role: "Staff", department: "Data Analytics" },
+        { userId: 15, name: "Christopher Lee", email: "christopher.lee@company.com", role: "Manager", department: "Customer Support" }
+      ],
+      tags: ["ai", "chatbot", "nlp", "customer-support"],
+      status: "In Progress",
+      comments: [
+        {
+          commentId: 27,
+          author: "Jessica Chen",
+          content: "NLP model training completed. Working on knowledge base integration.",
+          timestamp: "2025-09-28T16:45:00Z"
+        }
+      ],
+      projectName: "Customer Experience Enhancement",
+      department: "Consultant",
+    },
+    {
+      taskId: 44,
+      title: "Financial Reporting Automation",
+      description: "Automate monthly financial reporting process with data validation and executive summary generation.",
+      startDate: "2025-09-29",
+      completedDate: null,
+      dueDate: "2025-10-25",
+      priority: "High",
+      assignedUsers: [
+        { userId: 16, name: "Michael Torres", email: "michael.torres@company.com", role: "Manager", department: "Finance" },
+        { userId: 17, name: "Stephanie Kim", email: "stephanie.kim@company.com", role: "Staff", department: "Finance" }
+      ],
+      tags: ["finance", "automation", "reporting", "validation"],
+      status: "To Do",
+      comments: [],
+      projectName: "Financial Process Optimization",
+      department: "Consultant",
+    },
+    {
+      taskId: 45,
+      title: "Employee Onboarding Portal",
+      description: "Develop comprehensive employee onboarding portal with document management and training modules.",
+      startDate: "2025-09-24",
+      completedDate: null,
+      dueDate: "2025-10-18",
+      priority: "Medium",
+      assignedUsers: [
+        { userId: 18, name: "Nicole Brown", email: "nicole.brown@company.com", role: "Manager", department: "Human Resources" },
+        { userId: 19, name: "Daniel Wilson", email: "daniel.wilson@company.com", role: "Staff", department: "Human Resources" },
+        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering" }
+      ],
+      tags: ["hr", "onboarding", "portal", "training"],
+      status: "In Progress",
+      comments: [
+        {
+          commentId: 28,
+          author: "Nicole Brown",
+          content: "Document management system 70% complete. Starting training module integration.",
+          timestamp: "2025-09-27T10:30:00Z"
+        }
+      ],
+      projectName: "HR Digitization",
+      department: "Consultant",
+    },
+    {
+      taskId: 46,
+      title: "Legal Compliance Audit System",
+      description: "Build automated system for tracking and auditing legal compliance requirements across all departments.",
+      startDate: "2025-09-27",
+      completedDate: null,
+      dueDate: "2025-11-05",
+      priority: "High",
+      assignedUsers: [
+        { userId: 20, name: "Andrew Martinez", email: "andrew.martinez@company.com", role: "Manager", department: "Legal" },
+        { userId: 2, name: "Sarah Davis", email: "sarah.davis@company.com", role: "Admin", department: "Security" }
+      ],
+      tags: ["legal", "compliance", "audit", "automation"],
+      status: "To Do",
+      comments: [],
+      projectName: "Compliance Management",
+      department: "Consultant",
+    },
+    {
+      taskId: 47,
+      title: "Sales Performance Dashboard",
+      description: "Create interactive sales performance dashboard with territory analysis and forecasting capabilities.",
+      startDate: "2025-09-25",
+      completedDate: null,
+      dueDate: "2025-10-12",
+      priority: "High",
+      assignedUsers: [
+        { userId: 21, name: "Patricia Garcia", email: "patricia.garcia@company.com", role: "Manager", department: "Sales" },
+        { userId: 13, name: "Ryan Mitchell", email: "ryan.mitchell@company.com", role: "Staff", department: "Data Analytics" }
+      ],
+      tags: ["sales", "dashboard", "analytics", "forecasting"],
+      status: "In Progress",
+      comments: [
+        {
+          commentId: 29,
+          author: "Patricia Garcia",
+          content: "Territory analysis module completed. Working on forecasting algorithms.",
+          timestamp: "2025-09-28T11:15:00Z"
+        }
+      ],
+      projectName: "Sales Intelligence Platform",
+      department: "Consultant",
+    },
+    {
+      taskId: 48,
+      title: "Product Roadmap Visualization Tool",
+      description: "Develop interactive product roadmap visualization tool for stakeholder communication and planning.",
+      startDate: "2025-09-26",
+      completedDate: null,
+      dueDate: "2025-10-15",
+      priority: "Medium",
+      assignedUsers: [
+        { userId: 22, name: "Thomas Anderson", email: "thomas.anderson@company.com", role: "Manager", department: "Product Management" },
+        { userId: 7, name: "Rachel Green", email: "rachel.green@company.com", role: "Manager", department: "UX/UI Design" }
+      ],
+      tags: ["product", "roadmap", "visualization", "planning"],
+      status: "To Do",
+      comments: [],
+      projectName: "Product Strategy Tools",
+      department: "Consultant",
+    },
+    // Add some security-focused tasks that Sarah might own as Security Admin
+    {
+      taskId: 49,
+      title: "Security Vulnerability Assessment",
+      description: "Conduct comprehensive security vulnerability assessment across all systems and applications with remediation plan.",
+      startDate: "2025-09-29",
+      completedDate: null,
+      dueDate: "2025-10-20",
+      priority: "High",
+      assignedUsers: [
+        { userId: 2, name: "Sarah Davis", email: "sarah.davis@company.com", role: "Admin", department: "Security" },
+        { userId: 11, name: "Robert Johnson", email: "robert.johnson@company.com", role: "Admin", department: "Infrastructure" }
+      ],
+      tags: ["security", "vulnerability", "assessment", "remediation"],
+      status: "In Progress",
+      comments: [
+        {
+          commentId: 30,
+          author: "Sarah Davis",
+          content: "Initial scan completed. Found 23 medium-priority vulnerabilities to address.",
+          timestamp: "2025-09-29T09:30:00Z"
+        }
+      ],
+      projectName: "Security Enhancement",
+      department: "Consultant",
+    },
+    {
+      taskId: 50,
+      title: "Identity Access Management Upgrade",
+      description: "Upgrade identity and access management system with multi-factor authentication and single sign-on capabilities.",
+      startDate: "2025-09-30",
+      completedDate: null,
+      dueDate: "2025-11-15",
+      priority: "High",
+      assignedUsers: [
+        { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Engineering Operation Division" },
+        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" },
+      ],
+      tags: ["identity", "access", "authentication", "sso"],
+      status: "To Do",
+      comments: [],
+      projectName: "Identity Management",
+      department: "Consultant",
+    }
   ]
 };
 
-
-// Additional users for the new tasks
+// Expanded user base with multiple departments
 export const allUsers: User[] = [
-  { userId: 1, name: "John Smith" },
-  { userId: 2, name: "Sarah Davis" },
-  { userId: 3, name: "Alice Johnson" },
-  { userId: 4, name: "Mike Wilson" },
-  { userId: 5, name: "Emma Thompson" },
-  { userId: 6, name: "David Chen" }
+  { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Engineering Operation Division" },
+  { userId: 2, name: "Sarah Davis", email: "sarah.davis@company.com", role: "Admin", department: "Senior Engineers" },
+  { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" },
+  { userId: 4, name: "Mike Wilson", email: "mike.wilson@company.com", role: "Manager", department: "Operation Planning Team" },
+  { userId: 5, name: "Emma Thompson", email: "emma.thompson@company.com", role: "Staff", department: "Engineering Operation Division" },
+  { userId: 6, name: "David Chen", email: "david.chen@company.com", role: "Staff", department: "Operation Planning Team" },
+  { userId: 7, name: "Rachel Green", email: "rachel.green@company.com", role: "Manager", department: "IT Division" },
+  { userId: 8, name: "James Rodriguez", email: "james.rodriguez@company.com", role: "Staff", department: "IT Division" },
+  { userId: 9, name: "Kevin Park", email: "kevin.park@company.com", role: "Manager", department: "L&D Team" },
+  { userId: 10, name: "Lisa Wang", email: "lisa.wang@company.com", role: "Staff", department: "L&D Team" },
 ];

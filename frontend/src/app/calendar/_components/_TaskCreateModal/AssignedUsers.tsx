@@ -1,5 +1,5 @@
 import { Autocomplete, TextField } from '@mui/material';
-import { User, CurrentUser } from '@/mocks/staff/taskMockData';
+import { User } from '@/mocks/staff/taskMockData';
 import renderAssignedUserTags from '../../_functions/renderAssignedUserTags';
 import { handleAssignedUsersChange } from '../../_functions/TaskCreateModelFunctions';
 
@@ -9,7 +9,7 @@ interface AssignedUsersAutocompleteProps {
     setFormData: React.Dispatch<React.SetStateAction<any>>;
     isEditMode: boolean;
     existingAssignees: User[];
-    currentUser: CurrentUser;
+    currentUser: User;
     currentUserObj?: User;
     error?: boolean;
     helperText?: string;

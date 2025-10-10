@@ -13,7 +13,7 @@ import dayjs from 'dayjs';
 import { getAvailableUsers, handleAddTag, handleRemoveTag, resetForm, handleSubmit, canAddMoreUsers } from '../_functions/TaskCreateModelFunctions';
 
 // Types and Constants
-import { Task, taskMockData, allUsers, CurrentUser } from '@/mocks/staff/taskMockData';
+import { Task, taskMockData, allUsers, User } from '@/mocks/staff/taskMockData';
 import IFormData from "@/types/IFormData";
 import DefaultFormData, { PriorityOptions, StatusOptions } from '@/constants/DefaultFormData';
 import { ALL_DEPARTMENTS } from '@/constants/Organisation';
@@ -35,7 +35,7 @@ interface TaskCreateModalProps {
   open: boolean;
   onClose: () => void;
   setSnackbarContent: (message: string, severity: AlertColor) => void;
-  currentUser: CurrentUser;
+  currentUser: User;
   existingTaskDetails?: Task | null;
   preselectedParentTask?: Task | null;
   allTasks: Task[];

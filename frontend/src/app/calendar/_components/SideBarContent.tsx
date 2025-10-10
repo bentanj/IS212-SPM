@@ -1,9 +1,9 @@
-import { CurrentUser, Task } from '@/mocks/staff/taskMockData'
+import { User, Task } from '@/mocks/staff/taskMockData'
 import { Avatar, Box, Stack, Typography } from '@mui/material'
 
 interface SideBarContentProps {
     isMobile: boolean
-    currentUser: CurrentUser
+    currentUser: User
     assignedTasks: Task[]
 }
 
@@ -28,7 +28,7 @@ const SideBarContent: React.FC<SideBarContentProps> = ({
                         {currentUser.name}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        {currentUser.systemRole}
+                        {currentUser.role}
                     </Typography>
                 </Box>
             </Box>

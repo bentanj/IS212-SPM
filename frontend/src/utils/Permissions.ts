@@ -1,17 +1,17 @@
-import { CurrentUser, Task } from '@/mocks/staff/taskMockData';
+import { User, Task } from '@/mocks/staff/taskMockData';
 import { ORGANISATION } from '@/constants/Organisation';
 
 const AllowEditTask = ['HR/Admin', "Manager"]
 
-export function canEditTask(currentUser: CurrentUser, task: Task) {
-    return AllowEditTask.includes(currentUser.systemRole) || task.assignedUsers.some(u => u.userId === currentUser.userId);
+export function canEditTask(currentUser: User, task: Task) {
+    return AllowEditTask.includes(currentUser.role) || task.assignedUsers.some(u => u.userId === currentUser.userId);
 }
 
-export function canEditTaskAssignees(currentUser: CurrentUser) {
-    return AllowEditTask.includes(currentUser.systemRole);
+export function canEditTaskAssignees(currentUser: User) {
+    return AllowEditTask.includes(currentUser.role);
 }
 
-export function determineDepartmentScope(currentUser: CurrentUser) {
+export function determineDepartmentScope(currentUser: User) {
     let VisibleDepartments = [];
 
     VisibleDepartments.push(currentUser.department);

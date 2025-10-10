@@ -1,4 +1,4 @@
-import { User, CurrentUser } from '@/mocks/staff/taskMockData';
+import { User } from '@/mocks/staff/taskMockData';
 import Chip from '@mui/material/Chip';
 import LockIcon from '@mui/icons-material/Lock';
 import { canEditTaskAssignees } from '@/utils/Permissions';
@@ -7,7 +7,7 @@ import { canEditTaskAssignees } from '@/utils/Permissions';
 const renderAssignedUserTags = (
     users: User[],
     getTagProps: any,
-    currentUser: CurrentUser,
+    currentUser: User,
     isEditMode: boolean,
     existingAssignees: User[]
 ) => {

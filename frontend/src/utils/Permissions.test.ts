@@ -1,11 +1,10 @@
 import { canEditTask, canEditTaskAssignees, determineDepartmentScope } from './Permissions';
-import { ORGANISATION } from '@/constants/Organisation';
 
 // Mock CurrentUser and Task
-const Staff_1 = { userId: 1, name: "Staff 1", systemRole: "Staff", department: "Sales Division" };
-const Admin_2 = { userId: 2, name: "HR/Admin", systemRole: "HR/Admin", department: "HR/Admin" };
-const Manager_3 = { userId: 3, name: "Manager", systemRole: "Manager", department: "Sales Manager" };
-const Staff_4 = { userId: 4, name: "Staff 4", systemRole: "Staff", department: "Sales Manager" };
+const Staff_1 = { userId: 1, name: "Staff 1", email: "staff1@example.com", role: "Staff", department: "Sales Division" };
+const Admin_2 = { userId: 2, name: "HR/Admin", email: "admin@example.com", role: "HR/Admin", department: "HR/Admin" };
+const Manager_3 = { userId: 3, name: "Manager", email: "manager@example.com", role: "Manager", department: "Sales Manager" };
+const Staff_4 = { userId: 4, name: "Staff 4", email: "staff4@example.com", role: "Staff", department: "Sales Manager" };
 
 const mockTask = {
     taskId: 1,
@@ -15,10 +14,7 @@ const mockTask = {
     completedDate: null,
     dueDate: "2025-10-01",
     priority: 7,
-    assignedUsers: [
-        { userId: 1, name: "Staff 1" },
-        { userId: 3, name: "Staff 3" }
-    ],
+    assignedUsers: [Staff_1, Manager_3],
     tags: ["authentication", "security", "backend"],
     status: "In Progress",
     comments: [
@@ -72,19 +68,19 @@ describe('canEditTaskAssignees', () => {
 const dummyUserDetails = {}; // To address type error
 describe('determineDepartmentScope', () => {
     test('returns department and direct children for divisions', () => {
-        const currentUser = { userId: 5, name: "Dummy User", systemRole: "Staff", department: "Sales Division" };
+        const currentUser = { userId: 5, name: "Dummy User", email: "dummy@example.com", role: "Staff", department: "Sales Division" };
         const expected = ["Sales Division", "Sales Manager", "Account Managers"];
         expect(determineDepartmentScope(currentUser)).toEqual(expected);
     });
 
     test('returns department and children for manager level', () => {
-        const currentUser = { userId: 5, name: "Dummy User", systemRole: "Staff", department: "Sales Manager" };
+        const currentUser = { userId: 5, name: "Dummy User", email: "dummy@example.com", role: "Staff", department: "Sales Manager" };
         const expected = ["Sales Manager", "Account Managers"];
         expect(determineDepartmentScope(currentUser)).toEqual(expected);
     });
 
     test('returns only department when no children', () => {
-        const currentUser = { userId: 5, name: "Dummy User", systemRole: "Staff", department: "Account Managers" };
+        const currentUser = { userId: 5, name: "Dummy User", email: "dummy@example.com", role: "Staff", department: "Account Managers" };
         const expected = ["Account Managers"];
         expect(determineDepartmentScope(currentUser)).toEqual(expected);
     });

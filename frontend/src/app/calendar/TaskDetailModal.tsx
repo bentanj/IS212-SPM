@@ -7,7 +7,7 @@ import {
   useTheme, useMediaQuery
 } from '@mui/material';
 import { Edit, Add } from '@mui/icons-material';
-import { CurrentUser, Task, taskMockData } from '@/mocks/staff/taskMockData';
+import { User, Task, taskMockData } from '@/mocks/staff/taskMockData';
 import dayjs from 'dayjs';
 import { canEditTask } from '@/utils/Permissions';
 import { getPriorityColor, getStatusColor } from './_functions/TaskRenderingFunctions';
@@ -16,7 +16,7 @@ interface TaskDetailModalProps {
   task: Task | null;
   open: boolean;
   onClose: () => void;
-  currentUser: CurrentUser;
+  currentUser: User;
   onCreateSubtask?: (parentTask: Task) => void;
   onSubtaskClick?: (subtask: Task) => void;
   onEditButtonClick?: () => void; // New
@@ -26,6 +26,7 @@ interface TaskDetailModalProps {
 const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   task,
   open,
+  currentUser,
   onClose,
   onCreateSubtask,
   onSubtaskClick,
@@ -34,8 +35,6 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const { currentUser } = taskMockData;
-
 
   const relatedSubtasks = useMemo(() => {
     // Return empty array if task is null/undefined

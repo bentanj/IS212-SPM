@@ -1,12 +1,13 @@
 import { Drawer, Paper } from "@mui/material";
+import { Task, User } from "@/mocks/staff/taskMockData";
 import SideBarContent from "./SideBarContent"
 
 interface SideBarProps {
     isMobile: boolean
     sidebarOpen: boolean
     toggleSidebar: () => void
-    currentUser: any
-    assignedTasks: any[]
+    currentUser: User
+    assignedTasks: Task[]
 }
 
 const SideBar: React.FC<SideBarProps> = ({
