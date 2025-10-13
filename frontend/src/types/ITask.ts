@@ -14,5 +14,5 @@ export interface Task {
     assignedUsers: User[];
     tags: string[];
     comments: Comment[];
-    parentTaskId?: number;
+    parentTaskId?: number | null;
 }

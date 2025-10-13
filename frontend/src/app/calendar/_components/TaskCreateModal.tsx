@@ -81,6 +81,7 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
       if (isEditMode && existingTaskDetails) {
         // Pre-populate form with existing task data
         setFormData({
+          taskId: existingTaskDetails.taskId,
           title: existingTaskDetails.title,
           description: existingTaskDetails.description,
           parentTaskId: existingTaskDetails.parentTaskId,
