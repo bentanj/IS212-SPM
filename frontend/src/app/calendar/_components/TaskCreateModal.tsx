@@ -19,7 +19,7 @@ import { ALL_DEPARTMENTS } from '@/constants/Organisation';
 import { Task, User, FormData, Departments, Priority, Status } from '@/types'
 
 // Components
-import { ModalTitle, ParentTaskField, DateRow, DropDownMenu, Tags, AssignedUsersAutocomplete, Comments, FileUpload } from './_TaskCreateModal/';
+import { ModalTitle, ParentTaskField, DateRow, MultiSelectInput, DropDownMenu, Tags, AssignedUsersAutocomplete, Comments, FileUpload } from './_TaskCreateModal/';
 
 interface TaskCreateModalProps {
   open: boolean;
@@ -198,14 +198,14 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
 
         {/* Department, Priority and Status Row */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }}>
-          <DropDownMenu
+          <MultiSelectInput
             label="Department"
-            value={formData.department}
-            onChange={(val) => setFormData((prev) => ({ ...prev, department: val as Departments }))}
+            value={formData.department ?? []}
+            onChange={(_, val) => setFormData((prev) => ({ ...prev, department: val as Departments[] }))}
             options={ALL_DEPARTMENTS}
             error={!!errors.department}
             helperText={errors.department}
-            required />
+            freeSolo={true} required={true} />
 
           <DropDownMenu
             label="Priority"

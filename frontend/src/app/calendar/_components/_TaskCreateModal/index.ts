@@ -4,6 +4,7 @@ export * from "./DateRow";
 export * from "./DropDownMenu";
 export * from "./FileUpload";
 export * from "./ModalTitle";
+export * from "./MultiSelectInput";
 export * from "./NoPermission";
 export * from "./ParentTaskField";
 export * from "./Tags";

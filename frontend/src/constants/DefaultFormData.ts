@@ -1,17 +1,17 @@
-import IFormData from "@/types/IFormData";
+import { FormData } from "@/types";
 
 export const PriorityOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ''];
 
 export const StatusOptions = ["To Do", "In Progress", "Completed", "Blocked", ''];
 
-const DefaultFormData: IFormData = {
+const DefaultFormData: Omit<FormData, "taskId"> = {
     title: '',
     description: '',
     projectName: '',
     startDate: null,
     dueDate: null,
     completedDate: null,
-    department: '',
+    department: [],
     priority: '',
     status: '',
     assignedUsers: [],
