@@ -14,7 +14,7 @@ export const getAvailableUsers = (allUsers: User[], assignedUsers: User[]): User
 export const canRemoveUser = (
     user: User,
     isEditMode: boolean,
-    currentUser: CurrentUser,
+    currentUser: User,
     existingAssignees: User[]
 ): boolean => {
     if (!isEditMode) return user.userId !== currentUser.userId;
@@ -46,7 +46,7 @@ const validateForm = (formData: FormData, setErrors: React.Dispatch<React.SetSta
 
 // Reset form
 export const resetForm = (
-    setFormData: React.Dispatch<React.SetStateAction<IFormData>>,
+    setFormData: React.Dispatch<React.SetStateAction<FormData>>,
     setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>,
     setSubmitStatus: React.Dispatch<React.SetStateAction<'idle' | 'success' | 'error'>>,
     setSubmitMessage: React.Dispatch<React.SetStateAction<string>>,
@@ -166,7 +166,7 @@ export const handleSubmit = async (params: {
 // Handle file upload
 export const handleFileUpload = (
     event: React.ChangeEvent<HTMLInputElement>,
-    setFormData: React.Dispatch<React.SetStateAction<IFormData>>
+    setFormData: React.Dispatch<React.SetStateAction<FormData>>
 ) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -176,7 +176,7 @@ export const handleFileUpload = (
 
 // Handle file removal
 export const handleRemoveFile = (
-    setFormData: React.Dispatch<React.SetStateAction<IFormData>>
+    setFormData: React.Dispatch<React.SetStateAction<FormData>>
 ) => {
     setFormData(prev => ({ ...prev, attachedFile: null }));
 };
@@ -186,8 +186,8 @@ export const handleAddTag = (
     event: React.KeyboardEvent<HTMLElement>,
     tagInput: string,
     setTagInput: React.Dispatch<React.SetStateAction<string>>,
-    formData: IFormData,
-    setFormData: React.Dispatch<React.SetStateAction<IFormData>>
+    formData: FormData,
+    setFormData: React.Dispatch<React.SetStateAction<FormData>>
 ) => {
     if (event.key === 'Enter' && tagInput.trim()) {
         event.preventDefault();
@@ -205,7 +205,7 @@ export const handleAddTag = (
 // Remove tag
 export const handleRemoveTag = (
     tagToRemove: string,
-    setFormData: React.Dispatch<React.SetStateAction<IFormData>>
+    setFormData: React.Dispatch<React.SetStateAction<FormData>>
 ) => {
     setFormData(prev => ({
         ...prev,
@@ -221,7 +221,7 @@ export const handleAssignedUsersChange = (
     existingAssignees: User[],
     currentUser: User,
     currentUserObj: User | undefined,
-    setFormData: React.Dispatch<React.SetStateAction<IFormData>>
+    setFormData: React.Dispatch<React.SetStateAction<FormData>>
 ) => {
     let updatedUsers = users;
 
