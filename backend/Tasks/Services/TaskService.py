@@ -1,6 +1,5 @@
 from typing import Iterable, Optional, Dict, Any, List
 from datetime import datetime
-from uuid import UUID
 from Repositories.TaskRepository import TaskRepository
 from Models.Task import Task
 from exceptions import TaskNotFoundError, TaskValidationError, InvalidTaskStatusError
@@ -84,7 +83,7 @@ class TaskService:
     def get_tasks_by_project(self, project_name: str) -> Iterable[Task]:
         return self.repo.find_by_project(project_name)
 
-    def get_tasks_by_user(self, user_id: UUID) -> Iterable[Task]:
+    def get_tasks_by_user(self, user_id: int) -> Iterable[Task]:
         return self.repo.find_by_assigned_user(user_id)
 
     def get_tasks_by_priority(self, priority: str) -> Iterable[Task]:
@@ -111,10 +110,10 @@ class TaskService:
             'completed_date': datetime.now()
         })
 
-    def assign_users_to_task(self, task_id: int, user_ids: List[UUID]) -> Optional[Task]:
+    def assign_users_to_task(self, task_id: int, user_ids: List[int]) -> Optional[Task]:
         return self.update_task(task_id, {'assigned_users': user_ids})
 
-    def add_user_to_task(self, task_id: int, user_id: UUID) -> Optional[Task]:
+    def add_user_to_task(self, task_id: int, user_id: int) -> Optional[Task]:
         task = self.repo.get(task_id)
         if not task:
             return None
@@ -128,7 +127,7 @@ class TaskService:
 
         return task
 
-    def remove_user_from_task(self, task_id: int, user_id: UUID) -> Optional[Task]:
+    def remove_user_from_task(self, task_id: int, user_id: int) -> Optional[Task]:
         task = self.repo.get(task_id)
         if not task:
             return None

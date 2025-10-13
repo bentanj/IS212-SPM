@@ -6,12 +6,12 @@ try:
     # Try relative imports first (for tests)
     from .config import Config
     from .db import SessionLocal, init_db
-    from .Controllers.AuthController import bp as auth_bp
+    from .Controllers.AuthController import bp as auth_bp, users_bp
 except ImportError:
     # Fall back to absolute imports (for Docker)
     from config import Config
     from db import SessionLocal, init_db
-    from Controllers.AuthController import bp as auth_bp
+    from Controllers.AuthController import bp as auth_bp, users_bp
 
 def create_app():
     app = Flask(__name__)
@@ -41,8 +41,9 @@ def create_app():
     @app.get("/api/auth/health")
     def health():
         return {"status": "ok", "service": "authentication"}
-    
+
     app.register_blueprint(auth_bp)
+    app.register_blueprint(users_bp)
     
     if app.config.get('ENV') != 'test':
         with app.app_context():

@@ -18,20 +18,29 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)
     role = Column(String(50), default='user')
+    department = Column(String(100), nullable=True)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     last_login = Column(DateTime(timezone=True), nullable=True)
     
     def to_dict(self):
+        # Combine first_name and last_name into single name field
+        name_parts = []
+        if self.first_name:
+            name_parts.append(self.first_name)
+        if self.last_name:
+            name_parts.append(self.last_name)
+        full_name = ' '.join(name_parts) if name_parts else None
+
         return {
-            'id': self.id,
+            'userId': self.id,
             'email': self.email,
-            'first_name': self.first_name,
-            'last_name': self.last_name,
-            'is_active': self.is_active,
-            'is_verified': self.is_verified,
+            'name': full_name,
             'role': self.role,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
-            'last_login': self.last_login.isoformat() if self.last_login else None
+            'department': self.department,
+            'isActive': self.is_active,
+            'isVerified': self.is_verified,
+            'createdAt': self.created_at.isoformat() if self.created_at else None,
+            'updatedAt': self.updated_at.isoformat() if self.updated_at else None,
+            'lastLogin': self.last_login.isoformat() if self.last_login else None
         }

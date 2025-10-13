@@ -2,7 +2,6 @@ from typing import Iterable, Optional, Dict, Any, List
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 from datetime import datetime
-from uuid import UUID
 from Models.Task import Task
 
 class TaskRepository:
@@ -44,7 +43,7 @@ class TaskRepository:
     def find_by_project(self, project_name: str) -> Iterable[Task]:
         return self.session.query(Task).filter(Task.project_name == project_name).all()
 
-    def find_by_assigned_user(self, user_id: UUID) -> Iterable[Task]:
+    def find_by_assigned_user(self, user_id: int) -> Iterable[Task]:
         return self.session.query(Task).filter(Task.assigned_users.any(user_id)).all()
 
     def find_by_priority(self, priority: str) -> Iterable[Task]:
