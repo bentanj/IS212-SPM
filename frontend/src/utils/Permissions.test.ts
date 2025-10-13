@@ -32,7 +32,7 @@ const mockTask = {
         }
     ],
     projectName: "E-Commerce Platform",
-    department: "IT Team",
+    department: ["IT Team"],
 }
 
 // Tests for canEditTask

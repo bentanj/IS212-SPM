@@ -44,7 +44,7 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "E-Commerce Platform",
-      department: "IT Team",
+      department: ["IT Team"],
     },
     {
       taskId: 101,
@@ -69,7 +69,7 @@ export const taskMockData: MockData = {
       ],
       projectName: "E-Commerce Platform",
       parentTaskId: 1,
-      department: "Sales Manager",
+      department: ["Sales Manager"],
     },
     {
       taskId: 102,
@@ -87,7 +87,7 @@ export const taskMockData: MockData = {
       comments: [],
       projectName: "E-Commerce Platform",
       parentTaskId: 1,
-      department: "IT Team",
+      department: ["IT Team"],
     },
     {
       taskId: 103,
@@ -106,7 +106,7 @@ export const taskMockData: MockData = {
       comments: [],
       projectName: "E-Commerce Platform",
       parentTaskId: 1,
-      department: "IT Team",
+      department: ["IT Team"],
     },
     {
       taskId: 104,
@@ -124,7 +124,7 @@ export const taskMockData: MockData = {
       comments: [],
       projectName: "E-Commerce Platform",
       parentTaskId: 1,
-      department: "IT Team",
+      department: ["IT Team"],
     },
     {
       taskId: 3,
@@ -154,7 +154,7 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "API Gateway Project",
-      department: "Support Team",
+      department: ["Support Team"],
     },
     {
       taskId: 301,
@@ -180,7 +180,7 @@ export const taskMockData: MockData = {
       ],
       projectName: "API Gateway Project",
       parentTaskId: 3,
-      department: "Support Team",
+      department: ["Support Team"],
     },
     {
       taskId: 302,
@@ -199,7 +199,7 @@ export const taskMockData: MockData = {
       comments: [],
       projectName: "API Gateway Project",
       parentTaskId: 3,
-      department: "Support Team",
+      department: ["Support Team"],
     },
     {
       taskId: 303,
@@ -218,7 +218,7 @@ export const taskMockData: MockData = {
       comments: [],
       projectName: "API Gateway Project",
       parentTaskId: 3,
-      department: "Support Team",
+      department: ["Support Team"],
     },
     {
       taskId: 21,
@@ -243,7 +243,7 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "E-Commerce Platform",
-      department: "IT Team",
+      department: ["IT Team"],
     },
     {
       taskId: 201,
@@ -269,7 +269,7 @@ export const taskMockData: MockData = {
       ],
       projectName: "E-Commerce Platform",
       parentTaskId: 21,
-      department: "IT Team",
+      department: ["IT Team"],
     },
     {
       taskId: 202,
@@ -295,7 +295,7 @@ export const taskMockData: MockData = {
       ],
       projectName: "E-Commerce Platform",
       parentTaskId: 21,
-      department: "IT Team",
+      department: ["IT Team"],
     },
     {
       taskId: 203,
@@ -321,7 +321,7 @@ export const taskMockData: MockData = {
       ],
       projectName: "E-Commerce Platform",
       parentTaskId: 21,
-      department: "IT Team",
+      department: ["IT Team"],
     },
     {
       taskId: 204,
@@ -339,7 +339,7 @@ export const taskMockData: MockData = {
       comments: [],
       projectName: "E-Commerce Platform",
       parentTaskId: 21,
-      department: "IT Team",
+      department: ["IT Team"],
     },
     {
       taskId: 24,
@@ -357,7 +357,7 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Quality Assurance",
-      department: "Consultant",
+      department: ["Consultant"],
     },
     {
       taskId: 401,
@@ -383,7 +383,7 @@ export const taskMockData: MockData = {
       ],
       projectName: "Quality Assurance",
       parentTaskId: 24,
-      department: "Consultant",
+      department: ["Consultant"],
     },
     {
       taskId: 402,
@@ -409,7 +409,7 @@ export const taskMockData: MockData = {
       ],
       projectName: "Quality Assurance",
       parentTaskId: 24,
-      department: "Consultant",
+      department: ["Consultant"],
     },
     {
       taskId: 403,
@@ -428,7 +428,7 @@ export const taskMockData: MockData = {
       comments: [],
       projectName: "Quality Assurance",
       parentTaskId: 24,
-      department: "Consultant",
+      department: ["Consultant"],
     },
     {
       taskId: 404,
@@ -446,7 +446,7 @@ export const taskMockData: MockData = {
       comments: [],
       projectName: "Quality Assurance",
       parentTaskId: 24,
-      department: "Consultant",
+      department: ["Consultant"],
     },
     {
       taskId: 39,
@@ -471,7 +471,7 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "Quality Assurance",
-      department: "Consultant",
+      department: ["Consultant"],
     },
     // SUBTASKS FOR TASK 39: Integration Testing Automation
     {
@@ -497,7 +497,7 @@ export const taskMockData: MockData = {
       ],
       projectName: "Quality Assurance",
       parentTaskId: 39,
-      department: "Consultant",
+      department: ["Consultant"],
     },
     {
       taskId: 502,
@@ -523,7 +523,7 @@ export const taskMockData: MockData = {
       ],
       projectName: "Quality Assurance",
       parentTaskId: 39,
-      department: "Consultant",
+      department: ["Consultant"],
     },
     {
       taskId: 503,
@@ -541,7 +541,7 @@ export const taskMockData: MockData = {
       comments: [],
       projectName: "Quality Assurance",
       parentTaskId: 39,
-      department: "Consultant",
+      department: ["Consultant"],
     },
     // Other original tasks without subtasks with default org fields added
     {
@@ -567,7 +567,7 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "E-Commerce Platform",
-      department: "IT Team",
+      department: ["IT Team"],
     },
     {
       taskId: 4,
@@ -585,7 +585,7 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Development Process Improvement",
-      department: "Consultant",
+      department: ["Consultant"],
     },
     {
       taskId: 5,
@@ -609,7 +609,7 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "Performance Enhancement",
-      department: "Consultant",
+      department: ["Consultant"],
     },
     // New tasks with expanded team across more departments
     {
@@ -635,7 +635,7 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "Mobile App Redesign",
-      department: "Consultant",
+      department: ["Consultant"],
     },
     {
       taskId: 41,
@@ -654,7 +654,7 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Digital Transformation",
-      department: "Consultant",
+      department: ["Consultant"],
     },
     {
       taskId: 42,
@@ -672,7 +672,7 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Marketing Intelligence",
-      department: "Consultant",
+      department: ["Consultant"],
     },
     {
       taskId: 43,
@@ -697,7 +697,7 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "Customer Experience Enhancement",
-      department: "Consultant",
+      department: ["Consultant"],
     },
     {
       taskId: 44,
@@ -715,7 +715,7 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Financial Process Optimization",
-      department: "Consultant",
+      department: ["Consultant"],
     },
     {
       taskId: 45,
@@ -741,7 +741,7 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "HR Digitization",
-      department: "Consultant",
+      department: ["Consultant"],
     },
     {
       taskId: 46,
@@ -759,7 +759,7 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Compliance Management",
-      department: "Consultant",
+      department: ["Consultant"],
     },
     {
       taskId: 47,
@@ -784,7 +784,7 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "Sales Intelligence Platform",
-      department: "Consultant",
+      department: ["Consultant"],
     },
     {
       taskId: 48,
@@ -802,7 +802,7 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Product Strategy Tools",
-      department: "Consultant",
+      department: ["Consultant"],
     },
     // Add some security-focused tasks that Sarah might own as Security Admin
     {
@@ -828,7 +828,7 @@ export const taskMockData: MockData = {
         }
       ],
       projectName: "Security Enhancement",
-      department: "Consultant",
+      department: ["Consultant"],
     },
     {
       taskId: 50,
@@ -846,7 +846,7 @@ export const taskMockData: MockData = {
       status: "To Do",
       comments: [],
       projectName: "Identity Management",
-      department: "Consultant",
+      department: ["Consultant"],
     }
   ]
 };
