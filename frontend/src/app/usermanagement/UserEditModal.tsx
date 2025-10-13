@@ -18,7 +18,7 @@ import {
   FormHelperText
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
-import { User } from '@/mocks/staff/taskMockData';
+import { User } from '@/types';
 
 interface ExtendedUser extends User {
   // Removed status and lastLogin properties
@@ -52,7 +52,7 @@ const UserEditModal = memo(function UserEditModal({
 }: UserEditModalProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
   const [showNewDepartment, setShowNewDepartment] = useState(false);
   const [newDepartment, setNewDepartment] = useState('');
   const [errors, setErrors] = useState({
@@ -87,7 +87,7 @@ const UserEditModal = memo(function UserEditModal({
   const handleFieldChange = (field: string) => (event: any) => {
     const value = event.target.value;
     onFormDataChange(field, value);
-    
+
     // Clear error when user starts typing
     if (errors[field as keyof typeof errors]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
@@ -134,7 +134,7 @@ const UserEditModal = memo(function UserEditModal({
     const nameError = validateField('name', formData.name);
     const emailError = validateField('email', formData.email);
     const departmentError = validateField('department', formData.department);
-    
+
     setErrors({
       name: nameError,
       email: emailError,
@@ -166,10 +166,10 @@ const UserEditModal = memo(function UserEditModal({
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={handleClose} 
-      maxWidth="sm" 
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="sm"
       fullWidth
       fullScreen={isMobile}
     >
@@ -177,11 +177,11 @@ const UserEditModal = memo(function UserEditModal({
         Edit User
       </DialogTitle>
       <DialogContent>
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: 'column', 
-          gap: { xs: 1.5, sm: 2 }, 
-          pt: 1 
+        <Box sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: { xs: 1.5, sm: 2 },
+          pt: 1
         }}>
           <TextField
             label="Full Name"
@@ -194,7 +194,7 @@ const UserEditModal = memo(function UserEditModal({
             error={touched.name && !!errors.name}
             helperText={touched.name ? errors.name || 'Only letters and spaces are allowed' : 'Only letters and spaces are allowed'}
           />
-          
+
           <TextField
             label="Email Address"
             type="email"
@@ -221,9 +221,9 @@ const UserEditModal = memo(function UserEditModal({
             </Select>
           </FormControl>
 
-          <FormControl 
-            fullWidth 
-            required 
+          <FormControl
+            fullWidth
+            required
             size={isMobile ? "small" : "medium"}
             error={touched.department && !!errors.department}
           >
@@ -237,10 +237,10 @@ const UserEditModal = memo(function UserEditModal({
               {departments.map(dept => (
                 <MenuItem key={dept} value={dept}>{dept}</MenuItem>
               ))}
-              <MenuItem 
-                value="ADD_NEW" 
-                sx={{ 
-                  color: 'primary.main', 
+              <MenuItem
+                value="ADD_NEW"
+                sx={{
+                  color: 'primary.main',
                   fontWeight: 'bold',
                   borderTop: '1px solid #e0e0e0',
                   mt: 1,
@@ -257,11 +257,11 @@ const UserEditModal = memo(function UserEditModal({
           </FormControl>
 
           {showNewDepartment && (
-            <Box sx={{ 
-              border: '1px solid #e0e0e0', 
-              borderRadius: 1, 
-              p: 2, 
-              backgroundColor: '#f9f9f9' 
+            <Box sx={{
+              border: '1px solid #e0e0e0',
+              borderRadius: 1,
+              p: 2,
+              backgroundColor: '#f9f9f9'
             }}>
               <TextField
                 label="New Department Name"
@@ -292,19 +292,19 @@ const UserEditModal = memo(function UserEditModal({
           )}
         </Box>
       </DialogContent>
-      <DialogActions sx={{ 
+      <DialogActions sx={{
         p: { xs: 2, sm: 3 },
         flexDirection: { xs: 'column', sm: 'row' },
         gap: { xs: 1, sm: 0 }
       }}>
-        <Button 
+        <Button
           onClick={handleClose}
           sx={{ width: { xs: '100%', sm: 'auto' } }}
         >
           Cancel
         </Button>
-        <Button 
-          onClick={handleSave} 
+        <Button
+          onClick={handleSave}
           variant="contained"
           sx={{ width: { xs: '100%', sm: 'auto' } }}
         >

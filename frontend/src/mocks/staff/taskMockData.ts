@@ -1,39 +1,4 @@
-import Priority from '@/types/TPriority';
-import Status from '@/types/TStatus';
-import Roles from '@/types/TRoles';
-import { Departments } from '@/types/TOrganisation';
-
-export interface User {
-  userId: number;
-  name: string;
-  email: string;
-  role: Roles;
-  department: string;
-}
-
-export interface Comment {
-  commentId: number;
-  author: string;
-  content: string;
-  timestamp: string;
-}
-
-export interface Task {
-  taskId: number;
-  title: string;
-  description: string;
-  projectName: string;
-  department: Departments;
-  priority: Priority;
-  status: Status;
-  startDate: string;
-  dueDate: string;
-  completedDate: string | null;
-  assignedUsers: User[];
-  tags: string[];
-  comments: Comment[];
-  parentTaskId?: number;
-}
+import { Task, User } from '@/types';
 
 export interface MockData {
   currentUser: User;

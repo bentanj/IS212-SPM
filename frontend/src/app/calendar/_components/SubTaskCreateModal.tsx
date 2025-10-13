@@ -13,10 +13,10 @@ import dayjs from 'dayjs';
 import { getAvailableUsers, handleAddTag, handleRemoveTag, resetForm, handleSubmit, canAddMoreUsers } from '../_functions/TaskCreateModelFunctions';
 
 // Types and Constants
-import { Task, taskMockData, allUsers, User } from '@/mocks/staff/taskMockData';
-import IFormData from "@/types/IFormData";
+import { taskMockData, allUsers } from '@/mocks/staff/taskMockData';
 import DefaultFormData, { PriorityOptions, StatusOptions } from '@/constants/DefaultFormData';
 import { ALL_DEPARTMENTS } from '@/constants/Organisation';
+import { Task, User, FormData, Departments, Priority, Status } from '@/types'
 
 // Components
 import ModalTitle from './_TaskCreateModal/ModalTitle';
@@ -27,9 +27,6 @@ import AssignedUsersAutocomplete from './_TaskCreateModal/AssignedUsers';
 import Comments from './_TaskCreateModal/Comments';
 import FileUpload from './_TaskCreateModal/FileUpload';
 import ParentTaskField from './_TaskCreateModal/ParentTaskField';
-import { Departments } from '@/types/TOrganisation';
-import Priority from '@/types/TPriority';
-import Status from '@/types/TStatus';
 
 interface SubtaskCreateModalProps {
   open: boolean;
@@ -67,7 +64,7 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
   const existingAssignees = isEditMode ? existingTaskDetails!.assignedUsers : [];
 
   // Form state
-  const [formData, setFormData] = useState<IFormData>(DefaultFormData);
+  const [formData, setFormData] = useState<FormData>(DefaultFormData);
   const [parentTask, setParentTask] = useState<Task | null>(preselectedParentTask);
 
   // UI state

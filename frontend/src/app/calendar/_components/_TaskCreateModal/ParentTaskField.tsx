@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Autocomplete, TextField, Chip, Box, Typography } from '@mui/material';
-import { Task } from '@/mocks/staff/taskMockData';
+import { Task } from '@/types';
 import { getPriorityColor, getStatusColor } from '../../_functions/TaskRenderingFunctions';
 
 interface ParentTaskFieldProps {
