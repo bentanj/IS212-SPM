@@ -1,17 +1,17 @@
 import { TextField, Chip, Box } from '@mui/material'
-import IFormData from '@/types/IFormData';
+import { FormData } from '@/types';
 
 interface TagsProps {
     tagInput: string;
     setTagInput: React.Dispatch<React.SetStateAction<string>>;
-    handleAddTag: (event: React.KeyboardEvent<HTMLElement>, tagInput: string, setTagInput: React.Dispatch<React.SetStateAction<string>>, formData: IFormData, setFormData: React.Dispatch<React.SetStateAction<IFormData>>) => void
+    handleAddTag: (event: React.KeyboardEvent<HTMLElement>, tagInput: string, setTagInput: React.Dispatch<React.SetStateAction<string>>, formData: FormData, setFormData: React.Dispatch<React.SetStateAction<FormData>>) => void
 
-    handleRemoveTag: (tagToRemove: string, setFormData: React.Dispatch<React.SetStateAction<IFormData>>) => void
-    formData: IFormData;
-    setFormData: React.Dispatch<React.SetStateAction<IFormData>>
+    handleRemoveTag: (tagToRemove: string, setFormData: React.Dispatch<React.SetStateAction<FormData>>) => void
+    formData: FormData;
+    setFormData: React.Dispatch<React.SetStateAction<FormData>>
 }
 
-const Tags: React.FC<TagsProps> = ({
+export const Tags: React.FC<TagsProps> = ({
     tagInput,
     setTagInput,
     handleAddTag,
@@ -45,5 +45,3 @@ const Tags: React.FC<TagsProps> = ({
         </>
     )
 }
-
-export default Tags

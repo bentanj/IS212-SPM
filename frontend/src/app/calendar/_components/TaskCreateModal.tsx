@@ -19,14 +19,7 @@ import { ALL_DEPARTMENTS } from '@/constants/Organisation';
 import { Task, User, FormData, Departments, Priority, Status } from '@/types'
 
 // Components
-import ModalTitle from './_TaskCreateModal/ModalTitle';
-import ParentTaskField from './_TaskCreateModal/ParentTaskField';
-import DateRow from './_TaskCreateModal/DateRow';
-import DropDownMenu from './_TaskCreateModal/DropDownMenu';
-import Tags from './_TaskCreateModal/Tags';
-import AssignedUsersAutocomplete from './_TaskCreateModal/AssignedUsers';
-import Comments from './_TaskCreateModal/Comments';
-import FileUpload from './_TaskCreateModal/FileUpload';
+import { ModalTitle, ParentTaskField, DateRow, DropDownMenu, Tags, AssignedUsersAutocomplete, Comments, FileUpload } from './_TaskCreateModal/';
 
 interface TaskCreateModalProps {
   open: boolean;
@@ -38,7 +31,7 @@ interface TaskCreateModalProps {
   allTasks: Task[];
 };
 
-const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
+export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   open,
   onClose,
   setSnackbarContent,
@@ -287,5 +280,3 @@ const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
     </Dialog >
   );
 };
-
-export default TaskCreateModal;

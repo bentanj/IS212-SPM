@@ -1,6 +1,5 @@
 import { FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
-import Priority from "@/types/TPriority";
-import Status from "@/types/TStatus";
+import { Priority, Status } from "@/types";
 
 interface DropDownMenuProps {
     label: string;
@@ -12,7 +11,7 @@ interface DropDownMenuProps {
     required?: boolean;
 }
 
-const DropDownMenu: React.FC<DropDownMenuProps> = ({
+export const DropDownMenu: React.FC<DropDownMenuProps> = ({
     label,
     value,
     onChange,
@@ -43,5 +42,3 @@ const DropDownMenu: React.FC<DropDownMenuProps> = ({
         </FormControl>
     );
 };
-
-export default DropDownMenu;

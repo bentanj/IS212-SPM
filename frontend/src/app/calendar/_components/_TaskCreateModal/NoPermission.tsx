@@ -5,7 +5,7 @@ interface NoPermissionProps {
     onClose: () => void;
 }
 
-const NoPermission: React.FC<NoPermissionProps> = ({ open, onClose }) => {
+export const NoPermission: React.FC<NoPermissionProps> = ({ open, onClose }) => {
     return (
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
             <DialogTitle>Access Denied</DialogTitle>
@@ -18,5 +18,3 @@ const NoPermission: React.FC<NoPermissionProps> = ({ open, onClose }) => {
         </Dialog>
     );
 };
-
-export default NoPermission;

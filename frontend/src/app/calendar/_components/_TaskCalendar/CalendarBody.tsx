@@ -14,7 +14,7 @@ interface CalendarBodyProps {
     isTablet: boolean;
 }
 
-const CalendarBody: React.FC<CalendarBodyProps> = ({
+export const CalendarBody: React.FC<CalendarBodyProps> = ({
     currentDate,
     getTasksForDay,
     isTaskOverdue,
@@ -203,5 +203,3 @@ const CalendarBody: React.FC<CalendarBodyProps> = ({
         </Stack>
     )
 }
-
-export default CalendarBody

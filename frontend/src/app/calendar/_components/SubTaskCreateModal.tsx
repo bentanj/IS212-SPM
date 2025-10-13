@@ -19,14 +19,7 @@ import { ALL_DEPARTMENTS } from '@/constants/Organisation';
 import { Task, User, FormData, Departments, Priority, Status } from '@/types'
 
 // Components
-import ModalTitle from './_TaskCreateModal/ModalTitle';
-import DateRow from './_TaskCreateModal/DateRow';
-import DropDownMenu from './_TaskCreateModal/DropDownMenu';
-import Tags from './_TaskCreateModal/Tags';
-import AssignedUsersAutocomplete from './_TaskCreateModal/AssignedUsers';
-import Comments from './_TaskCreateModal/Comments';
-import FileUpload from './_TaskCreateModal/FileUpload';
-import ParentTaskField from './_TaskCreateModal/ParentTaskField';
+import { ModalTitle, DateRow, DropDownMenu, Tags, AssignedUsersAutocomplete, Comments, FileUpload, ParentTaskField } from './_TaskCreateModal';
 
 interface SubtaskCreateModalProps {
   open: boolean;
@@ -40,7 +33,7 @@ interface SubtaskCreateModalProps {
   allTasks: Task[]; // All tasks for parent selection
 }
 
-const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
+export const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
   open,
   onClose,
   onTaskCreated,
@@ -220,7 +213,7 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
           <DropDownMenu
             label="Department"
             value={formData.department}
-            onChange={(val) => setFormData((prev) => ({ ...prev, department: val as Departments }))}
+            onChange={(val) => setFormData((prev) => ({ ...prev, department: [val] as Departments[] }))}
             options={ALL_DEPARTMENTS}
             error={!!errors.department}
             helperText={errors.department}
@@ -305,5 +298,3 @@ const SubtaskCreateModal: React.FC<SubtaskCreateModalProps> = ({
     </Dialog >
   );
 };
-
-export default SubtaskCreateModal;

@@ -1,10 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import {
-  Alert, AlertColor, Box, Paper, Typography, Card, CardContent, Stack,
-  useTheme, useMediaQuery, Snackbar
-} from '@mui/material';
+import { useState, useMemo, useEffect } from 'react';
+import { Alert, AlertColor, Box, useTheme, useMediaQuery, Snackbar } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
@@ -15,14 +12,10 @@ dayjs.extend(weekOfYear);
 
 import { taskMockData } from '@/mocks/staff/taskMockData';
 import { Task } from '@/types';
-import SideBar from './_components/SideBar';
-import Header from './_components/Header';
-import MonthHeader from './_components/_TaskCalendar/MonthHeader';
-import CalendarBody from './_components/_TaskCalendar/CalendarBody';
+import { SideBar, Header, TaskCreateModal } from './_components';
+import { MonthHeader, CalendarBody, DayHeaders } from './_components/_TaskCalendar';
 import TaskDetailModal from './TaskDetailModal';
-import TaskCreateModal from './_components/TaskCreateModal';
 import DayTasksModal from './DayTasksModal';
-import DayHeaders from './_components/_TaskCalendar/DayHeaders';
 import { getTaskTypeColor, isTaskOverdue } from './_functions/TaskRenderingFunctions';
 
 const TaskCalendar: React.FC = () => {

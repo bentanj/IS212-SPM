@@ -7,7 +7,7 @@ interface HeaderProps {
     setCreateModalOpen: (open: boolean) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({
+export const Header: React.FC<HeaderProps> = ({
     isMobile, toggleSidebar, setCreateModalOpen
 }) => {
     return (
@@ -57,5 +57,3 @@ const Header: React.FC<HeaderProps> = ({
         </AppBar>
     )
 }
-
-export default Header

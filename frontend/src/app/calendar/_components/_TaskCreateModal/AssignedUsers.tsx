@@ -1,5 +1,5 @@
 import { Autocomplete, TextField } from '@mui/material';
-import { User } from '@/mocks/staff/taskMockData';
+import { User } from '@/types';
 import renderAssignedUserTags from '../../_functions/renderAssignedUserTags';
 import { handleAssignedUsersChange } from '../../_functions/TaskCreateModelFunctions';
 
@@ -16,7 +16,7 @@ interface AssignedUsersAutocompleteProps {
     canAddMoreUsers: boolean;
 }
 
-const AssignedUsersAutocomplete: React.FC<AssignedUsersAutocompleteProps> = ({
+export const AssignedUsersAutocomplete: React.FC<AssignedUsersAutocompleteProps> = ({
     availableUsers,
     assignedUsers,
     setFormData,
@@ -63,5 +63,3 @@ const AssignedUsersAutocomplete: React.FC<AssignedUsersAutocompleteProps> = ({
         />
     )
 }
-
-export default AssignedUsersAutocomplete;

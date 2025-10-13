@@ -1,16 +1,16 @@
 import { TextField } from '@mui/material';
-import IFormData from '@/types/IFormData';
+import { FormData } from '@/types';
 
 interface CommentsProps {
     isEditMode: boolean;
     newComment: string;
-    formData: IFormData;
+    formData: FormData;
     setNewComment: (value: React.SetStateAction<string>) => void
-    setFormData: (value: React.SetStateAction<IFormData>) => void
+    setFormData: (value: React.SetStateAction<FormData>) => void
     errors: Record<string, string>;
 }
 
-const Comments: React.FC<CommentsProps> = ({
+export const Comments: React.FC<CommentsProps> = ({
     isEditMode, newComment, formData, setNewComment, setFormData, errors
 }) => {
     return (
@@ -36,5 +36,3 @@ const Comments: React.FC<CommentsProps> = ({
         </>
     )
 }
-
-export default Comments;

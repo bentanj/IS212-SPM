@@ -1,4 +1,4 @@
-'use client';
+; 'use client';
 
 import React from 'react';
 import { Autocomplete, TextField, Chip, Box, Typography } from '@mui/material';
@@ -14,7 +14,7 @@ interface ParentTaskFieldProps {
   disabled?: boolean;
 }
 
-const ParentTaskField: React.FC<ParentTaskFieldProps> = ({
+export const ParentTaskField: React.FC<ParentTaskFieldProps> = ({
   parentTask,
   availableParentTasks,
   onChange,
@@ -112,5 +112,3 @@ const ParentTaskField: React.FC<ParentTaskFieldProps> = ({
     </Box>
   );
 };
-
-export default ParentTaskField;

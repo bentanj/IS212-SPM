@@ -10,7 +10,7 @@ interface SideBarProps {
     assignedTasks: Task[]
 }
 
-const SideBar: React.FC<SideBarProps> = ({
+export const SideBar: React.FC<SideBarProps> = ({
     isMobile,
     sidebarOpen,
     toggleSidebar,
@@ -37,5 +37,3 @@ const SideBar: React.FC<SideBarProps> = ({
         </Paper>
     )
 }
-
-export default SideBar;

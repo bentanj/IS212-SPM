@@ -12,7 +12,7 @@ interface DateRowProps {
     parentTask?: Task | null
 }
 
-const DateRow: React.FC<DateRowProps> = ({
+export const DateRow: React.FC<DateRowProps> = ({
     formData, setFormData, errors, parentTask = null
 }) => {
     return (
@@ -56,5 +56,3 @@ const DateRow: React.FC<DateRowProps> = ({
         </LocalizationProvider>
     )
 }
-
-export default DateRow;

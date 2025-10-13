@@ -6,7 +6,7 @@ interface ModalTitleProps {
     onClose: () => void;
 }
 
-const ModalTitle: React.FC<ModalTitleProps> = ({
+export const ModalTitle: React.FC<ModalTitleProps> = ({
     isEditMode, onClose
 }) => {
     return (
@@ -19,5 +19,3 @@ const ModalTitle: React.FC<ModalTitleProps> = ({
         </DialogTitle>
     )
 }
-
-export default ModalTitle;
