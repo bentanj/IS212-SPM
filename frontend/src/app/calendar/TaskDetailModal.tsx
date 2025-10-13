@@ -7,7 +7,8 @@ import {
   useTheme, useMediaQuery
 } from '@mui/material';
 import { Edit, Add } from '@mui/icons-material';
-import { User, Task, taskMockData } from '@/mocks/staff/taskMockData';
+import { taskMockData } from '@/mocks/staff/taskMockData';
+import { User, Task } from '@/types';
 import dayjs from 'dayjs';
 import { canEditTask } from '@/utils/Permissions';
 import { getPriorityColor, getStatusColor } from './_functions/TaskRenderingFunctions';

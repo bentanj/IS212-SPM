@@ -1,4 +1,4 @@
-import { User, Task } from '@/mocks/staff/taskMockData'
+import { User, Task } from '@/types'
 import { Avatar, Box, Stack, Typography } from '@mui/material'
 
 interface SideBarContentProps {

@@ -1,9 +1,6 @@
 import dayjs from 'dayjs';
-import { User, Task, Comment, taskMockData } from '@/mocks/staff/taskMockData';
-import IFormData from "@/types/IFormData";
+import { User, Task, Comment, FormData, Priority, Status } from '@/types'
 import DefaultFormData from '@/constants/DefaultFormData';
-import Priority from '@/types/TPriority';
-import Status from '@/types/TStatus';
 import updateTask from '@/utils/Tasks/updateTask';
 import createTask from '@/utils/Tasks/createTask';
 
@@ -25,7 +22,7 @@ export const canRemoveUser = (
 };
 
 //  Check if form entries are valid
-const validateForm = (formData: IFormData, setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>): boolean => {
+const validateForm = (formData: FormData, setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>): boolean => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.title.trim()) newErrors.title = 'Title is required';
@@ -67,7 +64,7 @@ export const resetForm = (
 export const handleSubmit = async (params: {
     isEditMode: boolean;
     existingTaskDetails: Task | null;
-    formData: IFormData;
+    formData: FormData;
     newComment: string;
     currentUser: User;
     setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
@@ -141,7 +138,7 @@ export const handleSubmit = async (params: {
                 startDate: formData.startDate!.format('YYYY-MM-DD'),
                 completedDate: formData.completedDate?.format('YYYY-MM-DD') || null,
                 dueDate: formData.dueDate!.format('YYYY-MM-DD'),
-                department: formData.department,
+                department: [formData.department],
                 priority: formData.priority as Priority,
                 assignedUsers: formData.assignedUsers,
                 tags: formData.tags,

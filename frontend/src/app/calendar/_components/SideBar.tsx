@@ -1,5 +1,5 @@
 import { Drawer, Paper } from "@mui/material";
-import { Task, User } from "@/mocks/staff/taskMockData";
+import { Task, User } from "@/types";
 import SideBarContent from "./SideBarContent"
 
 interface SideBarProps {

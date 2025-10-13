@@ -17,7 +17,7 @@ import {
   useMediaQuery,
   Stack
 } from '@mui/material';
-import { Task } from '@/mocks/staff/taskMockData';
+import { Task } from '@/types';
 import dayjs, { Dayjs } from 'dayjs';
 import { getPriorityColor, getStatusColor } from './_functions/TaskRenderingFunctions';
 

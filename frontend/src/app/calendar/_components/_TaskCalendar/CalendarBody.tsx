@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Box, Card, CardContent, Paper, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
-import { Task } from "@/mocks/staff/taskMockData";
+import { Task } from "@/types";
 
 interface CalendarBodyProps {
     currentDate: dayjs.Dayjs;

@@ -3,12 +3,11 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { Stack } from '@mui/material'
 import dayjs from 'dayjs'
 import CustomDatePicker from '@/components/DatePickerInput'
-import IFormData from "@/types/IFormData";
-import { Task } from '@/mocks/staff/taskMockData';
+import { FormData, Task } from '@/types';
 
 interface DateRowProps {
-    formData: IFormData
-    setFormData: React.Dispatch<React.SetStateAction<IFormData>>
+    formData: FormData
+    setFormData: React.Dispatch<React.SetStateAction<FormData>>
     errors: Record<string, string>
     parentTask?: Task | null
 }

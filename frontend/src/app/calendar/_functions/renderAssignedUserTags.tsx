@@ -1,4 +1,4 @@
-import { User } from '@/mocks/staff/taskMockData';
+import { User } from '@/types';
 import Chip from '@mui/material/Chip';
 import LockIcon from '@mui/icons-material/Lock';
 import { canEditTaskAssignees } from '@/utils/Permissions';

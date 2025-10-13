@@ -43,7 +43,8 @@ import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon
 } from '@mui/icons-material';
-import { allUsers, User, taskMockData } from '@/mocks/staff/taskMockData';
+import { allUsers, taskMockData } from '@/mocks/staff/taskMockData';
+import { User } from '@/types';
 import UserEditModal from './UserEditModal';
 import UserCreateModal from './UserCreateModal';
 
@@ -95,12 +96,12 @@ function CustomPagination() {
         <Typography variant="body2" color="text.secondary">
           Rows per page: {pageSize}
         </Typography>
-        
+
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography variant="body2" color="text.secondary" sx={{ mr: 2 }}>
             {page * pageSize + 1}–{Math.min((page + 1) * pageSize, rowCount)} of {rowCount}
           </Typography>
-          
+
           <Tooltip title="First page">
             <span>
               <IconButton
@@ -112,7 +113,7 @@ function CustomPagination() {
               </IconButton>
             </span>
           </Tooltip>
-          
+
           <Tooltip title="Previous page">
             <span>
               <IconButton
@@ -124,7 +125,7 @@ function CustomPagination() {
               </IconButton>
             </span>
           </Tooltip>
-          
+
           <Tooltip title="Next page">
             <span>
               <IconButton
@@ -136,7 +137,7 @@ function CustomPagination() {
               </IconButton>
             </span>
           </Tooltip>
-          
+
           <Tooltip title="Last page">
             <span>
               <IconButton
@@ -157,11 +158,11 @@ function CustomPagination() {
 export default function UserManagement() {
   const theme = useTheme();
   const [mounted, setMounted] = useState(false);
-  
+
   // Use state instead of useMediaQuery for initial render to prevent hydration mismatch
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
-  
+
   const mobileMQ = useMediaQuery(theme.breakpoints.down('sm'));
   const tabletMQ = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -221,12 +222,12 @@ export default function UserManagement() {
   // Memoized filtered users with debounced search
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
-      const matchesSearch = debouncedSearchTerm === '' || 
+      const matchesSearch = debouncedSearchTerm === '' ||
         user.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
       const matchesDepartment = !departmentFilter || user.department === departmentFilter;
       const matchesRole = !roleFilter || user.role === roleFilter;
-      
+
       return matchesSearch && matchesDepartment && matchesRole;
     });
   }, [users, debouncedSearchTerm, departmentFilter, roleFilter]);
@@ -235,10 +236,10 @@ export default function UserManagement() {
   const handleAddDepartment = useCallback((newDepartment: string) => {
     if (!departments.includes(newDepartment)) {
       setDepartments(prev => [...prev, newDepartment]);
-      setSnackbar({ 
-        open: true, 
-        message: `Department "${newDepartment}" added successfully`, 
-        severity: 'success' 
+      setSnackbar({
+        open: true,
+        message: `Department "${newDepartment}" added successfully`,
+        severity: 'success'
       });
     }
   }, [departments]);
@@ -348,8 +349,8 @@ export default function UserManagement() {
     }
 
     // Check for duplicate email (excluding current user)
-    const emailExists = users.some(user => 
-      user.userId !== selectedUser?.userId && 
+    const emailExists = users.some(user =>
+      user.userId !== selectedUser?.userId &&
       user.email.toLowerCase() === editFormData.email.toLowerCase()
     );
     if (emailExists) {
@@ -394,9 +395,9 @@ export default function UserManagement() {
       headerAlign: 'center',
       align: 'left',
       renderCell: (params) => (
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
           gap: 1,
           width: '100%',
           height: '100%',
@@ -421,9 +422,9 @@ export default function UserManagement() {
           >
             {params.value.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
           </Box>
-          <Typography 
-            variant="body2" 
-            sx={{ 
+          <Typography
+            variant="body2"
+            sx={{
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
@@ -443,16 +444,16 @@ export default function UserManagement() {
       headerAlign: 'center',
       align: 'center',
       renderCell: (params) => (
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
           justifyContent: 'center',
           width: '100%',
           height: '100%'
         }}>
-          <Typography 
+          <Typography
             variant="body2"
-            sx={{ 
+            sx={{
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap'
@@ -471,9 +472,9 @@ export default function UserManagement() {
       headerAlign: 'center',
       align: 'center',
       renderCell: (params) => (
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
           justifyContent: 'center',
           width: '100%',
           height: '100%'
@@ -496,16 +497,16 @@ export default function UserManagement() {
       headerAlign: 'center',
       align: 'center',
       renderCell: (params) => (
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
           justifyContent: 'center',
           width: '100%',
           height: '100%'
         }}>
-          <Typography 
+          <Typography
             variant="body2"
-            sx={{ 
+            sx={{
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap'
@@ -536,7 +537,7 @@ export default function UserManagement() {
   ], [getColumnWidth, getRoleColor, handleOpenEditDialog, isMobile]);
 
   // Memoized rows to prevent recreation on each render
-  const rows: GridRowsProp = useMemo(() => 
+  const rows: GridRowsProp = useMemo(() =>
     filteredUsers.map(user => ({
       id: user.userId,
       ...user,
@@ -560,28 +561,28 @@ export default function UserManagement() {
   }
 
   return (
-    <Box sx={{ 
-      p: isMobile ? 1 : isTablet ? 2 : 3, 
-      minHeight: '100vh', 
+    <Box sx={{
+      p: isMobile ? 1 : isTablet ? 2 : 3,
+      minHeight: '100vh',
       backgroundColor: '#f5f5f5'
     }}>
-      <Paper sx={{ 
+      <Paper sx={{
         height: isMobile ? 'calc(100vh - 16px)' : isTablet ? 'calc(100vh - 32px)' : 'calc(100vh - 48px)',
-        display: 'flex', 
-        flexDirection: 'column' 
+        display: 'flex',
+        flexDirection: 'column'
       }}>
-        <Toolbar sx={{ 
-          borderBottom: 1, 
+        <Toolbar sx={{
+          borderBottom: 1,
           borderColor: 'divider',
           flexDirection: isMobile ? 'column' : 'row',
           gap: isMobile ? 1 : 0,
           py: isMobile ? 1 : 2
         }}>
-          <Typography 
-            variant={isMobile ? "h6" : "h5"} 
-            component="h1" 
-            sx={{ 
-              flexGrow: 1, 
+          <Typography
+            variant={isMobile ? "h6" : "h5"}
+            component="h1"
+            sx={{
+              flexGrow: 1,
               fontWeight: 600,
               textAlign: isMobile ? 'center' : 'left'
             }}
@@ -593,7 +594,7 @@ export default function UserManagement() {
               variant="contained"
               startIcon={<AddIcon />}
               onClick={handleOpenCreateDialog}
-              sx={{ 
+              sx={{
                 borderRadius: 2,
                 fontSize: '0.875rem'
               }}
@@ -603,12 +604,12 @@ export default function UserManagement() {
           )}
         </Toolbar>
 
-        <Box sx={{ 
-          p: isMobile ? 1 : 2, 
-          display: 'flex', 
-          gap: isMobile ? 1 : 2, 
-          alignItems: 'center', 
-          flexWrap: 'wrap' 
+        <Box sx={{
+          p: isMobile ? 1 : 2,
+          display: 'flex',
+          gap: isMobile ? 1 : 2,
+          alignItems: 'center',
+          flexWrap: 'wrap'
         }}>
           <TextField
             size="small"
@@ -622,15 +623,15 @@ export default function UserManagement() {
                 </InputAdornment>
               ),
             }}
-            sx={{ 
+            sx={{
               minWidth: isMobile ? '100%' : isTablet ? 200 : 250,
               mb: isMobile ? 1 : 0
             }}
           />
 
-          <FormControl 
-            size="small" 
-            sx={{ 
+          <FormControl
+            size="small"
+            sx={{
               minWidth: isMobile ? '48%' : isTablet ? 120 : 150,
               mb: isMobile ? 1 : 0
             }}
@@ -648,9 +649,9 @@ export default function UserManagement() {
             </Select>
           </FormControl>
 
-          <FormControl 
-            size="small" 
-            sx={{ 
+          <FormControl
+            size="small"
+            sx={{
               minWidth: isMobile ? '48%' : isTablet ? 100 : 120,
               mb: isMobile ? 1 : 0
             }}
@@ -673,7 +674,7 @@ export default function UserManagement() {
               variant="contained"
               startIcon={<AddIcon />}
               onClick={handleOpenCreateDialog}
-              sx={{ 
+              sx={{
                 borderRadius: 2,
                 fontSize: '0.8rem',
                 width: '100%',
@@ -689,7 +690,7 @@ export default function UserManagement() {
               variant="outlined"
               size="small"
               onClick={handleClearFilters}
-              sx={{ 
+              sx={{
                 fontSize: isMobile ? '0.7rem' : '0.875rem',
                 width: isMobile ? '100%' : 'auto'
               }}
@@ -699,9 +700,9 @@ export default function UserManagement() {
           )}
         </Box>
 
-        <Box sx={{ 
-          flexGrow: 1, 
-          p: isMobile ? 1 : 2, 
+        <Box sx={{
+          flexGrow: 1,
+          p: isMobile ? 1 : 2,
           pt: 0,
           overflow: 'hidden'
         }}>
@@ -813,8 +814,8 @@ export default function UserManagement() {
         autoHideDuration={4000}
         onClose={handleSnackbarClose}
       >
-        <Alert 
-          onClose={handleSnackbarClose} 
+        <Alert
+          onClose={handleSnackbarClose}
           severity={snackbar.severity}
           sx={{ width: '100%' }}
         >
