@@ -5,7 +5,7 @@ export interface FormData {
     title: string;
     description: string;
     projectName: string;
-    department: Departments;
+    department: Departments[];
     priority: Priority;
     status: Status;
     startDate: Dayjs | null;
