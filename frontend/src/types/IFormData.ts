@@ -1,10 +1,7 @@
 import { Dayjs } from 'dayjs';
-import { User } from '@/mocks/staff/taskMockData';
-import Priority from './TPriority';
-import Status from './TStatus';
-import { Departments } from './TOrganisation';
+import { User, Priority, Status, Departments } from '@/types';
 
-interface FormData {
+export interface FormData {
     title: string;
     description: string;
     projectName: string;
@@ -20,5 +17,3 @@ interface FormData {
     attachedFile: File | null;
     parentTaskId?: number | null; // New
 }
-
-export default FormData;

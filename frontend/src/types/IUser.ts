@@ -1,6 +1,6 @@
-import Roles from "./TRoles";
+import { Roles } from '@/types';
 
-export default interface User {
+export interface User {
     userId: number;
     name: string;
     email: string;

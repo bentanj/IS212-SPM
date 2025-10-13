@@ -1,10 +1,6 @@
-import { Departments } from "./TOrganisation";
-import Priority from "./TPriority";
-import Status from "./TStatus";
-import User from "./IUser";
-import Comment from "./IComment";
+import { Departments, Priority, Status, User, Comment } from "@/types";
 
-export default interface Task {
+export interface Task {
     taskId: number;
     title: string;
     description: string;
