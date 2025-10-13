@@ -5,28 +5,16 @@ import { TextField, InputAdornment, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 
-/**
- * Props for SearchBar component
- */
 interface SearchBarProps {
-  value: string;                    // Current search value
-  onChange: (value: string) => void; // Callback when search changes
-  placeholder?: string;             // Placeholder text
-  debounceMs?: number;              // Delay before triggering onChange (default 300ms)
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  debounceMs?: number;
 }
 
 /**
- * Reusable search bar component with debouncing
- * 
- * Debouncing means it waits for user to stop typing before triggering search
- * This prevents searching on every single keystroke (better performance)
- * 
- * Usage:
- * <SearchBar 
- *   value={searchTerm} 
- *   onChange={setSearchTerm}
- *   placeholder="Search projects..."
- * />
+ * Reusable search bar with debouncing
+ * Waits for user to stop typing before triggering search
  */
 export function SearchBar({ 
   value, 
@@ -34,17 +22,14 @@ export function SearchBar({
   placeholder = 'Search...', 
   debounceMs = 300 
 }: SearchBarProps) {
-  // Local state for the input (updates immediately)
   const [localValue, setLocalValue] = useState(value);
 
-  // Debounce effect: wait for user to stop typing
+  // Debounce effect
   useEffect(() => {
-    // Set a timer
     const timer = setTimeout(() => {
-      onChange(localValue); // Call parent's onChange after delay
+      onChange(localValue);
     }, debounceMs);
 
-    // Clear timer if user types again before delay finishes
     return () => clearTimeout(timer);
   }, [localValue, debounceMs, onChange]);
 
@@ -53,7 +38,6 @@ export function SearchBar({
     setLocalValue(value);
   }, [value]);
 
-  // Clear search
   const handleClear = () => {
     setLocalValue('');
     onChange('');

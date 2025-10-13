@@ -3,42 +3,29 @@
 import React from 'react';
 import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { Box, Chip } from '@mui/material';
-import { useRouter } from 'next/navigation';
 import { TProject } from '@/types/TProject';
 
-/**
- * Props for ProjectsDataGrid
- */
 interface ProjectsDataGridProps {
-  projects: TProject[];     // Array of projects to display
-  loading?: boolean;        // Show loading state
+  projects: TProject[];
+  loading?: boolean;
+  onProjectClick: (project: TProject) => void;  // Callback when row is clicked
 }
 
 /**
- * DataGrid component for displaying projects
- * 
- * Features:
- * - Sortable columns
- * - Pagination
- * - Click row to navigate to project detail
- * - Status badges with colors
- * - Responsive
- * 
- * Usage:
- * <ProjectsDataGrid projects={filteredProjects} loading={isLoading} />
+ * DataGrid for displaying list of projects
+ * Click a row to open ProjectDetailModal
  */
-export function ProjectsDataGrid({ projects, loading = false }: ProjectsDataGridProps) {
-  const router = useRouter();
-
+export function ProjectsDataGrid({ projects, loading = false, onProjectClick }: ProjectsDataGridProps) {
+  
   /**
    * Column definitions
-   * Each column defines how to display a field from the project object
+   * Using 'name' as the id field since it's unique
    */
   const columns: GridColDef<TProject>[] = [
     {
       field: 'name',
       headerName: 'Project Name',
-      flex: 1,            // Takes up remaining space
+      flex: 1,
       minWidth: 200,
     },
     {
@@ -46,7 +33,6 @@ export function ProjectsDataGrid({ projects, loading = false }: ProjectsDataGrid
       headerName: 'Status',
       width: 130,
       renderCell: (params) => {
-        // Custom rendering for status - show colored chip
         const statusColors = {
           active: 'success',
           completed: 'default',
@@ -74,10 +60,9 @@ export function ProjectsDataGrid({ projects, loading = false }: ProjectsDataGrid
       headerName: 'Last Updated',
       width: 150,
       type: 'date',
-      valueFormatter: (params) => {
-        // Format date nicely
-        if (!params) return '';
-        return new Date(params).toLocaleDateString('en-US', {
+      valueFormatter: (value) => {
+        if (!value) return '';
+        return new Date(value).toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
           year: 'numeric',
@@ -93,10 +78,10 @@ export function ProjectsDataGrid({ projects, loading = false }: ProjectsDataGrid
   ];
 
   /**
-   * Handle row click - navigate to project detail page
+   * Handle row click - call parent's callback with project data
    */
   const handleRowClick = (params: GridRowParams<TProject>) => {
-    router.push(`/projects/${params.row.name}`);
+    onProjectClick(params.row);
   };
 
   return (
@@ -106,18 +91,18 @@ export function ProjectsDataGrid({ projects, loading = false }: ProjectsDataGrid
         columns={columns}
         loading={loading}
         onRowClick={handleRowClick}
+        getRowId={(row) => row.name}  // Use name as unique ID
         pageSizeOptions={[10, 25, 50]}
         initialState={{
           pagination: {
             paginationModel: { pageSize: 10, page: 0 },
           },
           sorting: {
-            sortModel: [{ field: 'updatedAt', sort: 'desc' }], // Default sort by recent
+            sortModel: [{ field: 'updatedAt', sort: 'desc' }],
           },
         }}
         disableRowSelectionOnClick
         sx={{
-          // Custom styling
           '& .MuiDataGrid-row': {
             cursor: 'pointer',
             '&:hover': {

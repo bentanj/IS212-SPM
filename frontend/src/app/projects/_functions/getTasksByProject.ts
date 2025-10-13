@@ -1,48 +1,37 @@
-// src/app/projects/_functions/getTasksByProject.ts
-
-// IMPORTANT: Update this import path to match YOUR task mock data location
-// import { taskMockData } from '@/mocks/staff/taskMockData';
+import { Task, taskMockData } from '@/mocks/staff/taskMockData';
 
 /**
- * Get all tasks for a specific project
+ * Get all tasks for a specific project (by project name)
  * 
- * MOCK IMPLEMENTATION: Filters taskMockData by projectName or projectId
+ * MOCK IMPLEMENTATION: Filters taskMockData by projectName
  * REAL IMPLEMENTATION: Will call backend API
- * 
- * @param projectId - The project ID or name
- * @returns Promise<Task[]> - List of tasks in this project
  */
-export async function getTasksByProject(projectId: string): Promise<any[]> {
+// this functions returns all the task for 1 project that you asked for
+export async function getTasksByProject(projectName: string): Promise<Task[]> {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 500));
   
-  // MOCK: Filter tasks by project
-  // NOTE: Adjust the filter condition based on your task data structure
-  // If your tasks have 'projectId', use: task.projectId === projectId
-  // If your tasks have 'projectName', use: task.projectName === projectName
+  // MOCK: Filter tasks by project name (case-insensitive)
+  const projectTasks = taskMockData.tasks.filter(task => 
+    task.projectName.toLowerCase() === projectName.toLowerCase()
+  );
   
-  // UNCOMMENT AND ADJUST THIS BASED ON YOUR TASK STRUCTURE:
-  // const projectTasks = taskMockData.filter(task => 
-  //   task.projectName === projectId || task.projectId === projectId
-  // );
-  // return projectTasks;
-  
-  // TEMPORARY: Return empty array until we see your task structure
-  return [];
-  
-  // REAL (later):
-  // const response = await fetch(`/api/projects/${projectId}/tasks`);
-  // return response.json();
+  return projectTasks;
 }
 
 /**
  * Get task count for a project
- * Useful for updating the task count in project list
- * 
- * @param projectId - The project ID
- * @returns Promise<number> - Number of tasks
  */
-export async function getTaskCountForProject(projectId: string): Promise<number> {
-  const tasks = await getTasksByProject(projectId);
+export async function getTaskCountForProject(projectName: string): Promise<number> {
+  const tasks = await getTasksByProject(projectName);
   return tasks.length;
+}
+
+/**
+ * Get only parent tasks (no subtasks) for a project
+ * Useful if you want to show a cleaner list
+ */
+export async function getParentTasksByProject(projectName: string): Promise<Task[]> {
+  const allTasks = await getTasksByProject(projectName);
+  return allTasks.filter(task => !task.parentTaskId);
 }

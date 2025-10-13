@@ -1,9 +1,9 @@
 /**
- * Represents a project in the system
- * Each project can have multiple tasks
+ * blue print for project object
+ * 
  */
 export interface TProject {
-  name: string;                  // Project name (e.g., "Website Rebuild")
+  name: string;                  // Unique identifier AND display name
   description?: string;          // Optional description
   status: 'active' | 'completed' | 'on-hold';  // Current status
   taskCount: number;             // Total number of tasks in this project

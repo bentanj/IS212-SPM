@@ -1,20 +1,14 @@
-// src/app/projects/_functions/filterHelpers.ts
-
 import { TProject, TProjectStatus } from '@/types/TProject';
 
 /**
- * Filters projects by search term (searches in name and description)
- * 
- * @param projects - Array of projects to search
- * @param searchTerm - The search string
- * @returns Filtered array of projects
+ * Filters projects by search term (searches in name and description) can be changed to just name
  */
 export function searchProjects(
   projects: TProject[],
   searchTerm: string
 ): TProject[] {
   if (!searchTerm.trim()) {
-    return projects; // No search term, return all
+    return projects;
   }
 
   const lowerSearch = searchTerm.toLowerCase();
@@ -27,29 +21,24 @@ export function searchProjects(
 
 /**
  * Filters projects by status
- * 
- * @param projects - Array of projects to filter
- * @param status - Status to filter by ('all' returns everything)
- * @returns Filtered array of projects
  */
 export function filterProjectsByStatus(
   projects: TProject[],
   status: TProjectStatus
 ): TProject[] {
-  if (status === 'all') {
+  // Make the 'All' check case-insensitive
+  if (status.toLowerCase() === 'all') {
     return projects;
   }
   
-  return projects.filter(project => project.status === status);
+  // Convert BOTH the project's status AND the filter status to lowercase
+  // This makes the comparison case-insensitive and very safe.
+  return projects.filter(project => 
+    project.status.toLowerCase() === status.toLowerCase()
+  );
 }
-
 /**
  * Sorts projects by a field
- * 
- * @param projects - Array of projects to sort
- * @param field - Field to sort by
- * @param direction - 'asc' or 'desc'
- * @returns Sorted array of projects
  */
 export function sortProjects(
   projects: TProject[],
@@ -85,12 +74,6 @@ export function sortProjects(
 
 /**
  * Combines search and filter operations
- * This is what you'll call from your page component
- * 
- * @param projects - Array of projects
- * @param searchTerm - Search string
- * @param status - Status filter
- * @returns Filtered and searched projects
  */
 export function applyProjectFilters(
   projects: TProject[],

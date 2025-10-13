@@ -11,30 +11,19 @@ import {
 } from '@mui/material';
 import { TProjectStatus } from '@/types/TProject';
 
-/**
- * Props for FilterControls component
- */
 interface FilterControlsProps {
-  status: TProjectStatus;                    // Current status filter
-  onStatusChange: (status: TProjectStatus) => void; // Callback when status changes
+  status: TProjectStatus;
+  onStatusChange: (status: TProjectStatus) => void;
 }
 
 /**
  * Reusable filter controls component
- * Currently just has status filter, but easy to add more filters later
- * 
- * Usage:
- * <FilterControls 
- *   status={statusFilter}
- *   onStatusChange={setStatusFilter}
- * />
  */
 export function FilterControls({ status, onStatusChange }: FilterControlsProps) {
-  // Count active filters (for showing badge)
   const activeFilterCount = status !== 'all' ? 1 : 0;
 
   return (
-    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
       {/* Status Filter */}
       <FormControl size="small" sx={{ minWidth: 150 }}>
         <InputLabel>Status</InputLabel>
@@ -50,18 +39,16 @@ export function FilterControls({ status, onStatusChange }: FilterControlsProps) 
         </Select>
       </FormControl>
 
-      {/* Show active filter count */}
+      {/* Active filter indicator */}
       {activeFilterCount > 0 && (
         <Chip 
-          label={`${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active`}
+          label={`${activeFilterCount} filter active`}
           size="small"
           onDelete={() => onStatusChange('all')}
           color="primary"
           variant="outlined"
         />
       )}
-      
-      {/* TODO: Add more filters here later (date range, assignee, etc.) */}
     </Box>
   );
 }

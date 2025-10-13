@@ -3,54 +3,53 @@
 import React from 'react';
 import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { Box, Chip } from '@mui/material';
-import { useRouter } from 'next/navigation';
+import { Task } from '@/mocks/staff/taskMockData';
+import dayjs from 'dayjs';
 
-/**
- * Props for TasksDataGrid
- */
 interface TasksDataGridProps {
-  tasks: any[];           // Array of tasks to display (TODO: type this properly after seeing your task structure)
-  projectId: string;      // The project these tasks belong to
-  loading?: boolean;      // Show loading state
+  tasks: Task[];
+  loading?: boolean;
+  onTaskClick: (task: Task) => void;  // Callback when row is clicked
 }
 
 /**
- * DataGrid component for displaying tasks
- * 
- * Features:
- * - Sortable columns
- * - Pagination
- * - Click row to navigate to task detail
- * - Status and priority badges
- * - Responsive
- * 
- * Usage:
- * <TasksDataGrid tasks={projectTasks} projectId={projectId} loading={isLoading} />
+ * DataGrid for displaying tasks
+ * Used inside ProjectDetailModal
+ * Click a row to open TaskDetailModal
  */
-export function TasksDataGrid({ tasks, projectId, loading = false }: TasksDataGridProps) {
-  const router = useRouter();
-
+export function TasksDataGrid({ tasks, loading = false, onTaskClick }: TasksDataGridProps) {
+  
   /**
-   * Column definitions
-   * NOTE: These are placeholder columns. Adjust based on your actual task structure
+   * Column definitions based on Task structure
    */
-  const columns: GridColDef[] = [
+  const columns: GridColDef<Task>[] = [
     {
-      field: 'title',           // Adjust field name based on your task structure
+      field: 'title',
       headerName: 'Task Name',
       flex: 1,
       minWidth: 200,
+      renderCell: (params) => {
+        // Show subtask indicator
+        const isSubtask = !!params.row.parentTaskId;
+        return (
+          <Box>
+            {isSubtask && <span style={{ marginRight: 4 }}>└</span>}
+            {params.value}
+          </Box>
+        );
+      },
     },
     {
       field: 'status',
       headerName: 'Status',
       width: 130,
       renderCell: (params) => {
+        // Adjust colors based on your status values
         const statusColors: Record<string, any> = {
-          'not-started': 'default',
-          'in-progress': 'primary',
-          'completed': 'success',
-          'blocked': 'error',
+          'Not Started': 'default',
+          'In Progress': 'primary',
+          'Completed': 'success',
+          'Blocked': 'error',
         };
 
         return (
@@ -58,22 +57,19 @@ export function TasksDataGrid({ tasks, projectId, loading = false }: TasksDataGr
             label={params.value}
             color={statusColors[params.value] || 'default'}
             size="small"
-            sx={{ textTransform: 'capitalize' }}
           />
         );
       },
     },
     {
-      field: 'priority',        // If your tasks have priority
+      field: 'priority',
       headerName: 'Priority',
       width: 110,
       renderCell: (params) => {
-        if (!params.value) return null;
-        
         const priorityColors: Record<string, any> = {
-          low: 'default',
-          medium: 'warning',
-          high: 'error',
+          Low: 'default',
+          Medium: 'warning',
+          High: 'error',
         };
 
         return (
@@ -87,44 +83,43 @@ export function TasksDataGrid({ tasks, projectId, loading = false }: TasksDataGr
       },
     },
     {
-      field: 'assignee',        // Adjust based on your structure
-      headerName: 'Assignee',
+      field: 'assignedUsers',
+      headerName: 'Assignees',
       width: 150,
+      renderCell: (params) => {
+        const users = params.value || [];
+        if (users.length === 0) return '-';
+        if (users.length === 1) return users[0].name;
+        return `${users[0].name} +${users.length - 1}`;
+      },
     },
     {
-      field: 'dueDate',         // Adjust based on your structure
+      field: 'dueDate',
       headerName: 'Due Date',
       width: 130,
-      type: 'date',
-      valueFormatter: (params) => {
-        if (!params) return '';
-        return new Date(params).toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-        });
+      valueFormatter: (value) => {
+        if (!value) return '';
+        return dayjs(value).format('MMM DD, YYYY');
       },
     },
   ];
 
   /**
-   * Handle row click - navigate to task detail page
+   * Handle row click
    */
-  const handleRowClick = (params: GridRowParams) => {
-    // Navigate to task detail page
-    router.push(`/projects/${projectId}/tasks/${params.row.id}`);
-    
-    // OR: Open your existing modal instead
-    // onTaskClick(params.row);
+  const handleRowClick = (params: GridRowParams<Task>) => {
+    onTaskClick(params.row);
   };
 
   return (
-    <Box sx={{ height: 600, width: '100%' }}>
+    <Box sx={{ height: 400, width: '100%' }}>
       <DataGrid
         rows={tasks}
         columns={columns}
         loading={loading}
         onRowClick={handleRowClick}
-        pageSizeOptions={[10, 25, 50]}
+        getRowId={(row) => row.taskId}
+        pageSizeOptions={[5, 10, 25]}
         initialState={{
           pagination: {
             paginationModel: { pageSize: 10, page: 0 },
