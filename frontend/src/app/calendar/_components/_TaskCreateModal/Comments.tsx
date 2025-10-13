@@ -4,9 +4,9 @@ import { FormData } from '@/types';
 interface CommentsProps {
     isEditMode: boolean;
     newComment: string;
-    formData: FormData;
+    formData: FormData | Omit<FormData, 'taskId'>;
     setNewComment: (value: React.SetStateAction<string>) => void
-    setFormData: (value: React.SetStateAction<FormData>) => void
+    setFormData: (value: React.SetStateAction<FormData | Omit<FormData, 'taskId'>>) => void
     errors: Record<string, string>;
 }
 

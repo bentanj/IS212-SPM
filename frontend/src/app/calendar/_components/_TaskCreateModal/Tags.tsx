@@ -7,8 +7,8 @@ interface TagsProps {
     handleAddTag: (event: React.KeyboardEvent<HTMLElement>, tagInput: string, setTagInput: React.Dispatch<React.SetStateAction<string>>, formData: FormData, setFormData: React.Dispatch<React.SetStateAction<FormData>>) => void
 
     handleRemoveTag: (tagToRemove: string, setFormData: React.Dispatch<React.SetStateAction<FormData>>) => void
-    formData: FormData;
-    setFormData: React.Dispatch<React.SetStateAction<FormData>>
+    formData: FormData | Omit<FormData, 'taskId'>;
+    setFormData: React.Dispatch<React.SetStateAction<FormData | Omit<FormData, 'taskId'>>>
 }
 
 export const Tags: React.FC<TagsProps> = ({

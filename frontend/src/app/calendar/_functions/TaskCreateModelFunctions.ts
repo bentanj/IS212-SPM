@@ -22,7 +22,7 @@ export const canRemoveUser = (
 };
 
 //  Check if form entries are valid
-const validateForm = (formData: FormData, setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>): boolean => {
+const validateForm = (formData: FormData | Omit<FormData, 'taskId'>, setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>): boolean => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.title.trim()) newErrors.title = 'Title is required';
@@ -46,7 +46,7 @@ const validateForm = (formData: FormData, setErrors: React.Dispatch<React.SetSta
 
 // Reset form
 export const resetForm = (
-    setFormData: React.Dispatch<React.SetStateAction<FormData>>,
+    setFormData: React.Dispatch<React.SetStateAction<FormData | Omit<FormData, 'taskId'>>>,
     setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>,
     setSubmitStatus: React.Dispatch<React.SetStateAction<'idle' | 'success' | 'error'>>,
     setSubmitMessage: React.Dispatch<React.SetStateAction<string>>,
@@ -64,7 +64,7 @@ export const resetForm = (
 export const handleSubmit = async (params: {
     isEditMode: boolean;
     existingTaskDetails: Task | null;
-    formData: FormData;
+    formData: FormData | Omit<FormData, 'taskId'>;
     newComment: string;
     currentUser: User;
     setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
@@ -122,11 +122,11 @@ export const handleSubmit = async (params: {
             const newTaskId = allTasks.length > 0
                 ? Math.max(...allTasks.map(t => t.taskId), 0) + 1
                 : 1;
-            const comments = formData.comments.trim()
+            const comments = formData.comments?.trim()
                 ? [{
                     commentId: 1,
                     author: currentUser.name,
-                    content: formData.comments.trim(),
+                    content: formData.comments?.trim(),
                     timestamp: dayjs().toISOString(),
                 }]
                 : [];
@@ -138,7 +138,7 @@ export const handleSubmit = async (params: {
                 startDate: formData.startDate!.format('YYYY-MM-DD'),
                 completedDate: formData.completedDate?.format('YYYY-MM-DD') || null,
                 dueDate: formData.dueDate!.format('YYYY-MM-DD'),
-                department: [formData.department],
+                department: formData.department,
                 priority: formData.priority as Priority,
                 assignedUsers: formData.assignedUsers,
                 tags: formData.tags,

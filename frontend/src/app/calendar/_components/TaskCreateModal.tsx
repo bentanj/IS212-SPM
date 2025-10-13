@@ -53,7 +53,7 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   const existingAssignees = isEditMode ? existingTaskDetails!.assignedUsers : [];
 
   // Form state
-  const [formData, setFormData] = useState<FormData>(DefaultFormData);
+  const [formData, setFormData] = useState<FormData | Omit<FormData, 'taskId'>>(DefaultFormData);
   const [parentTask, setParentTask] = useState<Task | null>(null);
 
   // UI state

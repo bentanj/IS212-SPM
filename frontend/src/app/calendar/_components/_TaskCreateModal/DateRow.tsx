@@ -6,8 +6,8 @@ import CustomDatePicker from '@/components/DatePickerInput'
 import { FormData, Task } from '@/types';
 
 interface DateRowProps {
-    formData: FormData
-    setFormData: React.Dispatch<React.SetStateAction<FormData>>
+    formData: FormData | Omit<FormData, 'taskId'>
+    setFormData: React.Dispatch<React.SetStateAction<FormData | Omit<FormData, 'taskId'>>>
     errors: Record<string, string>
     parentTask?: Task | null
 }
