@@ -33,7 +33,7 @@ class TaskService:
             task_data['start_date'] = datetime.now()
 
         if 'status' not in task_data or task_data['status'] is None:
-            task_data['status'] = 'pending'
+            task_data['status'] = 'To Do'
 
         if 'description' not in task_data or task_data['description'] is None:
             task_data['description'] = ''
@@ -45,7 +45,7 @@ class TaskService:
             task_data['due_date'] = start_date + timedelta(days=7)
 
         if 'priority' not in task_data or task_data['priority'] is None:
-            task_data['priority'] = 'medium'
+            task_data['priority'] = 5
 
         return self.repo.create(task_data)
 
@@ -65,7 +65,7 @@ class TaskService:
             if not parent_task:
                 raise TaskValidationError(f"Parent task with id {task_data['parent_id']} not found")
 
-        if 'status' in task_data and task_data['status'] == 'completed':
+        if 'status' in task_data and task_data['status'] == 'Completed':
             if not existing_task.completed_date:
                 task_data['completed_date'] = datetime.now()
 
@@ -86,7 +86,7 @@ class TaskService:
     def get_tasks_by_user(self, user_id: int) -> Iterable[Task]:
         return self.repo.find_by_assigned_user(user_id)
 
-    def get_tasks_by_priority(self, priority: str) -> Iterable[Task]:
+    def get_tasks_by_priority(self, priority: int) -> Iterable[Task]:
         return self.repo.find_by_priority(priority)
 
     def get_overdue_tasks(self) -> Iterable[Task]:
@@ -106,7 +106,7 @@ class TaskService:
 
     def mark_task_completed(self, task_id: int) -> Optional[Task]:
         return self.update_task(task_id, {
-            'status': 'completed',
+            'status': 'Completed',
             'completed_date': datetime.now()
         })
 
@@ -143,7 +143,7 @@ class TaskService:
         all_tasks = list(self.repo.list())
 
         total_tasks = len(all_tasks)
-        completed_tasks = len([t for t in all_tasks if t.status == 'completed'])
+        completed_tasks = len([t for t in all_tasks if t.status == 'Completed'])
         overdue_tasks = len(list(self.repo.find_overdue_tasks()))
 
         status_counts = {}
@@ -191,13 +191,13 @@ class TaskService:
             return
 
         valid_transitions = {
-            'pending': ['in_progress', 'cancelled'],
-            'in_progress': ['completed', 'pending', 'cancelled'],
-            'completed': [],  # Cannot change from completed
-            'cancelled': ['pending']  # Can reopen cancelled tasks
+            'To Do': ['In Progress', 'Blocked'],
+            'In Progress': ['Completed', 'To Do', 'Blocked'],
+            'Completed': [],  # Cannot change from completed
+            'Blocked': ['To Do']  # Can reopen blocked tasks
         }
 
-        current_status = task.status or 'pending'
+        current_status = task.status or 'To Do'
         if new_status not in valid_transitions.get(current_status, []):
             raise InvalidTaskStatusError(
                 f"Cannot transition from '{current_status}' to '{new_status}'"
