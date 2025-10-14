@@ -5,6 +5,9 @@ from Repositories.TaskRepository import TaskRepository
 from Models.Task import Task
 from exceptions import TaskNotFoundError, TaskValidationError, InvalidTaskStatusError
 
+# Maximum number of users that can be assigned to a single task
+MAX_ASSIGNED_USERS = 5
+
 class TaskService:
     def __init__(self, repo: TaskRepository):
         self.repo = repo
@@ -118,6 +121,8 @@ class TaskService:
 
         current_users = task.assigned_users or []
         if user_id not in current_users:
+            if len(current_users) >= MAX_ASSIGNED_USERS:
+                raise TaskValidationError(f"Cannot assign more than {MAX_ASSIGNED_USERS} users to a task")
             current_users.append(user_id)
             return self.update_task(task_id, {'assigned_users': current_users})
 
@@ -177,6 +182,10 @@ class TaskService:
             if (task_data['due_date'] and task_data['start_date'] and
                 task_data['due_date'] < task_data['start_date']):
                 raise TaskValidationError("Due date cannot be before start date")
+
+        if 'assigned_users' in task_data and task_data['assigned_users']:
+            if len(task_data['assigned_users']) > MAX_ASSIGNED_USERS:
+                raise TaskValidationError(f"Cannot assign more than {MAX_ASSIGNED_USERS} users to a task")
 
     def _validate_status_transition(self, task: Task, new_status: Optional[str]) -> None:
         if not new_status or new_status == task.status:

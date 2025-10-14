@@ -431,3 +431,110 @@ def test_date_range_inclusive():
     assert task_middle in results
     assert task_end in results
     assert task_after not in results
+
+
+@pytest.mark.unit
+def test_create_task_with_4_assigned_users():
+    service = TaskService(InMemoryRepo())
+    users = [uuid4() for _ in range(4)]
+
+    task = service.create_task({
+        'title': 'Task with 4 users',
+        'assigned_users': users
+    })
+
+    assert len(task.assigned_users) == 4
+    assert set(task.assigned_users) == set(users)
+
+
+@pytest.mark.unit
+def test_create_task_with_5_assigned_users():
+    service = TaskService(InMemoryRepo())
+    users = [uuid4() for _ in range(5)]
+
+    task = service.create_task({
+        'title': 'Task with 5 users',
+        'assigned_users': users
+    })
+
+    assert len(task.assigned_users) == 5
+    assert set(task.assigned_users) == set(users)
+
+
+@pytest.mark.unit
+def test_create_task_with_6_assigned_users_fails():
+    from exceptions import TaskValidationError
+    service = TaskService(InMemoryRepo())
+    users = [uuid4() for _ in range(6)]
+
+    with pytest.raises(TaskValidationError, match="Cannot assign more than 5 users to a task"):
+        service.create_task({
+            'title': 'Task with 6 users',
+            'assigned_users': users
+        })
+
+
+@pytest.mark.unit
+def test_update_task_with_6_assigned_users_fails():
+    from exceptions import TaskValidationError
+    service = TaskService(InMemoryRepo())
+    task = service.create_task({'title': 'Task'})
+    users = [uuid4() for _ in range(6)]
+
+    with pytest.raises(TaskValidationError, match="Cannot assign more than 5 users to a task"):
+        service.update_task(task.id, {'assigned_users': users})
+
+
+@pytest.mark.unit
+def test_assign_users_to_task_with_5_users():
+    service = TaskService(InMemoryRepo())
+    task = service.create_task({'title': 'Task'})
+    users = [uuid4() for _ in range(5)]
+
+    updated = service.assign_users_to_task(task.id, users)
+
+    assert len(updated.assigned_users) == 5
+    assert set(updated.assigned_users) == set(users)
+
+
+@pytest.mark.unit
+def test_assign_users_to_task_with_6_users_fails():
+    from exceptions import TaskValidationError
+    service = TaskService(InMemoryRepo())
+    task = service.create_task({'title': 'Task'})
+    users = [uuid4() for _ in range(6)]
+
+    with pytest.raises(TaskValidationError, match="Cannot assign more than 5 users to a task"):
+        service.assign_users_to_task(task.id, users)
+
+
+@pytest.mark.unit
+def test_add_user_to_task_up_to_5_users():
+    service = TaskService(InMemoryRepo())
+    task = service.create_task({'title': 'Task'})
+    users = [uuid4() for _ in range(5)]
+
+    # Add 5 users one by one
+    for user in users:
+        task = service.add_user_to_task(task.id, user)
+
+    assert len(task.assigned_users) == 5
+    assert set(task.assigned_users) == set(users)
+
+
+@pytest.mark.unit
+def test_add_user_to_task_exceeding_5_users_fails():
+    from exceptions import TaskValidationError
+    service = TaskService(InMemoryRepo())
+    task = service.create_task({'title': 'Task'})
+    users = [uuid4() for _ in range(6)]
+
+    # Add 5 users successfully
+    for user in users[:5]:
+        task = service.add_user_to_task(task.id, user)
+
+    assert len(task.assigned_users) == 5
+
+    # Adding 6th user should fail
+    with pytest.raises(TaskValidationError, match="Cannot assign more than 5 users to a task"):
+        service.add_user_to_task(task.id, users[5])
