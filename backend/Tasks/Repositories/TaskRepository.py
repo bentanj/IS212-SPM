@@ -46,13 +46,13 @@ class TaskRepository:
     def find_by_assigned_user(self, user_id: int) -> Iterable[Task]:
         return self.session.query(Task).filter(Task.assigned_users.any(user_id)).all()
 
-    def find_by_priority(self, priority: str) -> Iterable[Task]:
+    def find_by_priority(self, priority: int) -> Iterable[Task]:
         return self.session.query(Task).filter(Task.priority == priority).all()
 
     def find_overdue_tasks(self) -> Iterable[Task]:
         now = datetime.now()
         return self.session.query(Task).filter(
-            and_(Task.due_date < now, Task.status != 'completed')
+            and_(Task.due_date < now, Task.status != 'Completed')
         ).all()
 
     def find_by_criteria(self, filters: Dict[str, Any]) -> Iterable[Task]:

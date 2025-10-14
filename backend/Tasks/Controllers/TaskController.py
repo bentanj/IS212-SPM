@@ -118,8 +118,8 @@ def get_tasks_by_user(user_id: int):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@bp.get("/priority/<string:priority>")
-def get_tasks_by_priority(priority: str):
+@bp.get("/priority/<int:priority>")
+def get_tasks_by_priority(priority: int):
     try:
         tasks = _task_service().get_tasks_by_priority(priority)
         return jsonify([task.to_dict(g.db_session) for task in tasks])
