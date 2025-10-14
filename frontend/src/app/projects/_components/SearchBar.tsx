@@ -1,3 +1,5 @@
+// src/app/projects/_components/SearchBar.tsx
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -12,10 +14,6 @@ interface SearchBarProps {
   debounceMs?: number;
 }
 
-/**
- * Reusable search bar with debouncing
- * Waits for user to stop typing before triggering search
- */
 export function SearchBar({ 
   value, 
   onChange, 
@@ -24,7 +22,6 @@ export function SearchBar({
 }: SearchBarProps) {
   const [localValue, setLocalValue] = useState(value);
 
-  // Debounce effect
   useEffect(() => {
     const timer = setTimeout(() => {
       onChange(localValue);
@@ -33,7 +30,6 @@ export function SearchBar({
     return () => clearTimeout(timer);
   }, [localValue, debounceMs, onChange]);
 
-  // Sync with external value changes
   useEffect(() => {
     setLocalValue(value);
   }, [value]);
@@ -50,10 +46,11 @@ export function SearchBar({
       onChange={(e) => setLocalValue(e.target.value)}
       placeholder={placeholder}
       size="small"
+      variant="outlined"
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">
-            <SearchIcon />
+            <SearchIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
           </InputAdornment>
         ),
         endAdornment: localValue && (
@@ -64,12 +61,18 @@ export function SearchBar({
               edge="end"
               aria-label="clear search"
             >
-              <ClearIcon />
+              <ClearIcon sx={{ fontSize: 18 }} />
             </IconButton>
           </InputAdornment>
         ),
       }}
-      sx={{ maxWidth: 400 }}
+      sx={{ 
+        maxWidth: 500,
+        '& .MuiOutlinedInput-root': {
+          bgcolor: 'background.paper',
+          fontSize: '0.875rem',
+        }
+      }}
     />
   );
 }

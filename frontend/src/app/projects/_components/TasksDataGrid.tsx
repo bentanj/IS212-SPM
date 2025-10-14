@@ -5,6 +5,8 @@ import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { Box, Chip } from '@mui/material';
 import { Task } from '@/mocks/staff/taskMockData';
 import dayjs from 'dayjs';
+import Priority from '@/types/TPriority';
+import { getStatusColor, getPriorityColor } from '../../calendar/_functions/TaskRenderingFunctions';
 
 interface TasksDataGridProps {
   tasks: Task[];
@@ -56,29 +58,57 @@ export function TasksDataGrid({ tasks, loading = false, onTaskClick }: TasksData
           <Chip
             label={params.value}
             color={statusColors[params.value] || 'default'}
+            variant="outlined"
             size="small"
           />
         );
       },
     },
+
     {
       field: 'priority',
       headerName: 'Priority',
-      width: 110,
+      width: 100,
+      type: 'number',
+      align: 'center',        
+      headerAlign: 'center',
       renderCell: (params) => {
-        const priorityColors: Record<string, any> = {
-          Low: 'default',
-          Medium: 'warning',
-          High: 'error',
+        const priority = params.value as Priority;
+
+        const getPriorityTextColor = (p: Priority) => {
+          if (typeof p !== 'number') return '#3f3f3f';
+          if (p >= 7) return '#f44336';
+          if (p >= 4) return '#ff9800';
+          return '#2196f3';
         };
 
         return (
-          <Chip
-            label={params.value}
-            color={priorityColors[params.value] || 'default'}
-            size="small"
-            variant="outlined"
-          />
+          // This new outer Box fills the cell and centers the circle
+          <Box sx={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            {/* This is your original circle component */}
+            <Box
+              sx={{
+                width: 24,
+                height: 24,
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#f0f0f0',
+                color: getPriorityTextColor(priority),
+                fontWeight: 'bold',
+                fontSize: '0.75rem',
+              }}
+            >
+              {priority}
+            </Box>
+          </Box>
         );
       },
     },

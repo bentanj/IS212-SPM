@@ -2,65 +2,70 @@
 import { TProject } from '@/types/TProject';
 
 /**
- * Mock data for projects, before we implement API call, the projectName here does not match that of taskMockData.ts
- * data is stored in the array which is represnted using a constant
- * ensures that the data inside matches that of the project object
- * export allows it to be used by other files
+ * Mock data for projects. Names and task counts are now synced with taskMockData.ts
+ * to allow for a complete user flow from project to task details.
  */
 export const projectMockData: TProject[] = [
   {
-    name: 'Website Rebuild',
-    description: 'Complete overhaul of company website with modern design and improved user experience',
+    name: 'E-Commerce Platform',
+    description: 'Building a full-featured online shopping platform with user authentication and a secure database.',
     status: 'active',
-    taskCount: 12,
-    createdAt: new Date('2024-09-01'),
-    updatedAt: new Date('2024-10-05'),
+    taskCount: 11, // Calculated from taskMockData
+    createdAt: new Date('2025-08-01'),
+    updatedAt: new Date('2025-10-10'),
   },
   {
-    name: 'Mobile App Development',
-    description: 'iOS and Android app for customer portal with real-time notifications',
+    name: 'API Gateway Project',
+    description: 'Centralizing and managing all public-facing APIs with rate limiting and security features.',
     status: 'active',
-    taskCount: 8,
-    createdAt: new Date('2024-08-15'),
-    updatedAt: new Date('2024-10-03'),
+    taskCount: 5, // Calculated from taskMockData
+    createdAt: new Date('2025-08-15'),
+    updatedAt: new Date('2025-10-12'),
   },
   {
-    name: 'Q4 Marketing Campaign',
-    description: 'Social media and email marketing initiatives for Q4 product launch',
-    status: 'completed',
-    taskCount: 5,
-    createdAt: new Date('2024-07-01'),
-    updatedAt: new Date('2024-09-28'),
+    name: 'Quality Assurance',
+    description: 'Establishing infrastructure and processes for automated load testing and integration testing.',
+    status: 'active',
+    taskCount: 9, // Calculated from taskMockData
+    createdAt: new Date('2025-09-01'),
+    updatedAt: new Date('2025-10-14'),
   },
   {
-    name: 'Infrastructure Upgrade',
-    description: 'Server migration and security improvements for production environment',
+    name: 'Development Process Improvement',
+    description: 'Defining and documenting new engineering workflows and code review best practices.',
     status: 'on-hold',
-    taskCount: 15,
-    createdAt: new Date('2024-06-15'),
-    updatedAt: new Date('2024-09-20'),
+    taskCount: 1, // Calculated from taskMockData
+    createdAt: new Date('2025-09-05'),
+    updatedAt: new Date('2025-09-12'),
   },
   {
-    name: 'Customer Portal',
-    description: 'Self-service portal for customers to manage accounts and view analytics',
-    status: 'active',
-    taskCount: 10,
-    createdAt: new Date('2024-08-01'),
-    updatedAt: new Date('2024-10-07'),
+    name: 'Performance Enhancement',
+    description: 'Researching and identifying opportunities to optimize application performance.',
+    status: 'completed',
+    taskCount: 1, // Calculated from taskMockData
+    createdAt: new Date('2025-09-02'),
+    updatedAt: new Date('2025-09-14'),
   },
   {
-    name: 'Data Analytics Dashboard',
-    description: 'Internal dashboard for tracking KPIs and business metrics',
+    name: 'Security Enhancement',
+    description: 'Implementing automated security testing tools and penetration testing scripts.',
     status: 'active',
-    taskCount: 7,
-    createdAt: new Date('2024-09-10'),
-    updatedAt: new Date('2024-10-08'),
+    taskCount: 1, // Calculated from taskMockData
+    createdAt: new Date('2025-09-10'),
+    updatedAt: new Date('2025-10-05'),
+  },
+  {
+    name: 'Documentation Initiative',
+    description: 'Automating the generation of API documentation for all public endpoints.',
+    status: 'on-hold',
+    taskCount: 1, // Calculated from taskMockData
+    createdAt: new Date('2025-09-18'),
+    updatedAt: new Date('2025-09-20'),
   },
 ];
 
 /**
- * Helper function to get a single project by name, different from filterhelpers that is just meant for display filtering through search bar
- * this is used after they click on an item from the filtered list
+ * Helper function to get a single project by name.
  */
 export function getProjectByName(name: string): TProject | undefined {
   return projectMockData.find(

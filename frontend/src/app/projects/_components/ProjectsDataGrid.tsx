@@ -1,3 +1,5 @@
+// src/app/projects/_components/ProjectsDataGrid.tsx
+
 'use client';
 
 import React from 'react';
@@ -8,19 +10,15 @@ import { TProject } from '@/types/TProject';
 interface ProjectsDataGridProps {
   projects: TProject[];
   loading?: boolean;
-  onProjectClick: (project: TProject) => void;  // Callback when row is clicked
+  onProjectClick: (project: TProject) => void;
 }
 
 /**
  * DataGrid for displaying list of projects
- * Click a row to open ProjectDetailModal
+ * Styled to match calendar aesthetic
  */
 export function ProjectsDataGrid({ projects, loading = false, onProjectClick }: ProjectsDataGridProps) {
   
-  /**
-   * Column definitions
-   * Using 'name' as the id field since it's unique
-   */
   const columns: GridColDef<TProject>[] = [
     {
       field: 'name',
@@ -33,18 +31,24 @@ export function ProjectsDataGrid({ projects, loading = false, onProjectClick }: 
       headerName: 'Status',
       width: 130,
       renderCell: (params) => {
-        const statusColors = {
-          active: 'success',
-          completed: 'default',
-          'on-hold': 'warning',
+        const statusConfig = {
+          active: { label: 'Active', color: '#2e7d32' },
+          completed: { label: 'Completed', color: '#9e9e9e' },
+          'on-hold': { label: 'On-Hold', color: '#ed6c02' },
         } as const;
+
+        const config = statusConfig[params.value as keyof typeof statusConfig];
 
         return (
           <Chip
-            label={params.value}
-            color={statusColors[params.value as keyof typeof statusColors]}
+            label={config.label}
             size="small"
-            sx={{ textTransform: 'capitalize' }}
+            sx={{ 
+              bgcolor: config.color,
+              color: 'white',
+              fontWeight: 500,
+              fontSize: '0.75rem'
+            }}
           />
         );
       },
@@ -54,6 +58,8 @@ export function ProjectsDataGrid({ projects, loading = false, onProjectClick }: 
       headerName: 'Tasks',
       width: 100,
       type: 'number',
+      align: 'center',
+      headerAlign: 'center',
     },
     {
       field: 'updatedAt',
@@ -72,26 +78,23 @@ export function ProjectsDataGrid({ projects, loading = false, onProjectClick }: 
     {
       field: 'description',
       headerName: 'Description',
-      flex: 1,
-      minWidth: 250,
+      flex: 2,
+      minWidth: 300,
     },
   ];
 
-  /**
-   * Handle row click - call parent's callback with project data
-   */
   const handleRowClick = (params: GridRowParams<TProject>) => {
     onProjectClick(params.row);
   };
 
   return (
-    <Box sx={{ height: 600, width: '100%' }}>
+    <Box sx={{ width: '100%' }}>
       <DataGrid
         rows={projects}
         columns={columns}
         loading={loading}
         onRowClick={handleRowClick}
-        getRowId={(row) => row.name}  // Use name as unique ID
+        getRowId={(row) => row.name}
         pageSizeOptions={[10, 25, 50]}
         initialState={{
           pagination: {
@@ -102,21 +105,34 @@ export function ProjectsDataGrid({ projects, loading = false, onProjectClick }: 
           },
         }}
         disableRowSelectionOnClick
+        autoHeight
         sx={{
+          border: 'none',
+          '& .MuiDataGrid-root': {
+            border: 'none',
+          },
+          '& .MuiDataGrid-cell': {
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            fontSize: '0.875rem',
+          },
+          '& .MuiDataGrid-columnHeaders': {
+            bgcolor: 'background.default',
+            borderBottom: '2px solid',
+            borderColor: 'divider',
+            fontSize: '0.875rem',
+            fontWeight: 600,
+          },
           '& .MuiDataGrid-row': {
             cursor: 'pointer',
             '&:hover': {
-              backgroundColor: 'action.hover',
+              bgcolor: 'action.hover',
             },
           },
-          // Mobile responsiveness
-          '@media (max-width: 600px)': {
-            '& .MuiDataGrid-columnHeader': {
-              fontSize: '0.75rem',
-            },
-            '& .MuiDataGrid-cell': {
-              fontSize: '0.75rem',
-            },
+          '& .MuiDataGrid-footerContainer': {
+            borderTop: '2px solid',
+            borderColor: 'divider',
+            bgcolor: 'background.default',
           },
         }}
       />
