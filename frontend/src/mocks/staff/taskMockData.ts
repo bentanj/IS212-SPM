@@ -1,8 +1,12 @@
 import { Task, User } from '@/types';
 
+interface MigrateTask extends Omit<Task, "assignedUsers"> {
+  assignedUsers: number[]; // Array of user IDs
+}
+
 export interface MockData {
   currentUser: User;
-  tasks: Task[];
+  tasks: MigrateTask[];
 }
 
 export const taskMockData: MockData = {
@@ -23,10 +27,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-01",
       priority: 7,
-      assignedUsers: [
-        { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Developers" }, // Engineering→Developers
-        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Developers" }
-      ],
+      assignedUsers: [1, 3],
       tags: ["authentication", "security", "backend"],
       status: "In Progress",
       comments: [
@@ -54,9 +55,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-25",
       priority: 7,
-      assignedUsers: [
-        { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Developers" }, // Engineering→Developers
-      ],
+      assignedUsers: [1],
       tags: ["oauth2", "integration", "google", "facebook"],
       status: "In Progress",
       comments: [
@@ -79,9 +78,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-28",
       priority: 4,
-      assignedUsers: [
-        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" }
-      ],
+      assignedUsers: [3],
       tags: ["password-reset", "email", "security", "tokens"],
       status: "To Do",
       comments: [],
@@ -97,10 +94,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-30",
       priority: 7,
-      assignedUsers: [
-        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" },
-
-      ],
+      assignedUsers: [3],
       tags: ["unit-tests", "testing", "authentication", "coverage"],
       status: "To Do",
       comments: [],
@@ -116,9 +110,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-01",
       priority: 4,
-      assignedUsers: [
-        { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Developers" }
-      ],
+      assignedUsers: [1],
       tags: ["documentation", "api", "authentication", "examples"],
       status: "To Do",
       comments: [],
@@ -134,9 +126,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-25",
       priority: 4,
-      assignedUsers: [
-        { userId: 2, name: "Sarah Davis", email: "sarah.davis@company.com", role: "Admin", department: "Support Team" } // Security→Support Team
-      ],
+      assignedUsers: [2],
       tags: ["api", "security", "performance"],
       status: "Blocked",
       comments: [
@@ -164,10 +154,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-23",
       priority: 7,
-      assignedUsers: [
-        { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Engineering Operation Division" },
-
-      ],
+      assignedUsers: [1],
       tags: ["redis", "configuration", "clustering", "persistence"],
       status: "In Progress",
       comments: [
@@ -190,10 +177,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-24",
       priority: 7,
-      assignedUsers: [
-        { userId: 2, name: "Sarah Davis", email: "sarah.davis@company.com", role: "Admin", department: "Senior Engineers" },
-
-      ],
+      assignedUsers: [2],
       tags: ["algorithms", "token-bucket", "sliding-window", "rate-limiting"],
       status: "To Do",
       comments: [],
@@ -209,10 +193,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-26",
       priority: 4,
-      assignedUsers: [
-        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" },
-
-      ],
+      assignedUsers: [3],
       tags: ["dashboard", "admin", "configuration", "monitoring"],
       status: "To Do",
       comments: [],
@@ -228,10 +209,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-28",
       priority: 4,
-      assignedUsers: [
-        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" },
-
-      ],
+      assignedUsers: [3],
       tags: ["frontend", "components", "login", "ui"],
       status: "In Progress",
       comments: [
@@ -253,10 +231,7 @@ export const taskMockData: MockData = {
       completedDate: "2025-09-18",
       dueDate: "2025-09-17",
       priority: 4,
-      assignedUsers: [
-        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" },
-
-      ],
+      assignedUsers: [3],
       tags: ["ui-design", "responsive", "accessibility", "mobile"],
       status: "Completed",
       comments: [
@@ -279,10 +254,7 @@ export const taskMockData: MockData = {
       completedDate: "2025-09-19",
       dueDate: "2025-09-20",
       priority: 7,
-      assignedUsers: [
-        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" },
-
-      ],
+      assignedUsers: [3],
       tags: ["validation", "client-side", "real-time", "error-handling"],
       status: "Completed",
       comments: [
@@ -305,10 +277,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-26",
       priority: 7,
-      assignedUsers: [
-        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" },
-
-      ],
+      assignedUsers: [3],
       tags: ["api-integration", "authentication", "endpoints", "error-handling"],
       status: "In Progress",
       comments: [
@@ -331,9 +300,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-28",
       priority: 4,
-      assignedUsers: [
-        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" },
-      ],
+      assignedUsers: [3],
       tags: ["testing", "unit-tests", "integration", "components"],
       status: "To Do",
       comments: [],
@@ -349,10 +316,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-30",
       priority: 4,
-      assignedUsers: [
-        { userId: 4, name: "Mike Wilson", email: "mike.wilson@company.com", role: "Manager", department: "Support Team" }, // QA→Consultant or Support Team
-        { userId: 6, name: "David Chen", email: "david.chen@company.com", role: "Staff", department: "Support Team" }
-      ],
+      assignedUsers: [4, 6],
       tags: ["load-testing", "infrastructure", "performance", "validation"],
       status: "To Do",
       comments: [],
@@ -367,10 +331,7 @@ export const taskMockData: MockData = {
       completedDate: "2025-09-21",
       dueDate: "2025-09-21",
       priority: 7,
-      assignedUsers: [
-        { userId: 4, name: "Mike Wilson", email: "mike.wilson@company.com", role: "Manager", department: "Support Team" }, // QA→Consultant or Support Team
-
-      ],
+      assignedUsers: [4],
       tags: ["research", "tools", "k6", "jmeter", "selection"],
       status: "Completed",
       comments: [
@@ -393,10 +354,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-24",
       priority: 7,
-      assignedUsers: [
-        { userId: 6, name: "David Chen", email: "david.chen@company.com", role: "Staff", department: "Operation Planning Team" },
-
-      ],
+      assignedUsers: [6],
       tags: ["environment", "configuration", "infrastructure", "isolation"],
       status: "In Progress",
       comments: [
@@ -419,10 +377,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-28",
       priority: 7,
-      assignedUsers: [
-        { userId: 4, name: "Mike Wilson", email: "mike.wilson@company.com", role: "Manager", department: "Operation Planning Team" },
-
-      ],
+      assignedUsers: [4],
       tags: ["scripts", "scenarios", "endpoints", "user-simulation"],
       status: "To Do",
       comments: [],
@@ -438,9 +393,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-30",
       priority: 4,
-      assignedUsers: [
-        { userId: 6, name: "David Chen", email: "david.chen@company.com", role: "Staff", department: "Operation Planning Team" },
-      ],
+      assignedUsers: [6],
       tags: ["dashboard", "metrics", "real-time", "monitoring"],
       status: "To Do",
       comments: [],
@@ -456,10 +409,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-01",
       priority: 7,
-      assignedUsers: [
-        { userId: 6, name: "David Chen", email: "david.chen@company.com", role: "Staff", department: "Operation Planning Team" },
-        { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Engineering Operation Division" },
-      ],
+      assignedUsers: [1, 6],
       tags: ["integration", "testing", "oauth", "automation"],
       status: "In Progress",
       comments: [
@@ -482,9 +432,7 @@ export const taskMockData: MockData = {
       completedDate: "2025-09-24",
       dueDate: "2025-09-24",
       priority: 7,
-      assignedUsers: [
-        { userId: 6, name: "David Chen", email: "david.chen@company.com", role: "Staff", department: "Operation Planning Team" }
-      ],
+      assignedUsers: [6],
       tags: ["oauth", "test-setup", "mock-services", "providers"],
       status: "Completed",
       comments: [
@@ -507,10 +455,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-30",
       priority: 7,
-      assignedUsers: [
-        { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Engineering Operation Division" },
-
-      ],
+      assignedUsers: [1],
       tags: ["payment", "gateway", "integration", "error-handling"],
       status: "In Progress",
       comments: [
@@ -533,9 +478,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-01",
       priority: 4,
-      assignedUsers: [
-        { userId: 6, name: "David Chen", email: "david.chen@company.com", role: "Staff", department: "Operation Planning Team" }
-      ],
+      assignedUsers: [6],
       tags: ["test-data", "lifecycle", "cleanup", "isolation"],
       status: "To Do",
       comments: [],
@@ -552,10 +495,7 @@ export const taskMockData: MockData = {
       completedDate: "2025-09-18",
       dueDate: "2025-09-20",
       priority: 4,
-      assignedUsers: [
-        { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Engineering Operation Division" },
-
-      ],
+      assignedUsers: [1],
       tags: ["database", "migration", "sql"],
       status: "Completed",
       comments: [
@@ -577,10 +517,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-28",
       priority: 1,
-      assignedUsers: [
-        { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Engineering" },
-        { userId: 4, name: "Mike Wilson", email: "mike.wilson@company.com", role: "Manager", department: "QA" }
-      ],
+      assignedUsers: [1, 4],
       tags: ["documentation", "process", "guidelines"],
       status: "To Do",
       comments: [],
@@ -595,9 +532,7 @@ export const taskMockData: MockData = {
       completedDate: "2025-09-14",
       dueDate: "2025-09-15",
       priority: 7,
-      assignedUsers: [
-        { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Engineering" }
-      ],
+      assignedUsers: [1],
       tags: ["performance", "optimization", "research"],
       status: "Completed",
       comments: [
@@ -620,10 +555,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-08",
       priority: 7,
-      assignedUsers: [
-        { userId: 7, name: "Rachel Green", email: "rachel.green@company.com", role: "Manager", department: "UX/UI Design" },
-        { userId: 8, name: "James Rodriguez", email: "james.rodriguez@company.com", role: "Staff", department: "UX/UI Design" }
-      ],
+      assignedUsers: [7, 8],
       tags: ["mobile", "ux", "research", "usability"],
       status: "In Progress",
       comments: [
@@ -645,11 +577,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-15",
       priority: 10,
-      assignedUsers: [
-        { userId: 9, name: "Kevin Park", email: "kevin.park@company.com", role: "Manager", department: "Infrastructure" },
-        { userId: 10, name: "Lisa Wang", email: "lisa.wang@company.com", role: "Staff", department: "Infrastructure" },
-        { userId: 11, name: "Robert Johnson", email: "robert.johnson@company.com", role: "Admin", department: "Infrastructure" }
-      ],
+      assignedUsers: [9, 10, 8],
       tags: ["cloud", "migration", "strategy", "infrastructure"],
       status: "To Do",
       comments: [],
@@ -664,10 +592,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-20",
       priority: 7,
-      assignedUsers: [
-        { userId: 12, name: "Amanda Foster", email: "amanda.foster@company.com", role: "Manager", department: "Marketing" },
-        { userId: 13, name: "Ryan Mitchell", email: "ryan.mitchell@company.com", role: "Staff", department: "Data Analytics" }
-      ],
+      assignedUsers: [2, 3],
       tags: ["analytics", "dashboard", "marketing", "metrics"],
       status: "To Do",
       comments: [],
@@ -682,10 +607,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-10",
       priority: 7,
-      assignedUsers: [
-        { userId: 14, name: "Jessica Chen", email: "jessica.chen@company.com", role: "Staff", department: "Data Analytics" },
-        { userId: 15, name: "Christopher Lee", email: "christopher.lee@company.com", role: "Manager", department: "Customer Support" }
-      ],
+      assignedUsers: [4, 5],
       tags: ["ai", "chatbot", "nlp", "customer-support"],
       status: "In Progress",
       comments: [
@@ -707,10 +629,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-25",
       priority: 10,
-      assignedUsers: [
-        { userId: 16, name: "Michael Torres", email: "michael.torres@company.com", role: "Manager", department: "Finance" },
-        { userId: 17, name: "Stephanie Kim", email: "stephanie.kim@company.com", role: "Staff", department: "Finance" }
-      ],
+      assignedUsers: [6, 7],
       tags: ["finance", "automation", "reporting", "validation"],
       status: "To Do",
       comments: [],
@@ -725,11 +644,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-18",
       priority: 7,
-      assignedUsers: [
-        { userId: 18, name: "Nicole Brown", email: "nicole.brown@company.com", role: "Manager", department: "Human Resources" },
-        { userId: 19, name: "Daniel Wilson", email: "daniel.wilson@company.com", role: "Staff", department: "Human Resources" },
-        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering" }
-      ],
+      assignedUsers: [8, 9, 3],
       tags: ["hr", "onboarding", "portal", "training"],
       status: "In Progress",
       comments: [
@@ -751,10 +666,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-11-05",
       priority: 8,
-      assignedUsers: [
-        { userId: 20, name: "Andrew Martinez", email: "andrew.martinez@company.com", role: "Manager", department: "Legal" },
-        { userId: 2, name: "Sarah Davis", email: "sarah.davis@company.com", role: "Admin", department: "Security" }
-      ],
+      assignedUsers: [2],
       tags: ["legal", "compliance", "audit", "automation"],
       status: "To Do",
       comments: [],
@@ -769,10 +681,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-12",
       priority: 9,
-      assignedUsers: [
-        { userId: 21, name: "Patricia Garcia", email: "patricia.garcia@company.com", role: "Manager", department: "Sales" },
-        { userId: 13, name: "Ryan Mitchell", email: "ryan.mitchell@company.com", role: "Staff", department: "Data Analytics" }
-      ],
+      assignedUsers: [1, 3],
       tags: ["sales", "dashboard", "analytics", "forecasting"],
       status: "In Progress",
       comments: [
@@ -794,10 +703,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-15",
       priority: 5,
-      assignedUsers: [
-        { userId: 22, name: "Thomas Anderson", email: "thomas.anderson@company.com", role: "Manager", department: "Product Management" },
-        { userId: 7, name: "Rachel Green", email: "rachel.green@company.com", role: "Manager", department: "UX/UI Design" }
-      ],
+      assignedUsers: [2, 7],
       tags: ["product", "roadmap", "visualization", "planning"],
       status: "To Do",
       comments: [],
@@ -813,10 +719,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-20",
       priority: 10,
-      assignedUsers: [
-        { userId: 2, name: "Sarah Davis", email: "sarah.davis@company.com", role: "Admin", department: "Security" },
-        { userId: 11, name: "Robert Johnson", email: "robert.johnson@company.com", role: "Admin", department: "Infrastructure" }
-      ],
+      assignedUsers: [2, 1],
       tags: ["security", "vulnerability", "assessment", "remediation"],
       status: "In Progress",
       comments: [
@@ -838,10 +741,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-11-15",
       priority: 5,
-      assignedUsers: [
-        { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Engineering Operation Division" },
-        { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" },
-      ],
+      assignedUsers: [1, 3],
       tags: ["identity", "access", "authentication", "sso"],
       status: "To Do",
       comments: [],
