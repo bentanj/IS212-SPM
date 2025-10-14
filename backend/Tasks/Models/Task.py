@@ -1,4 +1,5 @@
 from sqlalchemy import Column, BigInteger, Text, DateTime, ARRAY, Integer
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Session
 from typing import Optional, List, Dict, Any
 import requests
@@ -22,6 +23,7 @@ class Task(Base):
     assigned_users = Column(ARRAY(Integer), nullable=True)
     parent_id = Column('parentID', BigInteger, nullable=True)
     departments = Column(ARRAY(Text), nullable=True)
+    comments = Column(JSONB, nullable=True, default=[])
 
     def to_dict(self, db_session: Optional[Session] = None, fetch_users: bool = True) -> Dict[str, Any]:
         # Fetch assigned users via HTTP call to Authentication service
@@ -73,7 +75,7 @@ class Task(Base):
             "assignedUsers": assigned_users_data,
             "parentTaskId": self.parent_id,
             "department": self.departments if self.departments else [],
-            "comments": []  # TODO: Implement comments functionality
+            "comments": self.comments if self.comments else []
         }
 
     def __repr__(self):

@@ -299,6 +299,12 @@ def _parse_task_data(data: dict, is_update: bool = False):
         else:
             raise ValueError("departments must be an array")
 
+    if 'comments' in data:
+        if isinstance(data['comments'], list):
+            task_data['comments'] = data['comments']
+        else:
+            raise ValueError("comments must be an array")
+
     for date_field in ['start_date', 'completed_date', 'due_date']:
         if date_field in data and data[date_field]:
             try:
