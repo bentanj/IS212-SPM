@@ -619,7 +619,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-25",
       completedDate: null,
       dueDate: "2025-10-08",
-      priority: "High",
+      priority: 7,
       assignedUsers: [
         { userId: 7, name: "Rachel Green", email: "rachel.green@company.com", role: "Manager", department: "UX/UI Design" },
         { userId: 8, name: "James Rodriguez", email: "james.rodriguez@company.com", role: "Staff", department: "UX/UI Design" }
@@ -644,7 +644,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-28",
       completedDate: null,
       dueDate: "2025-10-15",
-      priority: "High",
+      priority: 10,
       assignedUsers: [
         { userId: 9, name: "Kevin Park", email: "kevin.park@company.com", role: "Manager", department: "Infrastructure" },
         { userId: 10, name: "Lisa Wang", email: "lisa.wang@company.com", role: "Staff", department: "Infrastructure" },
@@ -663,7 +663,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-30",
       completedDate: null,
       dueDate: "2025-10-20",
-      priority: "Medium",
+      priority: 7,
       assignedUsers: [
         { userId: 12, name: "Amanda Foster", email: "amanda.foster@company.com", role: "Manager", department: "Marketing" },
         { userId: 13, name: "Ryan Mitchell", email: "ryan.mitchell@company.com", role: "Staff", department: "Data Analytics" }
@@ -681,7 +681,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-26",
       completedDate: null,
       dueDate: "2025-10-10",
-      priority: "Medium",
+      priority: 7,
       assignedUsers: [
         { userId: 14, name: "Jessica Chen", email: "jessica.chen@company.com", role: "Staff", department: "Data Analytics" },
         { userId: 15, name: "Christopher Lee", email: "christopher.lee@company.com", role: "Manager", department: "Customer Support" }
@@ -706,7 +706,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-29",
       completedDate: null,
       dueDate: "2025-10-25",
-      priority: "High",
+      priority: 10,
       assignedUsers: [
         { userId: 16, name: "Michael Torres", email: "michael.torres@company.com", role: "Manager", department: "Finance" },
         { userId: 17, name: "Stephanie Kim", email: "stephanie.kim@company.com", role: "Staff", department: "Finance" }
@@ -724,7 +724,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-24",
       completedDate: null,
       dueDate: "2025-10-18",
-      priority: "Medium",
+      priority: 7,
       assignedUsers: [
         { userId: 18, name: "Nicole Brown", email: "nicole.brown@company.com", role: "Manager", department: "Human Resources" },
         { userId: 19, name: "Daniel Wilson", email: "daniel.wilson@company.com", role: "Staff", department: "Human Resources" },
@@ -750,7 +750,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-27",
       completedDate: null,
       dueDate: "2025-11-05",
-      priority: "High",
+      priority: 8,
       assignedUsers: [
         { userId: 20, name: "Andrew Martinez", email: "andrew.martinez@company.com", role: "Manager", department: "Legal" },
         { userId: 2, name: "Sarah Davis", email: "sarah.davis@company.com", role: "Admin", department: "Security" }
@@ -768,7 +768,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-25",
       completedDate: null,
       dueDate: "2025-10-12",
-      priority: "High",
+      priority: 9,
       assignedUsers: [
         { userId: 21, name: "Patricia Garcia", email: "patricia.garcia@company.com", role: "Manager", department: "Sales" },
         { userId: 13, name: "Ryan Mitchell", email: "ryan.mitchell@company.com", role: "Staff", department: "Data Analytics" }
@@ -793,7 +793,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-26",
       completedDate: null,
       dueDate: "2025-10-15",
-      priority: "Medium",
+      priority: 5,
       assignedUsers: [
         { userId: 22, name: "Thomas Anderson", email: "thomas.anderson@company.com", role: "Manager", department: "Product Management" },
         { userId: 7, name: "Rachel Green", email: "rachel.green@company.com", role: "Manager", department: "UX/UI Design" }
@@ -812,7 +812,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-29",
       completedDate: null,
       dueDate: "2025-10-20",
-      priority: "High",
+      priority: 10,
       assignedUsers: [
         { userId: 2, name: "Sarah Davis", email: "sarah.davis@company.com", role: "Admin", department: "Security" },
         { userId: 11, name: "Robert Johnson", email: "robert.johnson@company.com", role: "Admin", department: "Infrastructure" }
@@ -837,7 +837,7 @@ export const taskMockData: MockData = {
       startDate: "2025-09-30",
       completedDate: null,
       dueDate: "2025-11-15",
-      priority: "High",
+      priority: 5,
       assignedUsers: [
         { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Engineering Operation Division" },
         { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" },

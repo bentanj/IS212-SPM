@@ -15,7 +15,7 @@ class Task(Base):
     start_date = Column(DateTime(timezone=True), nullable=True)
     completed_date = Column(DateTime(timezone=True), nullable=True)
     due_date = Column(DateTime(timezone=True), nullable=True)
-    priority = Column(Text, nullable=True)
+    priority = Column(BigInteger, nullable=True)
     tags = Column(ARRAY(Text), nullable=True)
     status = Column(Text, nullable=True)
     project_name = Column(Text, nullable=True)

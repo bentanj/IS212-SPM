@@ -168,12 +168,12 @@ class TaskService:
             raise TaskValidationError("Task title is required")
 
         if 'priority' in task_data and task_data['priority']:
-            valid_priorities = ['low', 'medium', 'high', 'urgent']
+            valid_priorities = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
             if task_data['priority'] not in valid_priorities:
-                raise TaskValidationError(f"Priority must be one of: {', '.join(valid_priorities)}")
+                raise TaskValidationError(f"Priority must be one of: {', '.join(map(str, valid_priorities))}")
 
         if 'status' in task_data and task_data['status']:
-            valid_statuses = ['pending', 'in_progress', 'completed', 'cancelled']
+            valid_statuses = ["To Do", "In Progress", "Completed", "Blocked"]
             if task_data['status'] not in valid_statuses:
                 raise TaskValidationError(f"Status must be one of: {', '.join(valid_statuses)}")
 
