@@ -286,36 +286,69 @@ def _parse_filter_data(data: dict):
 def _parse_task_data(data: dict, is_update: bool = False):
     task_data = {}
 
-    for key in ['title', 'description', 'priority', 'tags', 'status', 'project_name']:
-        if key in data:
-            task_data[key] = data[key]
+    # Handle both snake_case (backend) and camelCase (frontend) field names
+    field_mappings = {
+        'title': 'title',
+        'description': 'description',
+        'priority': 'priority',
+        'tags': 'tags',
+        'status': 'status',
+        'project_name': 'projectName',  # backend: frontend
+        'parent_id': 'parentTaskId',
+    }
 
-    if 'parent_id' in data:
-        task_data['parent_id'] = data['parent_id']
+    for backend_key, frontend_key in field_mappings.items():
+        # Try backend naming first, then frontend naming
+        if backend_key in data:
+            task_data[backend_key] = data[backend_key]
+        elif frontend_key in data:
+            task_data[backend_key] = data[frontend_key]
 
-    if 'departments' in data:
-        if isinstance(data['departments'], list):
-            task_data['departments'] = data['departments']
+    # Handle departments (can come as 'departments' or 'department')
+    departments_value = data.get('departments') or data.get('department')
+    if departments_value:
+        if isinstance(departments_value, list):
+            task_data['departments'] = departments_value
         else:
             raise ValueError("departments must be an array")
 
+    # Handle comments
     if 'comments' in data:
         if isinstance(data['comments'], list):
             task_data['comments'] = data['comments']
         else:
             raise ValueError("comments must be an array")
 
-    for date_field in ['start_date', 'completed_date', 'due_date']:
-        if date_field in data and data[date_field]:
-            try:
-                task_data[date_field] = datetime.fromisoformat(data[date_field].replace('Z', '+00:00'))
-            except ValueError:
-                raise ValueError(f"Invalid {date_field} format. Use ISO format")
+    # Handle date fields - support both naming conventions
+    date_field_mappings = {
+        'start_date': 'startDate',
+        'completed_date': 'completedDate',
+        'due_date': 'dueDate',
+    }
 
-    if 'assigned_users' in data:
+    for backend_field, frontend_field in date_field_mappings.items():
+        date_value = data.get(backend_field) or data.get(frontend_field)
+        if date_value:
+            try:
+                task_data[backend_field] = datetime.fromisoformat(date_value.replace('Z', '+00:00'))
+            except ValueError:
+                raise ValueError(f"Invalid {backend_field} format. Use ISO format")
+
+    # Handle assigned_users - support both formats
+    assigned_users_value = data.get('assigned_users') or data.get('assignedUsers')
+    if assigned_users_value:
         try:
-            task_data['assigned_users'] = [int(uid) for uid in data['assigned_users']]
-        except ValueError:
+            # If it's a list of objects (frontend format), extract userId
+            if isinstance(assigned_users_value, list) and len(assigned_users_value) > 0:
+                if isinstance(assigned_users_value[0], dict):
+                    # Frontend format: [{ userId: 1, name: "..." }, ...]
+                    task_data['assigned_users'] = [int(user.get('userId')) for user in assigned_users_value]
+                else:
+                    # Backend format: [1, 2, 3]
+                    task_data['assigned_users'] = [int(uid) for uid in assigned_users_value]
+            else:
+                task_data['assigned_users'] = []
+        except (ValueError, KeyError) as e:
             raise ValueError("Invalid user ID format in assigned_users")
 
     return task_data
