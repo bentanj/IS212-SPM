@@ -26,7 +26,7 @@ export async function getAllTasks(): Promise<Task[]> {
     }
 }
 
-export async function getTaskById(taskId = ""): Promise<Task[]> {
+export async function getTaskById(taskId: string): Promise<Task> {
 
     let targetURL = `http://localhost:${TASK_PORT}/api/tasks/${taskId}`;
 
@@ -51,13 +51,13 @@ export async function getTaskById(taskId = ""): Promise<Task[]> {
 
 export async function getUserTask(user: User): Promise<Task[]> {
 
-    let targetURL = `http://localhost:${TASK_PORT}/api/filter`;
+    let taskArray: Task[] = [];
+    let getDepartmentTasksURL = `http://localhost:${TASK_PORT}/api/tasks/filter`;
 
+    // Get tasks assigned to user's department(s)
     const departmentScope = determineDepartmentScope(user);
-    console.log(departmentScope)
-
     try {
-        const response = await fetch(targetURL, {
+        const response = await fetch(getDepartmentTasksURL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ "departments": departmentScope }),
@@ -68,10 +68,39 @@ export async function getUserTask(user: User): Promise<Task[]> {
             throw new Error(`HTTP error! Status: ${response.status}.\n${errorMessage.error}`);
         }
 
-        return await response.json();
+        const departmentTasks = await response.json();
+        taskArray.push(...departmentTasks);
     }
     catch (error) {
-        console.error("Error getting User's tasks:", error);
+        console.error("Error getting User's Department Tasks:", error);
         throw error;
     }
+
+    // Get tasks assigned directly to user
+    let userTaskURL = `http://localhost:${TASK_PORT}/api/tasks/user/${user.userId}`;
+    try {
+        const response = await fetch(userTaskURL, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (!response.ok) {
+            const errorMessage = await response.json();
+            throw new Error(`HTTP error! Status: ${response.status}.\n${errorMessage.error}`);
+        }
+
+        const userTasks = await response.json();
+        taskArray.push(...userTasks);
+    }
+    catch (error) {
+        console.error("Error getting User's Assigned Tasks:", error);
+        throw error;
+    }
+
+    // Remove duplicate tasks (if any) based on task ID
+    const uniqueTasksMap = new Map<string, Task>();
+    for (const task of taskArray) {
+        uniqueTasksMap.set(String(task.taskId), task);
+    }
+    return Array.from(uniqueTasksMap.values());
 }
