@@ -7,7 +7,7 @@ interface SideBarProps {
     sidebarOpen: boolean
     toggleSidebar: () => void
     currentUser: User
-    assignedTasks: Task[]
+    tasks: Task[]
 }
 
 export const SideBar: React.FC<SideBarProps> = ({
@@ -15,8 +15,13 @@ export const SideBar: React.FC<SideBarProps> = ({
     sidebarOpen,
     toggleSidebar,
     currentUser,
-    assignedTasks
+    tasks
 }) => {
+
+    const assignedTasks = tasks.filter(task =>
+        task.assignedUsers.some(assignedUser => assignedUser.userId === currentUser.userId)
+    );
+
     if (isMobile) {
         // Mobile Drawer
         return (

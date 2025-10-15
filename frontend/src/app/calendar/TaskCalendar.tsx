@@ -18,9 +18,12 @@ import TaskDetailModal from './TaskDetailModal';
 import DayTasksModal from './DayTasksModal';
 import { getTaskTypeColor, isTaskOverdue } from './_functions/TaskRenderingFunctions';
 
+// Functions
+import { getUserTask } from '@/utils/Tasks/getTask';
+
 const TaskCalendar: React.FC = () => {
   // Mock Data
-  const [tasks, setTasks] = useState(taskMockData.tasks);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [mockJWT, setMockJWT] = useState(taskMockData.currentUser);
 
   const [currentDate, setCurrentDate] = useState<Dayjs>(dayjs());
@@ -52,31 +55,25 @@ const TaskCalendar: React.FC = () => {
     setSnackbarSeverity('success');
   }
 
+  useEffect(() => {
+    fetchTasks();
+  }, [mockJWT]);
+
+  const fetchTasks = async () => {
+    try {
+      const TaskData = await getUserTask(mockJWT);
+      setTasks(TaskData);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    }
+  };
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
-  // BUSINESS LOGIC 1: Filter tasks assigned to current user only
-  const assignedTasks = useMemo(() => {
-    return tasks.filter(task =>
-      task.assignedUsers.some(assignedUser => assignedUser.userId === mockJWT.userId)
-    );
-  }, [tasks]);
-
-  // BUSINESS LOGIC 2: Get tasks for current month by START DATE
-  const monthTasks = useMemo(() => {
-    const startOfMonth = currentDate.startOf('month');
-    const endOfMonth = currentDate.endOf('month');
-
-    return assignedTasks.filter(task => {
-      const taskStartDate = dayjs(task.startDate);
-      return taskStartDate.isBetween(startOfMonth, endOfMonth, 'day', '[]');
-    });
-  }, [currentDate, assignedTasks]);
-
-  // BUSINESS LOGIC 2: Get tasks for specific day by START DATE
   const getTasksForDay = (date: Dayjs) => {
-    return monthTasks.filter(task => dayjs(task.startDate).isSame(date, 'day'));
+    return tasks.filter(task => dayjs(task.startDate).isSame(date, 'day'));
   };
 
   const toggleSidebar = () => {
@@ -145,7 +142,7 @@ const TaskCalendar: React.FC = () => {
         sidebarOpen={sidebarOpen}
         toggleSidebar={toggleSidebar}
         currentUser={mockJWT}
-        assignedTasks={assignedTasks}
+        tasks={tasks}
       />
 
       {/* Main Content */}

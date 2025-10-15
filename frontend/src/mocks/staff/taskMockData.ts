@@ -15,7 +15,7 @@ export const taskMockData: MockData = {
     name: "John Smith",
     email: "john.smith@company.com",
     role: "Staff",
-    department: "Sales Manager",
+    department: "Consultant",
   },
   tasks: [
     // Original parent tasks (existing ones unchanged)
