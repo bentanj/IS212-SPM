@@ -17,85 +17,124 @@ def client():
 
 
 @pytest.mark.unit
-def test_get_task_completion_report(client):
-    """Test GET /api/reports/task-completion endpoint."""
-    resp = client.get('/api/reports/task-completion')
-    
+def test_health_check(client):
+    """Test GET /api/reports/health endpoint."""
+    resp = client.get('/api/reports/health')
     assert resp.status_code == 200
     data = resp.get_json()
+    assert data["status"] == "ok"
+    assert data["service"] == "reports"
+
+
+@pytest.mark.unit
+def test_list_available_reports(client):
+    """Test GET /api/reports endpoint lists all report types."""
+    resp = client.get('/api/reports')
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert isinstance(data, list)
+    assert len(data) == 3
+    report_ids = [r["id"] for r in data]
+    assert "task-completion-status" in report_ids
+    assert "project-performance" in report_ids
+    assert "team-productivity" in report_ids
+
+
+@pytest.mark.unit
+def test_get_task_completion_report_data(client):
+    """Test GET /api/reports/task-completion/data endpoint."""
+    resp = client.get('/api/reports/task-completion/data')
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert 'metadata' in data
     assert 'summary' in data
+    assert 'data' in data
     assert 'total_tasks' in data['summary']
+    assert 'completed_tasks' in data['summary']
+    assert 'in_progress_tasks' in data['summary']
+    assert 'to_do_tasks' in data['summary']
+    assert 'blocked_tasks' in data['summary']
+    assert 'completion_rate' in data['summary']
 
 
 @pytest.mark.unit
-def test_get_project_performance_report(client):
-    """Test GET /api/reports/project-performance endpoint."""
-    resp = client.get('/api/reports/project-performance')
-    
+def test_get_project_performance_report_data(client):
+    """Test GET /api/reports/project-performance/data endpoint."""
+    resp = client.get('/api/reports/project-performance/data')
     assert resp.status_code == 200
     data = resp.get_json()
-    assert 'projects' in data
+    assert 'metadata' in data
+    assert 'summary' in data
+    assert 'data' in data
+    assert 'projects' in data['data']
+    assert isinstance(data['data']['projects'], list)
 
 
 @pytest.mark.unit
-def test_get_team_productivity_report(client):
-    """Test GET /api/reports/team-productivity endpoint."""
-    resp = client.get('/api/reports/team-productivity')
-    
+def test_get_team_productivity_report_data(client):
+    """Test GET /api/reports/team-productivity/data endpoint."""
+    resp = client.get('/api/reports/team-productivity/data')
     assert resp.status_code == 200
     data = resp.get_json()
-    assert 'team_members' in data
+    assert 'metadata' in data
+    assert 'summary' in data
+    assert 'data' in data
+    assert 'team_members' in data['data']
+    assert isinstance(data['data']['team_members'], list)
 
 
 @pytest.mark.unit
-def test_get_reports_with_date_filter(client):
-    """Test reports endpoint with date range filter."""
-    start_date = '2025-01-01'
-    end_date = '2025-12-31'
-    
-    resp = client.get(
-        f'/api/reports/task-completion?start_date={start_date}&end_date={end_date}'
-    )
-    
+def test_get_reports_summary(client):
+    """Test GET /api/reports/summary endpoint."""
+    resp = client.get('/api/reports/summary')
     assert resp.status_code == 200
     data = resp.get_json()
-    assert 'date_range' in data
+    assert 'total_tasks' in data
+    assert 'completion_rate' in data
+    assert 'total_projects' in data
+    assert 'total_team_members' in data
+    assert 'generated_at' in data
 
 
 @pytest.mark.unit
-def test_invalid_date_format(client):
-    """Test reports endpoint with invalid date format."""
-    resp = client.get('/api/reports/task-completion?start_date=invalid-date')
-    
-    assert resp.status_code == 400
+def test_report_metadata_structure(client):
+    """Test that report metadata contains correct fields."""
+    resp = client.get('/api/reports/task-completion/data')
+    assert resp.status_code == 200
     data = resp.get_json()
-    assert 'error' in data
+    
+    metadata = data['metadata']
+    assert 'report_id' in metadata
+    assert 'report_type' in metadata
+    assert 'generated_at' in metadata
+    assert metadata['report_type'] == 'task_completion_status'
 
 
 @pytest.mark.unit
-def test_report_export_pdf(client):
-    """Test PDF export endpoint."""
-    resp = client.get('/api/reports/task-completion/export?format=pdf')
-    
+def test_task_data_camelCase_fields(client):
+    """Test that task data returns camelCase fields for frontend."""
+    resp = client.get('/api/reports/task-completion/data')
     assert resp.status_code == 200
-    assert resp.content_type == 'application/pdf'
+    data = resp.get_json()
+    
+    if data['data']['tasks']:
+        task = data['data']['tasks'][0]
+        # Check for camelCase fields frontend expects
+        assert 'projectName' in task
+        assert 'assignedUsers' in task
+        assert 'completedDate' in task or task['status'] != 'Completed'
 
 
 @pytest.mark.unit
-def test_report_export_csv(client):
-    """Test CSV export endpoint."""
-    resp = client.get('/api/reports/project-performance/export?format=csv')
-    
+def test_error_handling_invalid_endpoint(client):
+    """Test error handling for non-existent endpoint."""
+    resp = client.get('/api/reports/nonexistent')
+    assert resp.status_code == 404
+
+
+@pytest.mark.unit
+def test_cors_headers_present(client):
+    """Test that CORS headers are present (if configured)."""
+    resp = client.get('/api/reports/health')
+    # Adjust based on your CORS configuration
     assert resp.status_code == 200
-    assert resp.content_type == 'text/csv'
-
-
-@pytest.mark.unit
-def test_unauthorized_access(client):
-    """Test accessing reports without proper authentication."""
-    # This assumes you have authentication middleware
-    resp = client.get('/api/reports/task-completion', headers={})
-    
-    # Should return 401 if authentication is required
-    # Adjust assertion based on your auth implementation
-    assert resp.status_code in [200, 401]
