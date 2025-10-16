@@ -15,17 +15,6 @@ def client():
     with app.test_client() as client:
         yield client
 
-
-@pytest.mark.unit
-def test_health_check(client):
-    """Test GET /api/reports/health endpoint."""
-    resp = client.get('/api/reports/health')
-    assert resp.status_code == 200
-    data = resp.get_json()
-    assert data["status"] == "ok"
-    assert data["service"] == "reports"
-
-
 @pytest.mark.unit
 def test_list_available_reports(client):
     """Test GET /api/reports endpoint lists all report types."""
@@ -132,9 +121,3 @@ def test_error_handling_invalid_endpoint(client):
     assert resp.status_code == 404
 
 
-@pytest.mark.unit
-def test_cors_headers_present(client):
-    """Test that CORS headers are present (if configured)."""
-    resp = client.get('/api/reports/health')
-    # Adjust based on your CORS configuration
-    assert resp.status_code == 200

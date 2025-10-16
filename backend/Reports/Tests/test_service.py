@@ -3,8 +3,8 @@ from typing import Iterable, Optional, Dict, Any, List
 from uuid import UUID, uuid4
 import pytest
 
-from backend.Reports.Services.ReportService import ReportService
-from backend.Reports.Repositories.ReportRepository import ReportRepository
+from Services.ReportService import ReportService
+from Repositories.ReportRepository import ReportRepository
 from Tasks.Models.Task import Task
 
 

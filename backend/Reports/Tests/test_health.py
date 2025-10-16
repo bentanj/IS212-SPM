@@ -18,11 +18,3 @@ def test_health_ok():
         assert data == {"status": "ok", "service": "reports"}
 
 
-@pytest.mark.unit
-def test_health_endpoint_accessible():
-    """Test that health endpoint is accessible without authentication."""
-    app.testing = True
-    with app.test_client() as client:
-        resp = client.get("/api/reports/health")
-        assert resp.status_code == 200
-        assert resp.content_type == "application/json"
