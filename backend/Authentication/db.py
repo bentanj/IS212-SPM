@@ -31,10 +31,13 @@ SessionLocal = scoped_session(
 )
 Base = declarative_base()
 
-def init_db():
+def init_db(engine_to_use=None):
     # import models here so Base.metadata is populated
     try:
         from .Models.User import User  # noqa
     except ImportError:
         from Models.User import User  # noqa
-    Base.metadata.create_all(bind=engine)
+    
+    # Use provided engine or default to global engine
+    target_engine = engine_to_use if engine_to_use is not None else engine
+    Base.metadata.create_all(bind=target_engine)

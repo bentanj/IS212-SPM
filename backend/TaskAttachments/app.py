@@ -26,9 +26,9 @@ def create_app():
     return app
 
 
-app = create_app()
-
+# Only create app instance when running directly, not when importing
 if __name__ == "__main__":
+    app = create_app()
     app.run(debug=True, port=8005, host='0.0.0.0')
 
 
