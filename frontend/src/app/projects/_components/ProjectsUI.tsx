@@ -12,10 +12,10 @@ import { ProjectsDataGrid } from './ProjectsDataGrid';
 import { ProjectDetailModal } from './ProjectDetailModal';
 import { SearchBar } from './SearchBar';
 import { FilterControls } from './FilterControls';
+import { ProjectCardList } from './ProjectCardList';
 
 import { applyProjectFilters } from '../_functions/filterHelpers';
-import { TaskDetailModal } from '@/app/calendar/_components';
-import { ProjectCardList } from './ProjectCardList';
+import { TaskDetailModal } from '@/components/TaskDetailModal';
 
 
 // The ONLY CHANGE is the function name here
