@@ -65,7 +65,16 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         <DialogContent dividers>
 
           <Subtitle1 boxMarginBottom={3} label="Description">{task.description} </Subtitle1>
-          <Subtitle1 boxMarginBottom={3} label="Project">{task.project_name}</Subtitle1>
+          <Stack direction="row">
+            <Subtitle1 boxMarginBottom={3} label="Project">{task.project_name}</Subtitle1>
+            <Box sx={{ ml: "auto", mr: "auto" }}>
+              <Subtitle1 boxMarginBottom={3} label="Departments">
+                {task.departments.map((dept, idx) => (
+                  <Chip key={idx} label={dept} sx={{ mr: 1 }} size="small" />
+                ))}
+              </Subtitle1>
+            </Box>
+          </Stack>
 
           {/* Dates Section - Responsive Stack */}
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 2, sm: 4 }} sx={{ mb: 3 }}>
@@ -104,12 +113,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             </Typography>
             <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
               {task.tags.map((tag, index) => (
-                <Chip
-                  key={index}
-                  label={tag}
-                  size="small"
-                  variant="outlined"
-                />
+                <Chip key={index} label={tag} size="small" variant="outlined" />
               ))}
             </Stack>
           </Box>
