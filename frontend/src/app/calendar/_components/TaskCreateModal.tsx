@@ -67,6 +67,7 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
     (!isEditMode || task.taskId !== existingTaskDetails!.taskId) // Exclude current task in edit mode
   );
 
+  console.log("Existing Task Details", existingTaskDetails)
 
   // Initialize form data when editing
   useEffect(() => {
@@ -78,22 +79,14 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
       if (isEditMode && existingTaskDetails) {
         // Pre-populate form with existing task data
         setFormData({
-          taskId: existingTaskDetails.taskId,
-          title: existingTaskDetails.title,
-          description: existingTaskDetails.description,
-          parentTaskId: existingTaskDetails.parentTaskId,
-          department: existingTaskDetails.department,
-          priority: existingTaskDetails.priority,
-          status: existingTaskDetails.status,
+          ...existingTaskDetails,
           startDate: dayjs(existingTaskDetails.startDate),
           completedDate: existingTaskDetails.completedDate ? dayjs(existingTaskDetails.completedDate) : null,
           dueDate: dayjs(existingTaskDetails.dueDate),
-          assignedUsers: [...existingTaskDetails.assignedUsers],
-          tags: [...existingTaskDetails.tags],
-          comments: '',
-          projectName: existingTaskDetails.projectName,
+          comments: "",
           attachedFile: null,
         });
+
 
         if (existingTaskDetails.parentTaskId) {
           const parentTaskObj = allTasks.find(t => t.taskId === existingTaskDetails.parentTaskId);
@@ -105,8 +98,6 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
       setFormData(DefaultFormData);
     }
   }, [open, isEditMode, existingTaskDetails, allTasks]);
-
-  console.log('Form Data:', formData);
 
   const handleReset = () => {
     resetForm(setFormData, setErrors, setSubmitStatus, setSubmitMessage, setTagInput, setNewComment)
