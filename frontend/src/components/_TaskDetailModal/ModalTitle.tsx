@@ -1,6 +1,6 @@
 import { DialogTitle, Box, Typography, Stack, Chip } from "@mui/material"
 import { Task } from "@/types"
-import { getPriorityColor, getStatusColor } from "../../_functions/TaskRenderingFunctions";
+import { getPriorityColor, getStatusColor } from "@/utils/TaskRenderingFunctions";
 
 interface ModalTitleProps {
     task: Task;

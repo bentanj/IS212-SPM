@@ -10,10 +10,10 @@ import {
 import dayjs from 'dayjs';
 
 // Functions
-import { getAvailableUsers, handleAddTag, handleRemoveTag, resetForm, handleSubmit, canAddMoreUsers } from '../_functions/TaskCreateModelFunctions';
+import { handleAddTag, handleRemoveTag, resetForm, handleSubmit, canAddMoreUsers } from '@/utils/TaskCreateModelFunctions';
 
 // Types and Constants
-import { taskMockData, allUsers } from '@/mocks/staff/taskMockData';
+import { taskMockData } from '@/mocks/staff/taskMockData';
 import DefaultFormData, { PriorityOptions, StatusOptions } from '@/constants/DefaultFormData';
 import { ALL_DEPARTMENTS } from '@/constants/Organisation';
 import { Task, User, FormData, Departments, Priority, Status } from '@/types'
@@ -46,9 +46,6 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   // Determine if in edit mode
   const isEditMode = existingTaskDetails !== null;
 
-  // Get current user object from allUsers
-  const currentUserObj = allUsers.find(user => user.userId === currentUser.userId);
-
   // Form state
   const [formData, setFormData] = useState<FormData | Omit<FormData, 'taskId'>>(DefaultFormData);
   const [parentTask, setParentTask] = useState<Task | null>(null);
@@ -66,8 +63,6 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
     !task.parentTaskId && // Only allow main tasks as parents
     (!isEditMode || task.taskId !== existingTaskDetails!.taskId) // Exclude current task in edit mode
   );
-
-  console.log("Existing Task Details", existingTaskDetails)
 
   // Initialize form data when editing
   useEffect(() => {

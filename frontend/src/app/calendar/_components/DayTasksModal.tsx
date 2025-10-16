@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 import { Task } from '@/types';
 import dayjs, { Dayjs } from 'dayjs';
-import { getPriorityColor, getStatusColor } from '../_functions/TaskRenderingFunctions';
+import { getPriorityColor, getStatusColor } from '../../../utils/TaskRenderingFunctions';
 
 interface DayTasksModalProps {
   tasks: Task[];
@@ -29,7 +29,7 @@ interface DayTasksModalProps {
   onTaskSelect: (task: Task) => void;
 }
 
-const DayTasksModal: React.FC<DayTasksModalProps> = ({
+export const DayTasksModal: React.FC<DayTasksModalProps> = ({
   tasks,
   selectedDate,
   open,
@@ -220,5 +220,3 @@ const DayTasksModal: React.FC<DayTasksModalProps> = ({
     </Dialog>
   );
 };
-
-export default DayTasksModal;

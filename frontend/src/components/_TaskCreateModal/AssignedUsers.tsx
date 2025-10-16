@@ -1,9 +1,8 @@
 import { Autocomplete, TextField } from '@mui/material';
 import { User } from '@/types';
 import { allUsers } from '@/mocks/allUsers';
-import { getAvailableUsers } from '../../_functions/TaskCreateModelFunctions';
-import renderAssignedUserTags from '../../_functions/renderAssignedUserTags';
-import { handleAssignedUsersChange } from '../../_functions/TaskCreateModelFunctions';
+import { getAvailableUsers, handleAssignedUsersChange } from '@/utils/TaskCreateModelFunctions';
+import renderAssignedUserTags from './renderAssignedUserTags';
 
 interface AssignedUsersAutocompleteProps {
     assignedUsers: User[];

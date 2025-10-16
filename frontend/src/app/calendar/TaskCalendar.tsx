@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Alert, AlertColor, Box, useTheme, useMediaQuery, Snackbar } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -12,11 +12,9 @@ dayjs.extend(weekOfYear);
 
 import { taskMockData } from '@/mocks/staff/taskMockData';
 import { Task } from '@/types';
-import { SideBar, Header, TaskCreateModal } from './_components';
+import { SideBar, Header, TaskCreateModal, TaskDetailModal, DayTasksModal } from './_components';
 import { MonthHeader, CalendarBody, DayHeaders } from './_components/_TaskCalendar';
-import TaskDetailModal from './_components/TaskDetailModal';
-import DayTasksModal from './_components/DayTasksModal';
-import { getTaskTypeColor, isTaskOverdue } from './_functions/TaskRenderingFunctions';
+import { getTaskTypeColor, isTaskOverdue } from '../../utils/TaskRenderingFunctions';
 
 // Functions
 import { getUserTask } from '@/utils/Tasks/getTask';

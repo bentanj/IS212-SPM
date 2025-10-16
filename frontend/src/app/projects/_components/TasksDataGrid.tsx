@@ -6,7 +6,7 @@ import { Box, Chip } from '@mui/material';
 import { Task } from '@/mocks/staff/taskMockData';
 import dayjs from 'dayjs';
 import Priority from '@/types/TPriority';
-import { getStatusColor, getPriorityColor } from '../../calendar/_functions/TaskRenderingFunctions';
+import { getStatusColor, getPriorityColor } from '../../../utils/TaskRenderingFunctions';
 
 interface TasksDataGridProps {
   tasks: Task[];
@@ -20,7 +20,7 @@ interface TasksDataGridProps {
  * Click a row to open TaskDetailModal
  */
 export function TasksDataGrid({ tasks, loading = false, onTaskClick }: TasksDataGridProps) {
-  
+
   /**
    * Column definitions based on Task structure
    */
@@ -70,7 +70,7 @@ export function TasksDataGrid({ tasks, loading = false, onTaskClick }: TasksData
       headerName: 'Priority',
       width: 100,
       type: 'number',
-      align: 'center',        
+      align: 'center',
       headerAlign: 'center',
       renderCell: (params) => {
         const priority = params.value as Priority;

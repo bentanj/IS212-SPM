@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography, List, ListItem, Stack, Chip } from '@mui/material';
 import { Task } from '@/types';
-import { getPriorityColor, getStatusColor } from '@/app/calendar/_functions/TaskRenderingFunctions';
+import { getPriorityColor, getStatusColor } from '@/utils/TaskRenderingFunctions';
 import dayjs from 'dayjs';
 
 interface SubTaskSectionProps {

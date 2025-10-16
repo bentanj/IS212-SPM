@@ -3,7 +3,7 @@
 import React from 'react';
 import { Autocomplete, TextField, Chip, Box, Typography } from '@mui/material';
 import { Task } from '@/types';
-import { getPriorityColor, getStatusColor } from '../../_functions/TaskRenderingFunctions';
+import { getPriorityColor, getStatusColor } from '@/utils/TaskRenderingFunctions';
 
 interface ParentTaskFieldProps {
   parentTask: Task | null;

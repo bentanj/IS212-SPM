@@ -1,6 +1,6 @@
 import { Box, Button, Typography, Paper, IconButton } from '@mui/material'
 import { CloudUpload, Delete } from '@mui/icons-material';
-import { handleFileUpload, handleRemoveFile } from '../../_functions/TaskCreateModelFunctions';
+import { handleFileUpload, handleRemoveFile } from '@/utils/TaskCreateModelFunctions';
 
 interface FileUploadProps {
     isMobile: boolean;
