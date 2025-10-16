@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { User, Task, Comment, FormData, APITaskParams } from '@/types'
+import { AlertColor } from '@mui/material';
 import DefaultFormData from '@/constants/DefaultFormData';
 import updateTask from '@/utils/Tasks/updateTask';
 import createTask from '@/utils/Tasks/createTask';
@@ -99,12 +100,13 @@ export const handleSubmit = async (params: {
     formData: FormData | Omit<FormData, 'taskId'>;
     newComment: string;
     currentUser: User;
+    setSnackbarContent: (message: string, severity: AlertColor) => void;
     setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
     handleReset: () => void;
     onClose: () => void;
 }) => {
     const { existingTaskDetails, formData, newComment, currentUser,
-        setErrors, handleReset, onClose } = params;
+        setSnackbarContent, setErrors, handleReset, onClose } = params;
 
     // Validate form
     if (!validateForm(formData, setErrors)) {
@@ -117,8 +119,10 @@ export const handleSubmit = async (params: {
     try {
         if (existingTaskDetails) {
             response = await updateTask(TaskData);
+            setSnackbarContent('Task updated successfully', 'success');
         } else {
             response = await createTask(TaskData);
+            setSnackbarContent('Task created successfully', 'success');
         }
 
         setTimeout(() => {
@@ -128,6 +132,7 @@ export const handleSubmit = async (params: {
 
         return response;
     } catch (error) {
+        setSnackbarContent(`Failed to create task. Please try again`, 'error');
         console.error('Error submitting form:', error);
     }
 };

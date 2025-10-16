@@ -99,19 +99,15 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
 
   // Function to Trigger when Submit Button is Clicked
   const onSubmit = () => {
-
-    handleSubmit({ existingTaskDetails, formData, newComment, currentUser, setErrors, handleReset, onClose })
+    handleSubmit({
+      existingTaskDetails, formData, newComment, currentUser,
+      setSnackbarContent, setErrors, handleReset, onClose
+    })
       .then((response) => {
         if (response) {
-          if (existingTaskDetails) setSnackbarContent('Task updated successfully', 'success');
-          else setSnackbarContent('Task created successfully', 'success');
           refetchTasks();
         }
-        else setSnackbarContent(`Failed to create task. Please try again`, 'error');
       })
-      .catch((error) => {
-        console.error("Error in handleSubmit:", error);
-      });
   }
 
   // Get unique project names from existing tasks [TO CHANGE TO API CALL LATER]
