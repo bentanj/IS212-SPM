@@ -24,6 +24,7 @@ import { ModalTitle, ParentTaskField, DateRow, MultiSelectInput, DropDownMenu, T
 interface TaskCreateModalProps {
   open: boolean;
   onClose: () => void;
+  refetchTasks: () => void;
   setSnackbarContent: (message: string, severity: AlertColor) => void;
   currentUser: User;
   existingTaskDetails?: Task | null;
@@ -34,6 +35,7 @@ interface TaskCreateModalProps {
 export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   open,
   onClose,
+  refetchTasks,
   setSnackbarContent,
   currentUser,
   existingTaskDetails = null,
@@ -98,28 +100,26 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   // Function to Trigger when Submit Button is Clicked
   const onSubmit = () => {
 
-    const taskWithParent = {
-      ...formData,
-      parentTaskId: parentTask?.taskId,
-    };
-
-    handleSubmit({
-      existingTaskDetails, formData: taskWithParent, newComment, currentUser,
-      setErrors, handleReset, onClose,
-      allTasks
-    });
-    // Placeholder. To replace with actual success condition
-    if (existingTaskDetails) setSnackbarContent('Task updated successfully', 'success');
-    else if (true) setSnackbarContent('Task created successfully', 'success');
-    else setSnackbarContent('Failed to create task', 'error');
-  };
+    handleSubmit({ existingTaskDetails, formData, newComment, currentUser, setErrors, handleReset, onClose })
+      .then((response) => {
+        if (response) {
+          if (existingTaskDetails) setSnackbarContent('Task updated successfully', 'success');
+          else setSnackbarContent('Task created successfully', 'success');
+          refetchTasks();
+        }
+        else setSnackbarContent(`Failed to create task. Please try again`, 'error');
+      })
+      .catch((error) => {
+        console.error("Error in handleSubmit:", error);
+      });
+  }
 
   // Get unique project names from existing tasks [TO CHANGE TO API CALL LATER]
   const existingProjects = Array.from(new Set(taskMockData.tasks.map(t => t.project_name)));
 
   return (
     <Dialog open={open} onClose={onClose}
-      maxWidth="md" fullWidth fullScreen={isMobile}
+      maxWidth="md" fullWidth fullScreen={isMobile} closeAfterTransition={false}
     >
       <ModalTitle isEditMode={isEditMode} onClose={onClose} />
 

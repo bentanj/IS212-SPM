@@ -117,22 +117,6 @@ const TaskCalendar: React.FC = () => {
     setSelectedDayTasks([]);
   };
 
-  // Handle Task Creation
-  const handleTaskCreated = (newTask: Task) => {
-    setTasks(prev => [...prev, newTask]);   // To be replaced with POST API endpoint
-    setCreateModalOpen(false);
-  };
-
-  // Handle Task Updates
-  const handleTaskUpdated = (updatedTask: Task) => {
-    setTasks(prev =>
-      prev.map(task =>
-        task.taskId === updatedTask.taskId ? updatedTask : task
-      )
-    );
-    setTaskDetailModalOpen(false);
-  };
-
   return (
     <Box sx={{ display: 'flex', height: '100vh', bgcolor: '#f5f5f5', overflow: 'hidden' }}>
       {/* Sidebar for Desktop */}
@@ -211,6 +195,7 @@ const TaskCalendar: React.FC = () => {
       <TaskCreateModal
         open={createModalOpen}
         onClose={handleCloseCreateTaskModal}
+        refetchTasks={fetchTasks}
         setSnackbarContent={setSnackbarContent}
         currentUser={mockJWT}
         existingTaskDetails={selectedTask || null}

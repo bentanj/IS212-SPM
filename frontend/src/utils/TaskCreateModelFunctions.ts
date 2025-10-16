@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { User, Task, Comment, FormData, Priority, Status } from '@/types'
+import { User, Task, Comment, FormData, APITaskParams } from '@/types'
 import DefaultFormData from '@/constants/DefaultFormData';
 import updateTask from '@/utils/Tasks/updateTask';
 import createTask from '@/utils/Tasks/createTask';
@@ -102,85 +102,31 @@ export const handleSubmit = async (params: {
     setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
     handleReset: () => void;
     onClose: () => void;
-    allTasks: Task[]; // New
 }) => {
     const { existingTaskDetails, formData, newComment, currentUser,
-        setErrors, handleReset, onClose, allTasks } = params;
+        setErrors, handleReset, onClose } = params;
 
     // Validate form
     if (!validateForm(formData, setErrors)) {
         return;
     }
 
+    const TaskData = transformFormDataToAPITaskParams(currentUser, existingTaskDetails, formData, newComment);
+    let response: any;
+
     try {
         if (existingTaskDetails) {
-            // Update existing task with comments
-            const updatedComments = [...existingTaskDetails.comments];
-
-            if (newComment.trim()) {
-                const newCommentObj: Comment = {
-                    commentId: Math.max(...existingTaskDetails.comments.map(c => c.commentId), 0) + 1,
-                    author: currentUser.name,
-                    content: newComment.trim(),
-                    timestamp: dayjs().toISOString(),
-                };
-                updatedComments.push(newCommentObj);
-            }
-
-            const updatedTask: Task = {
-                ...existingTaskDetails,
-                title: formData.title.trim(),
-                description: formData.description.trim(),
-                startDate: formData.startDate!.format('YYYY-MM-DD'),
-                completedDate: formData.completedDate?.format('YYYY-MM-DD') || null,
-                dueDate: formData.dueDate!.format('YYYY-MM-DD'),
-                priority: formData.priority as Priority,
-                assignedUsers: formData.assignedUsers,
-                tags: formData.tags,
-                status: formData.status as Status,
-                comments: updatedComments,
-                projectName: formData.projectName.trim(),
-            };
-
-            updateTask(updatedTask);
+            response = await updateTask(TaskData);
         } else {
-            // Create new task with proper ID generation from live state (Updated)
-            const newTaskId = allTasks.length > 0
-                ? Math.max(...allTasks.map(t => t.taskId), 0) + 1
-                : 1;
-            const comments = formData.comments?.trim()
-                ? [{
-                    commentId: 1,
-                    author: currentUser.name,
-                    content: formData.comments?.trim(),
-                    timestamp: dayjs().toISOString(),
-                }]
-                : [];
-
-            const newTask: Task = {
-                taskId: newTaskId,
-                title: formData.title.trim(),
-                description: formData.description.trim(),
-                startDate: formData.startDate!.format('YYYY-MM-DD'),
-                completedDate: formData.completedDate?.format('YYYY-MM-DD') || null,
-                dueDate: formData.dueDate!.format('YYYY-MM-DD'),
-                department: formData.department,
-                priority: formData.priority as Priority,
-                assignedUsers: formData.assignedUsers,
-                tags: formData.tags,
-                status: formData.status as Status,
-                comments: comments,
-                projectName: formData.projectName.trim(),
-                parentTaskId: (formData as any).parentTaskId || null, // New 
-            };
-
-            createTask(newTask);
+            response = await createTask(TaskData);
         }
 
         setTimeout(() => {
             handleReset()
             onClose();
         }, 1500);
+
+        return response;
     } catch (error) {
         console.error('Error submitting form:', error);
     }
