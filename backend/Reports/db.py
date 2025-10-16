@@ -114,3 +114,50 @@ def close_db_connections():
 
 # Reports service doesn't need to initialize tables
 # That's handled by the Tasks service
+
+# from sqlalchemy import create_engine
+# from sqlalchemy.ext.declarative import declarative_base
+# from sqlalchemy.orm import sessionmaker
+# from config import Config
+
+# # Create engine with connection pooling optimized for Supabase
+# engine = create_engine(
+#     Config.get_database_uri(),
+#     pool_size=2,              # Small pool for Supabase free tier
+#     max_overflow=3,           # Maximum extra connections
+#     pool_pre_ping=True,       # Verify connections before using
+#     pool_recycle=300,         # Recycle connections after 5 minutes
+#     pool_timeout=30,          # Wait 30s for connection
+#     echo=False
+# )
+
+# SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Base = declarative_base()
+
+# def get_db():
+#     """Get database session with automatic cleanup."""
+#     db = SessionLocal()
+#     try:
+#         yield db
+#     finally:
+#         db.close()
+
+# def init_db():
+#     """Initialize database tables."""
+#     try:
+#         Base.metadata.create_all(bind=engine)
+#         print("✓ Database tables created successfully")
+#     except Exception as e:
+#         print(f"✗ Database initialization error: {e}")
+#         raise
+
+# def test_connection():
+#     """Test database connectivity."""
+#     try:
+#         with engine.connect() as conn:
+#             conn.execute("SELECT 1")
+#         print("✓ Database connection successful")
+#         return True
+#     except Exception as e:
+#         print(f"✗ Database connection failed: {e}")
+#         return False

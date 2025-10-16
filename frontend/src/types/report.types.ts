@@ -16,12 +16,12 @@ export interface TaskDetail {
   title: string;
   status: 'Completed' | 'In Progress' | 'To Do' | 'Blocked';
   priority: 'High' | 'Medium' | 'Low';
-  projectName: string;
+  projectName: string | null;  // ✅ CHANGED: Allow null
   startDate: string | null;
   completedDate: string | null;
   dueDate: string | null;
   description: string;
-  assignedUsers: AssignedUser[];
+  assignedUsers: AssignedUser[] | null;  // ✅ CHANGED: Allow null
 }
 
 export interface AssignedUser {
@@ -54,7 +54,7 @@ export interface TaskCompletionReport {
 }
 
 export interface ProjectStatistics {
-  project_name: string;
+  project_name: string | null;  // ✅ CHANGED: Allow null
   total_tasks: number;
   completed: number;
   in_progress: number;

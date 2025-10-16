@@ -32,7 +32,7 @@ services:
       - "8001"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8001/api/tasks/health')"]
+      test: ["CMD", "python", "-f", "import requests; requests.get('http://127.0.0.1:8001/api/tasks/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -77,9 +77,9 @@ services:
       - ENV=${ENV}
     expose:
       - "8003"
-    depends_on:
-      tasks:
-        condition: service_healthy
+    # depends_on:
+    #   tasks:
+    #     condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8003/api/reports/health')"]
