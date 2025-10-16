@@ -10,7 +10,7 @@ import { Edit, Add } from '@mui/icons-material';
 import { User, Task } from '@/types';
 import dayjs from 'dayjs';
 import { canEditTask } from '@/utils/Permissions';
-import { ModalTitle, Subtitle1, SubTaskSection, CommentSection } from './_components/_TaskDetailModal';
+import { ModalTitle, Subtitle1, SubTaskSection, CommentSection } from './_TaskDetailModal';
 
 interface TaskDetailModalProps {
   task: Task | null;

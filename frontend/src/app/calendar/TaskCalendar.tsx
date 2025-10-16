@@ -14,7 +14,7 @@ import { taskMockData } from '@/mocks/staff/taskMockData';
 import { Task } from '@/types';
 import { SideBar, Header, TaskCreateModal } from './_components';
 import { MonthHeader, CalendarBody, DayHeaders } from './_components/_TaskCalendar';
-import TaskDetailModal from './TaskDetailModal';
+import TaskDetailModal from './_components/TaskDetailModal';
 import DayTasksModal from './DayTasksModal';
 import { getTaskTypeColor, isTaskOverdue } from './_functions/TaskRenderingFunctions';
 
