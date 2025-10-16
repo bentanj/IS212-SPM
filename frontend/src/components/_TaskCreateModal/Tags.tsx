@@ -4,9 +4,17 @@ import { FormData } from '@/types';
 interface TagsProps {
     tagInput: string;
     setTagInput: React.Dispatch<React.SetStateAction<string>>;
-    handleAddTag: (event: React.KeyboardEvent<HTMLElement>, tagInput: string, setTagInput: React.Dispatch<React.SetStateAction<string>>, formData: FormData, setFormData: React.Dispatch<React.SetStateAction<FormData>>) => void
-
-    handleRemoveTag: (tagToRemove: string, setFormData: React.Dispatch<React.SetStateAction<FormData>>) => void
+    handleAddTag: (
+        event: React.KeyboardEvent<HTMLElement>,
+        tagInput: string,
+        setTagInput: React.Dispatch<React.SetStateAction<string>>,
+        formData: FormData | Omit<FormData, 'taskId'>,
+        setFormData: React.Dispatch<React.SetStateAction<FormData | Omit<FormData, 'taskId'>>>
+    ) => void
+    handleRemoveTag: (
+        tagToRemove: string,
+        setFormData: React.Dispatch<React.SetStateAction<FormData | Omit<FormData, 'taskId'>>>
+    ) => void
     formData: FormData | Omit<FormData, 'taskId'>;
     setFormData: React.Dispatch<React.SetStateAction<FormData | Omit<FormData, 'taskId'>>>
 }

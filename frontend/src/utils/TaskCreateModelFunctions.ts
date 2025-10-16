@@ -37,39 +37,30 @@ const validateForm = (formData: FormData | Omit<FormData, 'taskId'>, setErrors: 
 export const resetForm = (
     setFormData: React.Dispatch<React.SetStateAction<FormData | Omit<FormData, 'taskId'>>>,
     setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>,
-    setSubmitStatus: React.Dispatch<React.SetStateAction<'idle' | 'success' | 'error'>>,
-    setSubmitMessage: React.Dispatch<React.SetStateAction<string>>,
     setTagInput: React.Dispatch<React.SetStateAction<string>>,
     setNewComment: React.Dispatch<React.SetStateAction<string>>
 ) => {
     setFormData(DefaultFormData);
     setErrors({});
-    setSubmitStatus('idle');
-    setSubmitMessage('');
     setTagInput('');
     setNewComment('');
 };
 
 export const handleSubmit = async (params: {
-    isEditMode: boolean;
     existingTaskDetails: Task | null;
     formData: FormData | Omit<FormData, 'taskId'>;
     newComment: string;
     currentUser: User;
     setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-    setSubmitStatus: React.Dispatch<React.SetStateAction<'idle' | 'success' | 'error'>>;
-    setSubmitMessage: React.Dispatch<React.SetStateAction<string>>;
     handleReset: () => void;
     onClose: () => void;
     allTasks: Task[]; // New
 }) => {
-    const { isEditMode, existingTaskDetails, formData, newComment, currentUser,
-        setErrors, setSubmitStatus, setSubmitMessage, handleReset, onClose, allTasks } = params;
+    const { existingTaskDetails, formData, newComment, currentUser,
+        setErrors, handleReset, onClose, allTasks } = params;
 
     // Validate form
     if (!validateForm(formData, setErrors)) {
-        setSubmitStatus('error');
-        setSubmitMessage('Please fix the errors');
         return;
     }
 
@@ -104,8 +95,6 @@ export const handleSubmit = async (params: {
             };
 
             updateTask(updatedTask);
-            setSubmitStatus('success');
-            setSubmitMessage('Task updated successfully!');
         } else {
             // Create new task with proper ID generation from live state (Updated)
             const newTaskId = allTasks.length > 0
@@ -138,8 +127,6 @@ export const handleSubmit = async (params: {
             };
 
             createTask(newTask);
-            setSubmitStatus('success');
-            setSubmitMessage('Task created successfully!');
         }
 
         setTimeout(() => {
@@ -147,15 +134,14 @@ export const handleSubmit = async (params: {
             onClose();
         }, 1500);
     } catch (error) {
-        setSubmitStatus('error');
-        setSubmitMessage(`Failed to ${isEditMode ? 'update' : 'create'} task. Please try again.`);
+        console.error('Error submitting form:', error);
     }
 };
 
 // Handle file upload
 export const handleFileUpload = (
     event: React.ChangeEvent<HTMLInputElement>,
-    setFormData: React.Dispatch<React.SetStateAction<FormData>>
+    setFormData: React.Dispatch<React.SetStateAction<FormData | Omit<FormData, 'taskId'>>>
 ) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -165,7 +151,7 @@ export const handleFileUpload = (
 
 // Handle file removal
 export const handleRemoveFile = (
-    setFormData: React.Dispatch<React.SetStateAction<FormData>>
+    setFormData: React.Dispatch<React.SetStateAction<FormData | Omit<FormData, 'taskId'>>>
 ) => {
     setFormData(prev => ({ ...prev, attachedFile: null }));
 };
@@ -175,8 +161,8 @@ export const handleAddTag = (
     event: React.KeyboardEvent<HTMLElement>,
     tagInput: string,
     setTagInput: React.Dispatch<React.SetStateAction<string>>,
-    formData: FormData,
-    setFormData: React.Dispatch<React.SetStateAction<FormData>>
+    formData: FormData | Omit<FormData, 'taskId'>,
+    setFormData: React.Dispatch<React.SetStateAction<FormData | Omit<FormData, 'taskId'>>>
 ) => {
     if (event.key === 'Enter' && tagInput.trim()) {
         event.preventDefault();
@@ -194,7 +180,7 @@ export const handleAddTag = (
 // Remove tag
 export const handleRemoveTag = (
     tagToRemove: string,
-    setFormData: React.Dispatch<React.SetStateAction<FormData>>
+    setFormData: React.Dispatch<React.SetStateAction<FormData | Omit<FormData, 'taskId'>>>
 ) => {
     setFormData(prev => ({
         ...prev,
@@ -207,7 +193,7 @@ export const handleAssignedUsersChange = (
     users: User[],
     isEditMode: boolean,
     existingAssignees: User[],
-    setFormData: React.Dispatch<React.SetStateAction<FormData>>
+    setFormData: React.Dispatch<React.SetStateAction<FormData | Omit<FormData, 'taskId'>>>
 ) => {
     let updatedUsers = users;
 

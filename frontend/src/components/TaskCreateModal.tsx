@@ -52,8 +52,6 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
 
   // UI state
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [submitMessage, setSubmitMessage] = useState('');
   const [tagInput, setTagInput] = useState('');
   const [newComment, setNewComment] = useState('');
 
@@ -67,8 +65,6 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   // Initialize form data when editing
   useEffect(() => {
     setErrors({});
-    setSubmitMessage('')
-    setSubmitStatus('idle');
     setParentTask(preselectedParentTask);
     if (open) {
       if (isEditMode && existingTaskDetails) {
@@ -95,7 +91,7 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   }, [open, isEditMode, existingTaskDetails, allTasks]);
 
   const handleReset = () => {
-    resetForm(setFormData, setErrors, setSubmitStatus, setSubmitMessage, setTagInput, setNewComment)
+    resetForm(setFormData, setErrors, setTagInput, setNewComment)
     setParentTask(null);
   }
 
@@ -108,8 +104,8 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
     };
 
     handleSubmit({
-      isEditMode, existingTaskDetails, formData: taskWithParent, newComment, currentUser,
-      setSubmitStatus, setSubmitMessage, setErrors, handleReset, onClose,
+      existingTaskDetails, formData: taskWithParent, newComment, currentUser,
+      setErrors, handleReset, onClose,
       allTasks
     });
     // Placeholder. To replace with actual success condition
@@ -128,9 +124,9 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
       <ModalTitle isEditMode={isEditMode} onClose={onClose} />
 
       <DialogContent dividers>
-        {submitStatus !== 'idle' && (
-          <Alert sx={{ mb: 2 }} severity={submitStatus === 'success' ? 'success' : 'error'}>
-            {submitMessage}
+        {Object.keys(errors).length > 0 && (
+          <Alert sx={{ mb: 2 }} severity='error'>
+            Please fix the following errors before submitting.
           </Alert>
         )}
 
@@ -246,15 +242,8 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
         <Button onClick={onClose}>
           Cancel
         </Button>
-        <Button
-          onClick={onSubmit}
-          variant="contained"
-          disabled={submitStatus === 'success'}
-        >
-          {submitStatus === 'success' ?
-            (isEditMode ? 'Updated!' : 'Created!') :
-            (isEditMode ? 'Update Task' : 'Create Task')
-          }
+        <Button variant="contained" onClick={onSubmit}>
+          {isEditMode ? 'Update Task' : 'Create Task'}
         </Button>
       </DialogActions>
     </Dialog >
