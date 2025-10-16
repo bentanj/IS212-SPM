@@ -71,10 +71,10 @@ class Task(Base):
             "priority": self.priority,
             "tags": self.tags if self.tags else [],
             "status": self.status,
-            "projectName": self.project_name,
+            "project_name": self.project_name,
             "assignedUsers": assigned_users_data,
             "parentTaskId": self.parent_id,
-            "department": self.departments if self.departments else [],
+            "departments": self.departments if self.departments else [],
             "comments": self.comments if self.comments else []
         }
 
