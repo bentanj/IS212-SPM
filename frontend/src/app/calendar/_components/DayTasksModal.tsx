@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 import { Task } from '@/types';
 import dayjs, { Dayjs } from 'dayjs';
-import { getPriorityColor, getStatusColor } from './_functions/TaskRenderingFunctions';
+import { getPriorityColor, getStatusColor } from '../_functions/TaskRenderingFunctions';
 
 interface DayTasksModalProps {
   tasks: Task[];
