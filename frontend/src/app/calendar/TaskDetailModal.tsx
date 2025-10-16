@@ -33,8 +33,6 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   onEditButtonClick,
   allTasks, // New
 }) => {
-  if (!task) return null;
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -51,6 +49,8 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     // ✅ Use allTasks prop if provided, fallback to mockData
     return allTasks!.filter(t => t.parentTaskId === task.taskId);
   }, [task, allTasks]); // ✅ Add allTasks to dependency array
+
+  if (!task) return null;
 
   // Check if current user can edit this task
   const canEdit = canEditTask(currentUser, task);
