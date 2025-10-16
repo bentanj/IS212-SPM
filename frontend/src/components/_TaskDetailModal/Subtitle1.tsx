@@ -15,7 +15,7 @@ export const Subtitle1: React.FC<Subtitle1Props> = ({
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
                 {label}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.secondary" component="span">
                 {children}
             </Typography>
         </Box>
