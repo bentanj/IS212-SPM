@@ -23,7 +23,7 @@ interface TaskDetailModalProps {
   allTasks?: Task[]; // New
 }
 
-const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
+export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   task,
   open,
   currentUser,
@@ -149,5 +149,3 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     </>
   );
 };
-
-export default TaskDetailModal;

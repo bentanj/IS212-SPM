@@ -1,5 +1,5 @@
 import { TProject } from '@/types/TProject';
-import { projectMockData } from '@/mocks/staff/projectMockData';
+import { projectMockData } from '@/mocks/allProjects';
 
 /**
  * Returns all projects

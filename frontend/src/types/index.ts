@@ -4,5 +4,6 @@ export * from "./ITask";
 export * from "./IUser";
 export * from "./TOrganisation";
 export * from "./TPriority";
+export * from "./TProject";
 export * from "./TRoles";
 export * from "./TStatus";

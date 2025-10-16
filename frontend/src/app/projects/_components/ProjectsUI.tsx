@@ -2,30 +2,25 @@
 
 // All your original imports from page.tsx
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Paper, 
-  CircularProgress,
-  Alert,
-  Stack
-} from '@mui/material';
+import { Box, Typography, Paper, CircularProgress, Alert, Stack, useMediaQuery, useTheme } from '@mui/material';
+
+import { taskMockData } from '@/mocks/staff/taskMockData';
+import { Task, TProject, TProjectStatus } from '@/types';
+import { getAllProjects } from '@/utils/Projects/getProjects';
+
 import { ProjectsDataGrid } from './ProjectsDataGrid';
 import { ProjectDetailModal } from './ProjectDetailModal';
 import { SearchBar } from './SearchBar';
 import { FilterControls } from './FilterControls';
-import { TProject, TProjectStatus } from '@/types/TProject';
-import { Task, taskMockData } from '@/mocks/staff/taskMockData';
-import { getAllProjects } from '../_functions/getProjects';
+
 import { applyProjectFilters } from '../_functions/filterHelpers';
-import TaskDetailModal from '../../calendar/TaskDetailModal';
-import { useMediaQuery, useTheme } from '@mui/material'; 
+import { TaskDetailModal } from '@/app/calendar/_components';
 import { ProjectCardList } from './ProjectCardList';
 
 
 // The ONLY CHANGE is the function name here
 export default function ProjectsUI() {
-  
+
   // Projects data
   const [projects, setProjects] = useState<TProject[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,7 +71,7 @@ export default function ProjectsUI() {
   const handleTaskModalClose = () => {
     setSelectedTask(null);
   };
-  
+
   const handleSubtaskClick = (subtask: Task) => {
     setSelectedTask(subtask);
   };
@@ -90,21 +85,21 @@ export default function ProjectsUI() {
   };
 
   return (
-    <Box sx={{ 
-      display: 'flex', 
+    <Box sx={{
+      display: 'flex',
       height: '100vh',
       bgcolor: 'background.default'
     }}>
       {/* Main Content Area */}
-      <Box sx={{ 
-        flex: 1, 
-        display: 'flex', 
+      <Box sx={{
+        flex: 1,
+        display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden'
       }}>
         {/* Header */}
-        <Box sx={{ 
-          px: 3, 
+        <Box sx={{
+          px: 3,
           py: 2,
           bgcolor: 'background.paper',
           borderBottom: 1,
@@ -116,15 +111,15 @@ export default function ProjectsUI() {
         </Box>
 
         {/* Search and Filter Bar */}
-        <Box sx={{ 
-          px: 3, 
+        <Box sx={{
+          px: 3,
           py: 2,
           bgcolor: 'background.paper',
           borderBottom: 1,
           borderColor: 'divider'
         }}>
-          <Stack 
-            direction={{ xs: 'column', sm: 'row' }} 
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
             spacing={2}
             alignItems={{ xs: 'stretch', sm: 'center' }}
           >
@@ -143,8 +138,8 @@ export default function ProjectsUI() {
         </Box>
 
         {/* Content Area */}
-        <Box sx={{ 
-          flex: 1, 
+        <Box sx={{
+          flex: 1,
           overflow: 'auto',
           p: 3,
         }}>
@@ -164,43 +159,43 @@ export default function ProjectsUI() {
 
           {/* Loading State */}
           {loading && (
-            <Box sx={{ 
-              display: 'flex', 
-              justifyContent: 'center', 
+            <Box sx={{
+              display: 'flex',
+              justifyContent: 'center',
               alignItems: 'center',
-              minHeight: 400 
+              minHeight: 400
             }}>
               <CircularProgress />
             </Box>
           )}
 
           {/* Projects Grid or Card List */}
-            {!loading && !error && (
+          {!loading && !error && (
             isMobile ? (
-                // If mobile is true, show the new card list
-                <ProjectCardList
+              // If mobile is true, show the new card list
+              <ProjectCardList
                 projects={filteredProjects}
                 onProjectClick={handleProjectClick}
-                />
+              />
             ) : (
-                // Otherwise, show the original data grid inside the Paper
-                <Paper 
+              // Otherwise, show the original data grid inside the Paper
+              <Paper
                 elevation={0}
-                sx={{ 
-                    border: 1,
-                    borderColor: 'divider',
-                    borderRadius: 1,
-                    overflow: 'hidden'
+                sx={{
+                  border: 1,
+                  borderColor: 'divider',
+                  borderRadius: 1,
+                  overflow: 'hidden'
                 }}
-                >
+              >
                 <ProjectsDataGrid
-                    projects={filteredProjects}
-                    loading={loading}
-                    onProjectClick={handleProjectClick}
+                  projects={filteredProjects}
+                  loading={loading}
+                  onProjectClick={handleProjectClick}
                 />
-                </Paper>
+              </Paper>
             )
-            )}
+          )}
         </Box>
       </Box>
 
