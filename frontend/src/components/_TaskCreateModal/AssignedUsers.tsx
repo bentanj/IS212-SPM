@@ -3,6 +3,7 @@ import { User } from '@/types';
 import { allUsers } from '@/mocks/allUsers';
 import { getAvailableUsers, handleAssignedUsersChange } from '@/utils/TaskCreateModelFunctions';
 import renderAssignedUserTags from './renderAssignedUserTags';
+import { canEditTaskAssignees } from '@/utils/Permissions';
 
 interface AssignedUsersAutocompleteProps {
     assignedUsers: User[];
@@ -26,6 +27,7 @@ export const AssignedUsersAutocomplete: React.FC<AssignedUsersAutocompleteProps>
     canAddMoreUsers,
 }) => {
     const availableUsers = getAvailableUsers(allUsers, assignedUsers);
+    const canDelete = canEditTaskAssignees(currentUser);
 
     return (
         <Autocomplete
@@ -34,7 +36,7 @@ export const AssignedUsersAutocomplete: React.FC<AssignedUsersAutocompleteProps>
             getOptionLabel={(user) => user.name}
             value={assignedUsers}
             onChange={(event, value) =>
-                handleAssignedUsersChange(value, isEditMode, existingAssignees, setFormData)
+                handleAssignedUsersChange(value, isEditMode, canDelete, existingAssignees, setFormData)
             }
             noOptionsText={
                 !canAddMoreUsers
@@ -54,7 +56,7 @@ export const AssignedUsersAutocomplete: React.FC<AssignedUsersAutocompleteProps>
                 />
             )}
             renderValue={(users, getTagProps) =>
-                renderAssignedUserTags(users, getTagProps, currentUser, isEditMode, existingAssignees)
+                renderAssignedUserTags(users, getTagProps, currentUser, isEditMode, canDelete, existingAssignees)
             }
             filterSelectedOptions
             getOptionDisabled={() => !canAddMoreUsers}

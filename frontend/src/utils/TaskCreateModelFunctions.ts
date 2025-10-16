@@ -186,12 +186,13 @@ export const handleRemoveTag = (
 export const handleAssignedUsersChange = (
     users: User[],
     isEditMode: boolean,
+    canDelete: boolean,
     existingAssignees: User[],
     setFormData: React.Dispatch<React.SetStateAction<FormData | Omit<FormData, 'taskId'>>>
 ) => {
     let updatedUsers = users;
 
-    if (isEditMode) {
+    if (isEditMode && !canDelete) {
         // Add back any existing assignees that might have been removed
         const missingExistingUsers = existingAssignees.filter(
             existing => !updatedUsers.some(user => user.userId === existing.userId)

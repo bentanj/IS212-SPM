@@ -9,12 +9,12 @@ const renderAssignedUserTags = (
     getTagProps: any,
     currentUser: User,
     isEditMode: boolean,
+    canDelete: boolean,
     existingAssignees: User[]
 ) => {
     return users.map((user, index) => {
         const isCurrentUser = user.userId === currentUser.userId;
         const isExistingAssignee = isEditMode && existingAssignees.some(existing => existing.userId === user.userId);
-        const canDelete = canEditTaskAssignees(currentUser);
         const { key, ...tagPropsWithoutKey } = getTagProps({ index });
 
         return (
