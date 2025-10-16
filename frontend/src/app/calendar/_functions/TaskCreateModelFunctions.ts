@@ -10,17 +10,6 @@ export const getAvailableUsers = (allUsers: User[], assignedUsers: User[]): User
     return allUsers.filter(user => !assignedUserIds.includes(user.userId));
 };
 
-// Check if a user can be removed (only for edit mode)
-export const canRemoveUser = (
-    user: User,
-    isEditMode: boolean,
-    currentUser: User,
-    existingAssignees: User[]
-): boolean => {
-    if (!isEditMode) return user.userId !== currentUser.userId;
-    return !existingAssignees.some(existing => existing.userId === user.userId);
-};
-
 //  Check if form entries are valid
 const validateForm = (formData: FormData | Omit<FormData, 'taskId'>, setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>): boolean => {
     const newErrors: Record<string, string> = {};
@@ -215,12 +204,9 @@ export const handleRemoveTag = (
 
 // Handle assigned users change with restrictions
 export const handleAssignedUsersChange = (
-    event: React.SyntheticEvent,
     users: User[],
     isEditMode: boolean,
     existingAssignees: User[],
-    currentUser: User,
-    currentUserObj: User | undefined,
     setFormData: React.Dispatch<React.SetStateAction<FormData>>
 ) => {
     let updatedUsers = users;
@@ -231,12 +217,6 @@ export const handleAssignedUsersChange = (
             existing => !updatedUsers.some(user => user.userId === existing.userId)
         );
         updatedUsers = [...updatedUsers, ...missingExistingUsers];
-    } else {
-        // In create mode, ensure current user is always included
-        const currentUserIncluded = users.find(u => u.userId === currentUser.userId);
-        if (!currentUserIncluded && currentUserObj) {
-            updatedUsers = [currentUserObj, ...users];
-        }
     }
 
     if (updatedUsers.length > 5) {
@@ -248,4 +228,15 @@ export const handleAssignedUsersChange = (
 
 export const canAddMoreUsers = (assignedUsers: User[]) => {
     return assignedUsers.length < 5;
+};
+
+// Check if a user can be removed (only for edit mode)
+export const canRemoveUser = (
+    user: User,
+    isEditMode: boolean,
+    currentUser: User,
+    existingAssignees: User[]
+): boolean => {
+    if (!isEditMode) return user.userId !== currentUser.userId;
+    return !existingAssignees.some(existing => existing.userId === user.userId);
 };

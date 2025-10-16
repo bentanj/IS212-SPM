@@ -49,9 +49,6 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   // Get current user object from allUsers
   const currentUserObj = allUsers.find(user => user.userId === currentUser.userId);
 
-  // Get existing assignees for edit mode (cannot be removed)
-  const existingAssignees = isEditMode ? existingTaskDetails!.assignedUsers : [];
-
   // Form state
   const [formData, setFormData] = useState<FormData | Omit<FormData, 'taskId'>>(DefaultFormData);
   const [parentTask, setParentTask] = useState<Task | null>(null);
@@ -109,6 +106,8 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
     }
   }, [open, isEditMode, existingTaskDetails, allTasks]);
 
+  console.log('Form Data:', formData);
+
   const handleReset = () => {
     resetForm(setFormData, setErrors, setSubmitStatus, setSubmitMessage, setTagInput, setNewComment)
     setParentTask(null);
@@ -133,12 +132,8 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
     else setSnackbarContent('Failed to create task', 'error');
   };
 
-  // Get available users for assignment (excluding already assigned)
-  const availableUsers = getAvailableUsers(allUsers, formData.assignedUsers);
-
-  // Get unique project names from existing tasks
+  // Get unique project names from existing tasks [TO CHANGE TO API CALL LATER]
   const existingProjects = Array.from(new Set(taskMockData.tasks.map(t => t.projectName)));
-
 
   return (
     <Dialog open={open} onClose={onClose}
@@ -228,13 +223,11 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
 
         {/* Assigned Users */}
         <AssignedUsersAutocomplete
-          availableUsers={availableUsers}
           assignedUsers={formData.assignedUsers}
           setFormData={setFormData}
           isEditMode={isEditMode}
-          existingAssignees={existingAssignees}
+          existingAssignees={existingTaskDetails?.assignedUsers || []}
           currentUser={currentUser}
-          currentUserObj={currentUserObj}
           error={!!errors.assignedUsers}
           helperText={errors.assignedUsers}
           canAddMoreUsers={canAddMoreUsers(formData.assignedUsers)} />

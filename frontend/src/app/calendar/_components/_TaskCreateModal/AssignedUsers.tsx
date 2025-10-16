@@ -1,33 +1,32 @@
 import { Autocomplete, TextField } from '@mui/material';
 import { User } from '@/types';
+import { allUsers } from '@/mocks/allUsers';
+import { getAvailableUsers } from '../../_functions/TaskCreateModelFunctions';
 import renderAssignedUserTags from '../../_functions/renderAssignedUserTags';
 import { handleAssignedUsersChange } from '../../_functions/TaskCreateModelFunctions';
 
 interface AssignedUsersAutocompleteProps {
-    availableUsers: User[];
     assignedUsers: User[];
     setFormData: React.Dispatch<React.SetStateAction<any>>;
     isEditMode: boolean;
     existingAssignees: User[];
     currentUser: User;
-    currentUserObj?: User;
     error?: boolean;
     helperText?: string;
     canAddMoreUsers: boolean;
 }
 
 export const AssignedUsersAutocomplete: React.FC<AssignedUsersAutocompleteProps> = ({
-    availableUsers,
     assignedUsers,
     setFormData,
     isEditMode,
     existingAssignees,
     currentUser,
-    currentUserObj,
     error = false,
     helperText = '',
     canAddMoreUsers,
 }) => {
+    const availableUsers = getAvailableUsers(allUsers, assignedUsers);
 
     return (
         <Autocomplete
@@ -36,7 +35,7 @@ export const AssignedUsersAutocomplete: React.FC<AssignedUsersAutocompleteProps>
             getOptionLabel={(user) => user.name}
             value={assignedUsers}
             onChange={(event, value) =>
-                handleAssignedUsersChange(event, value, isEditMode, existingAssignees, currentUser, currentUserObj, setFormData)
+                handleAssignedUsersChange(value, isEditMode, existingAssignees, setFormData)
             }
             noOptionsText={
                 !canAddMoreUsers
@@ -52,10 +51,10 @@ export const AssignedUsersAutocomplete: React.FC<AssignedUsersAutocompleteProps>
                     required
                     margin="normal"
                     error={error}
-                    helperText={helperText || (isEditMode ? "Note: Existing assignees cannot be removed, but you can add new ones" : "")}
+                    helperText={helperText || "Note: Maximum of 5 users can be assigned"}
                 />
             )}
-            renderTags={(users, getTagProps) =>
+            renderValue={(users, getTagProps) =>
                 renderAssignedUserTags(users, getTagProps, currentUser, isEditMode, existingAssignees)
             }
             filterSelectedOptions
