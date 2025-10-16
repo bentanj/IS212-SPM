@@ -4,34 +4,38 @@ import React, { useMemo } from 'react';
 import {
   Dialog, DialogContent, DialogActions,
   Button, Typography, Box, Chip, Avatar, Stack,
-  useTheme, useMediaQuery
+  useTheme, useMediaQuery, AlertColor
 } from '@mui/material';
 import { Edit, Add } from '@mui/icons-material';
-import { User, Task } from '@/types';
+import { User, Task, Priority, Status } from '@/types';
 import dayjs from 'dayjs';
 import { canEditTask } from '@/utils/Permissions';
 import { ModalTitle, Subtitle1, SubTaskSection, CommentSection } from './_TaskDetailModal';
+import updateTask from '@/utils/Tasks/updateTask';
 
 interface TaskDetailModalProps {
   task: Task | null;
+  setSelectedTask: React.Dispatch<React.SetStateAction<Task | null>>;
   open: boolean;
   onClose: () => void;
   currentUser: User;
   onCreateSubtask?: (parentTask: Task) => void;
   onSubtaskClick?: (subtask: Task) => void;
-  onEditButtonClick?: () => void; // New
-  allTasks?: Task[]; // New
+  onEditButtonClick?: () => void;
+  allTasks?: Task[];
+  setSnackbarContent: (message: string, severity: AlertColor) => void;
+  refetchTasks: () => void;
 }
 
 export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
-  task,
-  open,
+  task, setSelectedTask,
+  open, onClose,
   currentUser,
-  onClose,
   onCreateSubtask,
   onSubtaskClick,
   onEditButtonClick,
-  allTasks, // New
+  allTasks,
+  setSnackbarContent, refetchTasks
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -52,6 +56,34 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 
   if (!task) return null;
 
+  function changePriority(newPriority: Priority) {
+    setSelectedTask(prev => prev ? { ...prev, priority: newPriority } : prev);
+  }
+
+  function changeStatus(newStatus: Status) {
+    setSelectedTask(prev => prev ? { ...prev, status: newStatus } : prev);
+  }
+
+  const onSave = () => {
+    const TaskData = {
+      ...task,
+      assigned_users: task.assignedUsers.map(user => user.userId),
+    }
+    updateTask(TaskData)
+      .then(() => {
+        setSnackbarContent("Task updated successfully", "success");
+        refetchTasks();
+
+        setTimeout(() => {
+          onClose();
+        }, 1500);
+      })
+      .catch((error) => {
+        console.error("Error updating task:", error);
+        setSnackbarContent("Failed to update task. Please try again", "error");
+      });
+  }
+
   // Check if current user can edit this task
   const canEdit = canEditTask(currentUser, task);
 
@@ -60,11 +92,15 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
       <Dialog open={open} onClose={onClose}
         maxWidth="md" fullWidth fullScreen={isMobile}>
 
-        <ModalTitle task={task} isMobile={isMobile} />
+        <ModalTitle task={task} isMobile={isMobile}
+          changePriority={changePriority}
+          changeStatus={changeStatus}
+          onSaveButtonClick={onSave} />
 
         <DialogContent dividers>
 
           <Subtitle1 boxMarginBottom={3} label="Description">{task.description} </Subtitle1>
+
           <Stack direction="row">
             <Subtitle1 boxMarginBottom={3} label="Project">{task.project_name}</Subtitle1>
             <Box sx={{ ml: "auto", mr: "auto" }}>

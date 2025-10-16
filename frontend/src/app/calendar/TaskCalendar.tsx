@@ -181,14 +181,14 @@ const TaskCalendar: React.FC = () => {
 
       {/* Task Detail Modal */}
       <TaskDetailModal
-        task={selectedTask}
-        open={taskDetailModalOpen}
-        onClose={handleCloseTaskDetailModal}
+        task={selectedTask} setSelectedTask={setSelectedTask}
+        open={taskDetailModalOpen} onClose={handleCloseTaskDetailModal}
         currentUser={mockJWT}
         onCreateSubtask={handleCreateSubtask}
         onSubtaskClick={handleTaskClick}
         onEditButtonClick={() => setCreateModalOpen(true)}
         allTasks={tasks}
+        setSnackbarContent={setSnackbarContent} refetchTasks={fetchTasks}
       />
 
       {/* Task Create Modal */}
