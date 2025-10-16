@@ -66,7 +66,7 @@ export const ParentTaskField: React.FC<ParentTaskFieldProps> = ({
                     }}
                   />
                   <Typography variant="caption" color="text.secondary">
-                    {option.projectName}
+                    {option.project_name}
                   </Typography>
                 </Box>
               </Box>
@@ -105,7 +105,7 @@ export const ParentTaskField: React.FC<ParentTaskFieldProps> = ({
           return options.filter(option =>
             option.title.toLowerCase().includes(inputValue.toLowerCase()) ||
             option.taskId.toString().includes(inputValue) ||
-            option.projectName.toLowerCase().includes(inputValue.toLowerCase())
+            option.project_name.toLowerCase().includes(inputValue.toLowerCase())
           );
         }}
       />

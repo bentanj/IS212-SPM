@@ -44,8 +44,8 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-17T14:15:00Z"
         }
       ],
-      projectName: "E-Commerce Platform",
-      department: ["IT Team"],
+      project_name: "E-Commerce Platform",
+      departments: ["IT Team"],
     },
     {
       taskId: 101,
@@ -66,9 +66,9 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-18T14:20:00Z"
         }
       ],
-      projectName: "E-Commerce Platform",
+      project_name: "E-Commerce Platform",
       parentTaskId: 1,
-      department: ["Sales Manager"],
+      departments: ["Sales Manager"],
     },
     {
       taskId: 102,
@@ -82,9 +82,9 @@ export const taskMockData: MockData = {
       tags: ["password-reset", "email", "security", "tokens"],
       status: "To Do",
       comments: [],
-      projectName: "E-Commerce Platform",
+      project_name: "E-Commerce Platform",
       parentTaskId: 1,
-      department: ["IT Team"],
+      departments: ["IT Team"],
     },
     {
       taskId: 103,
@@ -98,9 +98,9 @@ export const taskMockData: MockData = {
       tags: ["unit-tests", "testing", "authentication", "coverage"],
       status: "To Do",
       comments: [],
-      projectName: "E-Commerce Platform",
+      project_name: "E-Commerce Platform",
       parentTaskId: 1,
-      department: ["IT Team"],
+      departments: ["IT Team"],
     },
     {
       taskId: 104,
@@ -114,9 +114,9 @@ export const taskMockData: MockData = {
       tags: ["documentation", "api", "authentication", "examples"],
       status: "To Do",
       comments: [],
-      projectName: "E-Commerce Platform",
+      project_name: "E-Commerce Platform",
       parentTaskId: 1,
-      department: ["IT Team"],
+      departments: ["IT Team"],
     },
     {
       taskId: 3,
@@ -143,8 +143,8 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-21T11:30:00Z"
         }
       ],
-      projectName: "API Gateway Project",
-      department: ["Support Team"],
+      project_name: "API Gateway Project",
+      departments: ["Support Team"],
     },
     {
       taskId: 301,
@@ -165,9 +165,9 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-22T11:15:00Z"
         }
       ],
-      projectName: "API Gateway Project",
+      project_name: "API Gateway Project",
       parentTaskId: 3,
-      department: ["Support Team"],
+      departments: ["Support Team"],
     },
     {
       taskId: 302,
@@ -181,9 +181,9 @@ export const taskMockData: MockData = {
       tags: ["algorithms", "token-bucket", "sliding-window", "rate-limiting"],
       status: "To Do",
       comments: [],
-      projectName: "API Gateway Project",
+      project_name: "API Gateway Project",
       parentTaskId: 3,
-      department: ["Support Team"],
+      departments: ["Support Team"],
     },
     {
       taskId: 303,
@@ -197,9 +197,9 @@ export const taskMockData: MockData = {
       tags: ["dashboard", "admin", "configuration", "monitoring"],
       status: "To Do",
       comments: [],
-      projectName: "API Gateway Project",
+      project_name: "API Gateway Project",
       parentTaskId: 3,
-      department: ["Support Team"],
+      departments: ["Support Team"],
     },
     {
       taskId: 21,
@@ -220,8 +220,8 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-17T09:45:00Z"
         }
       ],
-      projectName: "E-Commerce Platform",
-      department: ["IT Team"],
+      project_name: "E-Commerce Platform",
+      departments: ["IT Team"],
     },
     {
       taskId: 201,
@@ -242,9 +242,9 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-18T16:30:00Z"
         }
       ],
-      projectName: "E-Commerce Platform",
+      project_name: "E-Commerce Platform",
       parentTaskId: 21,
-      department: ["IT Team"],
+      departments: ["IT Team"],
     },
     {
       taskId: 202,
@@ -265,9 +265,9 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-19T14:45:00Z"
         }
       ],
-      projectName: "E-Commerce Platform",
+      project_name: "E-Commerce Platform",
       parentTaskId: 21,
-      department: ["IT Team"],
+      departments: ["IT Team"],
     },
     {
       taskId: 203,
@@ -288,9 +288,9 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-22T10:20:00Z"
         }
       ],
-      projectName: "E-Commerce Platform",
+      project_name: "E-Commerce Platform",
       parentTaskId: 21,
-      department: ["IT Team"],
+      departments: ["IT Team"],
     },
     {
       taskId: 204,
@@ -304,9 +304,9 @@ export const taskMockData: MockData = {
       tags: ["testing", "unit-tests", "integration", "components"],
       status: "To Do",
       comments: [],
-      projectName: "E-Commerce Platform",
+      project_name: "E-Commerce Platform",
       parentTaskId: 21,
-      department: ["IT Team"],
+      departments: ["IT Team"],
     },
     {
       taskId: 24,
@@ -320,8 +320,8 @@ export const taskMockData: MockData = {
       tags: ["load-testing", "infrastructure", "performance", "validation"],
       status: "To Do",
       comments: [],
-      projectName: "Quality Assurance",
-      department: ["Consultant"],
+      project_name: "Quality Assurance",
+      departments: ["Consultant"],
     },
     {
       taskId: 401,
@@ -342,9 +342,9 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-21T15:30:00Z"
         }
       ],
-      projectName: "Quality Assurance",
+      project_name: "Quality Assurance",
       parentTaskId: 24,
-      department: ["Consultant"],
+      departments: ["Consultant"],
     },
     {
       taskId: 402,
@@ -365,9 +365,9 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-23T13:15:00Z"
         }
       ],
-      projectName: "Quality Assurance",
+      project_name: "Quality Assurance",
       parentTaskId: 24,
-      department: ["Consultant"],
+      departments: ["Consultant"],
     },
     {
       taskId: 403,
@@ -381,9 +381,9 @@ export const taskMockData: MockData = {
       tags: ["scripts", "scenarios", "endpoints", "user-simulation"],
       status: "To Do",
       comments: [],
-      projectName: "Quality Assurance",
+      project_name: "Quality Assurance",
       parentTaskId: 24,
-      department: ["Consultant"],
+      departments: ["Consultant"],
     },
     {
       taskId: 404,
@@ -397,9 +397,9 @@ export const taskMockData: MockData = {
       tags: ["dashboard", "metrics", "real-time", "monitoring"],
       status: "To Do",
       comments: [],
-      projectName: "Quality Assurance",
+      project_name: "Quality Assurance",
       parentTaskId: 24,
-      department: ["Consultant"],
+      departments: ["Consultant"],
     },
     {
       taskId: 39,
@@ -420,8 +420,8 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-23T15:30:00Z"
         }
       ],
-      projectName: "Quality Assurance",
-      department: ["Consultant"],
+      project_name: "Quality Assurance",
+      departments: ["Consultant"],
     },
     // SUBTASKS FOR TASK 39: Integration Testing Automation
     {
@@ -443,9 +443,9 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-24T17:00:00Z"
         }
       ],
-      projectName: "Quality Assurance",
+      project_name: "Quality Assurance",
       parentTaskId: 39,
-      department: ["Consultant"],
+      departments: ["Consultant"],
     },
     {
       taskId: 502,
@@ -466,9 +466,9 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-25T11:30:00Z"
         }
       ],
-      projectName: "Quality Assurance",
+      project_name: "Quality Assurance",
       parentTaskId: 39,
-      department: ["Consultant"],
+      departments: ["Consultant"],
     },
     {
       taskId: 503,
@@ -482,9 +482,9 @@ export const taskMockData: MockData = {
       tags: ["test-data", "lifecycle", "cleanup", "isolation"],
       status: "To Do",
       comments: [],
-      projectName: "Quality Assurance",
+      project_name: "Quality Assurance",
       parentTaskId: 39,
-      department: ["Consultant"],
+      departments: ["Consultant"],
     },
     // Other original tasks without subtasks with default org fields added
     {
@@ -506,8 +506,8 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-18T16:45:00Z"
         }
       ],
-      projectName: "E-Commerce Platform",
-      department: ["IT Team"],
+      project_name: "E-Commerce Platform",
+      departments: ["IT Team"],
     },
     {
       taskId: 4,
@@ -521,8 +521,8 @@ export const taskMockData: MockData = {
       tags: ["documentation", "process", "guidelines"],
       status: "To Do",
       comments: [],
-      projectName: "Development Process Improvement",
-      department: ["Consultant"],
+      project_name: "Development Process Improvement",
+      departments: ["Consultant"],
     },
     {
       taskId: 5,
@@ -543,10 +543,10 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-14T17:00:00Z"
         }
       ],
-      projectName: "Performance Enhancement",
-      department: ["Consultant"],
+      project_name: "Performance Enhancement",
+      departments: ["Consultant"],
     },
-    // New tasks with expanded team across more departments
+    // New tasks with expanded team across more departmentss
     {
       taskId: 40,
       title: "Mobile App UX Research",
@@ -566,8 +566,8 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-27T14:20:00Z"
         }
       ],
-      projectName: "Mobile App Redesign",
-      department: ["Consultant"],
+      project_name: "Mobile App Redesign",
+      departments: ["Consultant"],
     },
     {
       taskId: 41,
@@ -581,8 +581,8 @@ export const taskMockData: MockData = {
       tags: ["cloud", "migration", "strategy", "infrastructure"],
       status: "To Do",
       comments: [],
-      projectName: "Digital Transformation",
-      department: ["Consultant"],
+      project_name: "Digital Transformation",
+      departments: ["Consultant"],
     },
     {
       taskId: 42,
@@ -596,8 +596,8 @@ export const taskMockData: MockData = {
       tags: ["analytics", "dashboard", "marketing", "metrics"],
       status: "To Do",
       comments: [],
-      projectName: "Marketing Intelligence",
-      department: ["Consultant"],
+      project_name: "Marketing Intelligence",
+      departments: ["Consultant"],
     },
     {
       taskId: 43,
@@ -618,8 +618,8 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-28T16:45:00Z"
         }
       ],
-      projectName: "Customer Experience Enhancement",
-      department: ["Consultant"],
+      project_name: "Customer Experience Enhancement",
+      departments: ["Consultant"],
     },
     {
       taskId: 44,
@@ -633,8 +633,8 @@ export const taskMockData: MockData = {
       tags: ["finance", "automation", "reporting", "validation"],
       status: "To Do",
       comments: [],
-      projectName: "Financial Process Optimization",
-      department: ["Consultant"],
+      project_name: "Financial Process Optimization",
+      departments: ["Consultant"],
     },
     {
       taskId: 45,
@@ -655,13 +655,13 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-27T10:30:00Z"
         }
       ],
-      projectName: "HR Digitization",
-      department: ["Consultant"],
+      project_name: "HR Digitization",
+      departments: ["Consultant"],
     },
     {
       taskId: 46,
       title: "Legal Compliance Audit System",
-      description: "Build automated system for tracking and auditing legal compliance requirements across all departments.",
+      description: "Build automated system for tracking and auditing legal compliance requirements across all departmentss.",
       startDate: "2025-09-27",
       completedDate: null,
       dueDate: "2025-11-05",
@@ -670,8 +670,8 @@ export const taskMockData: MockData = {
       tags: ["legal", "compliance", "audit", "automation"],
       status: "To Do",
       comments: [],
-      projectName: "Compliance Management",
-      department: ["Consultant"],
+      project_name: "Compliance Management",
+      departments: ["Consultant"],
     },
     {
       taskId: 47,
@@ -692,8 +692,8 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-28T11:15:00Z"
         }
       ],
-      projectName: "Sales Intelligence Platform",
-      department: ["Consultant"],
+      project_name: "Sales Intelligence Platform",
+      departments: ["Consultant"],
     },
     {
       taskId: 48,
@@ -707,8 +707,8 @@ export const taskMockData: MockData = {
       tags: ["product", "roadmap", "visualization", "planning"],
       status: "To Do",
       comments: [],
-      projectName: "Product Strategy Tools",
-      department: ["Consultant"],
+      project_name: "Product Strategy Tools",
+      departments: ["Consultant"],
     },
     // Add some security-focused tasks that Sarah might own as Security Admin
     {
@@ -730,8 +730,8 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-29T09:30:00Z"
         }
       ],
-      projectName: "Security Enhancement",
-      department: ["Consultant"],
+      project_name: "Security Enhancement",
+      departments: ["Consultant"],
     },
     {
       taskId: 50,
@@ -745,13 +745,13 @@ export const taskMockData: MockData = {
       tags: ["identity", "access", "authentication", "sso"],
       status: "To Do",
       comments: [],
-      projectName: "Identity Management",
-      department: ["Consultant"],
+      project_name: "Identity Management",
+      departments: ["Consultant"],
     }
   ]
 };
 
-// Expanded user base with multiple departments
+// Expanded user base with multiple departmentss
 export const allUsers: User[] = [
   { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Engineering Operation Division" },
   { userId: 2, name: "Sarah Davis", email: "sarah.davis@company.com", role: "Admin", department: "Senior Engineers" },

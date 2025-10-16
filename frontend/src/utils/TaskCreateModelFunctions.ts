@@ -26,8 +26,8 @@ const validateForm = (formData: FormData | Omit<FormData, 'taskId'>, setErrors: 
     if (formData.assignedUsers.length === 0) newErrors.assignedUsers = 'At least one user must be assigned';
     if (formData.assignedUsers.length > 5) newErrors.assignedUsers = 'Maximum 5 users can be assigned to a task';
     if (!formData.status) newErrors.status = 'Status is required';
-    if (!formData.projectName.trim()) newErrors.projectName = 'Project name is required';
-    if (formData.department.length < 1) newErrors.department = 'Department is required';
+    if (!formData.project_name.trim()) newErrors.project_name = 'Project name is required';
+    if (formData.departments.length < 1) newErrors.departments = 'Department is required';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

@@ -4,8 +4,8 @@ export interface Task {
     taskId: number;
     title: string;
     description: string;
-    projectName: string;
-    department: Departments[];
+    project_name: string;
+    departments: Departments[];
     priority: Priority;
     status: Status;
     startDate: string;

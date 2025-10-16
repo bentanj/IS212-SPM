@@ -115,7 +115,7 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   };
 
   // Get unique project names from existing tasks [TO CHANGE TO API CALL LATER]
-  const existingProjects = Array.from(new Set(taskMockData.tasks.map(t => t.projectName)));
+  const existingProjects = Array.from(new Set(taskMockData.tasks.map(t => t.project_name)));
 
   return (
     <Dialog open={open} onClose={onClose}
@@ -160,14 +160,14 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
         {/* Project Name */}
         <Autocomplete
           options={existingProjects}
-          value={formData.projectName}
-          onChange={(event: React.SyntheticEvent, value: string | null) => setFormData(prev => ({ ...prev, projectName: value || '' }))}
-          onInputChange={(event: React.SyntheticEvent, value: string) => setFormData(prev => ({ ...prev, projectName: value }))}
+          value={formData.project_name}
+          onChange={(event: React.SyntheticEvent, value: string | null) => setFormData(prev => ({ ...prev, project_name: value || '' }))}
+          onInputChange={(event: React.SyntheticEvent, value: string) => setFormData(prev => ({ ...prev, project_name: value }))}
           renderInput={(params) => (
             <TextField label="Project Name"
               {...params} required margin="normal"
-              error={!!errors.projectName}
-              helperText={errors.projectName} />
+              error={!!errors.project_name}
+              helperText={errors.project_name} />
           )} />
 
         {/* Dates Row */}
@@ -177,11 +177,11 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }}>
           <MultiSelectInput
             label="Department"
-            value={formData.department ?? []}
-            onChange={(_, val) => setFormData((prev) => ({ ...prev, department: val as Departments[] }))}
+            value={formData.departments ?? []}
+            onChange={(_, val) => setFormData((prev) => ({ ...prev, departments: val as Departments[] }))}
             options={ALL_DEPARTMENTS}
-            error={!!errors.department}
-            helperText={errors.department}
+            error={!!errors.departments}
+            helperText={errors.departments}
             freeSolo={true} required={true} />
 
           <DropDownMenu

@@ -65,7 +65,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         <DialogContent dividers>
 
           <Subtitle1 boxMarginBottom={3} label="Description">{task.description} </Subtitle1>
-          <Subtitle1 boxMarginBottom={3} label="Project">{task.projectName}</Subtitle1>
+          <Subtitle1 boxMarginBottom={3} label="Project">{task.project_name}</Subtitle1>
 
           {/* Dates Section - Responsive Stack */}
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 2, sm: 4 }} sx={{ mb: 3 }}>

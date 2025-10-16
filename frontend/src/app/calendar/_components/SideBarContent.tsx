@@ -66,7 +66,7 @@ const SideBarContent: React.FC<SideBarContentProps> = ({
                 MY PROJECTS
             </Typography>
             <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
-                {Array.from(new Set(assignedTasks.map(t => t.projectName))).map((project, index) => (
+                {Array.from(new Set(assignedTasks.map(t => t.project_name))).map((project, index) => (
                     <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                         <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'primary.main', mr: 1 }} />
                         <Typography variant="body2">{project}</Typography>

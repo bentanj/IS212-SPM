@@ -7,11 +7,11 @@ export const StatusOptions = ["To Do", "In Progress", "Completed", "Blocked", ''
 const DefaultFormData: Omit<FormData, "taskId"> = {
     title: '',
     description: '',
-    projectName: '',
+    project_name: '',
     startDate: null,
     dueDate: null,
     completedDate: null,
-    department: [],
+    departments: [],
     priority: '',
     status: '',
     assignedUsers: [],

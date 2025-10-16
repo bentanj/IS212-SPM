@@ -293,7 +293,7 @@ def _parse_task_data(data: dict, is_update: bool = False):
         'priority': 'priority',
         'tags': 'tags',
         'status': 'status',
-        'project_name': 'projectName',  # backend: frontend
+        'project_name': 'project_name',  # backend: frontend
         'parent_id': 'parentTaskId',
     }
 

@@ -184,7 +184,7 @@ export const DayTasksModal: React.FC<DayTasksModalProps> = ({
                     component="div"
                     sx={{ fontSize: '0.75rem' }}
                   >
-                    Project: {task.projectName}
+                    Project: {task.project_name}
                   </Typography>
                   <Typography
                     variant="caption"

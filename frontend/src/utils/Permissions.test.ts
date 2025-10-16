@@ -31,8 +31,8 @@ const mockTask = {
             timestamp: "2025-09-17T14:15:00Z"
         }
     ],
-    projectName: "E-Commerce Platform",
-    department: ["IT Team"],
+    project_name: "E-Commerce Platform",
+    departments: ["IT Team"],
 }
 
 // Tests for canEditTask
