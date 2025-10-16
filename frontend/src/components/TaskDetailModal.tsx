@@ -21,6 +21,8 @@ interface TaskDetailModalProps {
   onSubtaskClick?: (subtask: Task) => void;
   onEditButtonClick?: () => void; // New
   allTasks?: Task[]; // New
+  onTaskUpdated?: (allTasks: Task[]) => void;
+  setSnackbarContent?: (message: string, severity: any) => void;
 }
 
 export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({

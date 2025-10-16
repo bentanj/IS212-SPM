@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -11,63 +11,51 @@ import {
   Box,
   Chip,
   Divider,
-  CircularProgress,
   Stack,
   useTheme,
   useMediaQuery,
 } from '@mui/material';
 import { TProject } from '@/types/TProject';
-import { Task } from '@/mocks/staff/taskMockData';
+import { Task } from '@/types';
 import { TasksDataGrid } from './TasksDataGrid';
-import { getTasksByProject } from '../_functions/getTasksByProject';
 import dayjs from 'dayjs';
 
 interface ProjectDetailModalProps {
   project: TProject | null;
+  tasks: Task[];
   open: boolean;
   onClose: () => void;
-  onTaskClick: (task: Task) => void;  // When user clicks a task
+  onTaskClick: (task: Task) => void;
 }
 
 /**
  * Modal that shows project details and its tasks
- * Similar to TaskDetailModal but for projects
+ * Now receives tasks as prop instead of fetching them
  */
 export function ProjectDetailModal({ 
-  project, 
+  project,
+  tasks,
   open, 
   onClose, 
   onTaskClick 
 }: ProjectDetailModalProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(false);
 
   /**
-   * Fetch tasks when project changes
+   * Filter tasks for this project
+   * useMemo to avoid recalculating on every render
    */
-  useEffect(() => {
-    if (project && open) {
-      loadTasks();
-    }
-  }, [project, open]);
+  const projectTasks = useMemo(() => {
+    if (!project) return [];
+    return tasks.filter(
+      task => task.projectName.toLowerCase() === project.name.toLowerCase()
+    );
+  }, [project, tasks]);
 
-  const loadTasks = async () => {
-    if (!project) return;
-    
-    setLoading(true);
-    try {
-      const projectTasks = await getTasksByProject(project.name);
-      setTasks(projectTasks);
-    } catch (error) {
-      console.error('Error loading tasks:', error);
-      setTasks([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Separate parent tasks and subtasks for display
+  const parentTasks = projectTasks.filter(t => !t.parentTaskId);
+  const subtaskCount = projectTasks.filter(t => t.parentTaskId).length;
 
   if (!project) return null;
 
@@ -80,10 +68,6 @@ export function ProjectDetailModal({
     } as const;
     return colors[status as keyof typeof colors] || 'default';
   };
-
-  // Separate parent tasks and subtasks for display
-  const parentTasks = tasks.filter(t => !t.parentTaskId);
-  const subtaskCount = tasks.filter(t => t.parentTaskId).length;
 
   return (
     <Dialog
@@ -167,14 +151,10 @@ export function ProjectDetailModal({
             variant="subtitle1"
             sx={{ fontWeight: 600, mb: 2 }}
           >
-            Tasks ({tasks.length})
+            Tasks ({projectTasks.length})
           </Typography>
 
-          {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-              <CircularProgress />
-            </Box>
-          ) : tasks.length === 0 ? (
+          {projectTasks.length === 0 ? (
             <Box sx={{ textAlign: 'center', py: 4 }}>
               <Typography variant="body2" color="text.secondary">
                 No tasks found in this project
@@ -182,9 +162,9 @@ export function ProjectDetailModal({
             </Box>
           ) : (
             <TasksDataGrid
-              tasks={tasks}
+              tasks={projectTasks}
               onTaskClick={onTaskClick}
-              loading={loading}
+              loading={false}
             />
           )}
         </Box>

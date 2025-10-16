@@ -1,12 +1,12 @@
 'use client';
 
-// All your original imports from page.tsx
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, CircularProgress, Alert, Stack, useMediaQuery, useTheme } from '@mui/material';
 
 import { taskMockData } from '@/mocks/staff/taskMockData';
 import { Task, TProject, TProjectStatus } from '@/types';
-import { getAllProjects } from '@/utils/Projects/getProjects';
+import { getUserTask } from '@/utils/Tasks/getTask';
+import { getProjectsByTasks } from '../_functions/getProjectsByTasks';
 
 import { ProjectsDataGrid } from './ProjectsDataGrid';
 import { ProjectDetailModal } from './ProjectDetailModal';
@@ -17,16 +17,18 @@ import { ProjectCardList } from './ProjectCardList';
 import { applyProjectFilters } from '../_functions/filterHelpers';
 import { TaskDetailModal } from '@/components/TaskDetailModal';
 
-
-// The ONLY CHANGE is the function name here
 export default function ProjectsUI() {
-
-  // Projects data
+  // Data state
   const [projects, setProjects] = useState<TProject[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Current user - using mock data (same as calendar)
+  const currentUser = taskMockData.currentUser;
+  
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // This is TRUE on mobile screens
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // Search and filter state
   const [searchTerm, setSearchTerm] = useState('');
@@ -37,17 +39,23 @@ export default function ProjectsUI() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   useEffect(() => {
-    loadProjects();
+    loadProjectsAndTasks();
   }, []);
 
-  const loadProjects = async () => {
+  const loadProjectsAndTasks = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getAllProjects();
-      setProjects(data);
+      // 1. Fetch tasks from API (same as calendar does)
+      const taskData = await getUserTask(currentUser);
+      setTasks(taskData);
+
+      // 2. Extract projects from tasks
+      const projectData = getProjectsByTasks(taskData);
+      setProjects(projectData);
+      
     } catch (err) {
-      console.error('Error loading projects:', err);
+      console.error('Error loading projects and tasks:', err);
       setError('Failed to load projects. Please try again.');
     } finally {
       setLoading(false);
@@ -76,8 +84,10 @@ export default function ProjectsUI() {
     setSelectedTask(subtask);
   };
 
-  const handleTaskUpdated = (updatedTask: Task) => {
-    console.log('Task updated:', updatedTask);
+  const handleTaskUpdated = (newAllTasks: Task[]) => {
+    // The modal gives us the complete, updated list.
+    setTasks(newAllTasks);
+    console.log('Task list updated via modal.');
   };
 
   const setSnackbarContent = (message: string, severity: any) => {
@@ -172,13 +182,11 @@ export default function ProjectsUI() {
           {/* Projects Grid or Card List */}
           {!loading && !error && (
             isMobile ? (
-              // If mobile is true, show the new card list
               <ProjectCardList
                 projects={filteredProjects}
                 onProjectClick={handleProjectClick}
               />
             ) : (
-              // Otherwise, show the original data grid inside the Paper
               <Paper
                 elevation={0}
                 sx={{
@@ -202,6 +210,7 @@ export default function ProjectsUI() {
       {/* Modals */}
       <ProjectDetailModal
         project={selectedProject}
+        tasks={tasks}
         open={!!selectedProject}
         onClose={handleProjectModalClose}
         onTaskClick={handleTaskClick}
@@ -213,9 +222,9 @@ export default function ProjectsUI() {
         onClose={handleTaskModalClose}
         onTaskUpdated={handleTaskUpdated}
         setSnackbarContent={setSnackbarContent}
-        currentUser={taskMockData.currentUser}
+        currentUser={currentUser}
         onSubtaskClick={handleSubtaskClick}
-        allTasks={taskMockData.tasks}
+        allTasks={tasks}
       />
     </Box>
   );

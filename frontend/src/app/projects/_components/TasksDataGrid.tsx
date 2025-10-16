@@ -3,15 +3,14 @@
 import React from 'react';
 import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { Box, Chip } from '@mui/material';
-import { Task } from '@/mocks/staff/taskMockData';
+import { Task } from '@/types'; // Changed from '@/mocks/staff/taskMockData'
 import dayjs from 'dayjs';
-import Priority from '@/types/TPriority';
-import { getStatusColor, getPriorityColor } from '../../../utils/TaskRenderingFunctions';
+import { Priority } from '@/types/TPriority';
 
 interface TasksDataGridProps {
   tasks: Task[];
   loading?: boolean;
-  onTaskClick: (task: Task) => void;  // Callback when row is clicked
+  onTaskClick: (task: Task) => void;
 }
 
 /**
@@ -21,9 +20,6 @@ interface TasksDataGridProps {
  */
 export function TasksDataGrid({ tasks, loading = false, onTaskClick }: TasksDataGridProps) {
 
-  /**
-   * Column definitions based on Task structure
-   */
   const columns: GridColDef<Task>[] = [
     {
       field: 'title',
@@ -31,7 +27,6 @@ export function TasksDataGrid({ tasks, loading = false, onTaskClick }: TasksData
       flex: 1,
       minWidth: 200,
       renderCell: (params) => {
-        // Show subtask indicator
         const isSubtask = !!params.row.parentTaskId;
         return (
           <Box>
@@ -46,9 +41,8 @@ export function TasksDataGrid({ tasks, loading = false, onTaskClick }: TasksData
       headerName: 'Status',
       width: 130,
       renderCell: (params) => {
-        // Adjust colors based on your status values
         const statusColors: Record<string, any> = {
-          'Not Started': 'default',
+          'To Do': 'default',
           'In Progress': 'primary',
           'Completed': 'success',
           'Blocked': 'error',
@@ -64,7 +58,6 @@ export function TasksDataGrid({ tasks, loading = false, onTaskClick }: TasksData
         );
       },
     },
-
     {
       field: 'priority',
       headerName: 'Priority',
@@ -83,7 +76,6 @@ export function TasksDataGrid({ tasks, loading = false, onTaskClick }: TasksData
         };
 
         return (
-          // This new outer Box fills the cell and centers the circle
           <Box sx={{
             width: '100%',
             height: '100%',
@@ -91,7 +83,6 @@ export function TasksDataGrid({ tasks, loading = false, onTaskClick }: TasksData
             alignItems: 'center',
             justifyContent: 'center'
           }}>
-            {/* This is your original circle component */}
             <Box
               sx={{
                 width: 24,
@@ -134,9 +125,6 @@ export function TasksDataGrid({ tasks, loading = false, onTaskClick }: TasksData
     },
   ];
 
-  /**
-   * Handle row click
-   */
   const handleRowClick = (params: GridRowParams<Task>) => {
     onTaskClick(params.row);
   };
