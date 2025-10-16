@@ -9,6 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from Services.JWTService import JWTService
 from config import Config
 
+@pytest.mark.unit
 class TestJWTService:
     """Test JWT service functionality"""
     
