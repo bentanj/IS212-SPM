@@ -1,8 +1,8 @@
-import { Task } from "@/types";
+import { APITaskParams } from "@/types";
 
 const TASK_PORT = process.env.TASK_SERVICE_PORT || 8000;
 
-export default async function updateTask(updatedTask: Task) {
+export default async function updateTask(updatedTask: APITaskParams) {
     const taskId = updatedTask.taskId;
 
     try {

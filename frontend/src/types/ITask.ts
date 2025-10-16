@@ -16,3 +16,7 @@ export interface Task {
     comments: Comment[];
     parentTaskId?: number | null;
 }
+
+export interface APITaskParams extends Omit<Task, 'assignedUsers'> {
+    assigned_users: number[]; // Only require array of user IDs for API, not full User objects
+}

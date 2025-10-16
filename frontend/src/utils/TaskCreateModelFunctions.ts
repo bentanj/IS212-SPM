@@ -46,6 +46,54 @@ export const resetForm = (
     setNewComment('');
 };
 
+const transformFormDataToAPITaskParams = (
+    currentUser: User,
+    existingTaskDetails: Task | null,
+    formData: FormData | Omit<FormData, 'taskId'>,
+    newComment: string | null
+): APITaskParams => {
+
+    let Comments: Comment[] = [];
+
+    if (existingTaskDetails) {
+        Comments = [...existingTaskDetails.comments];
+
+        if (newComment?.trim()) {
+            const newCommentObj: Comment = {
+                commentId: Math.max(...existingTaskDetails.comments.map(c => c.commentId), 0) + 1,
+                author: currentUser.name,
+                content: newComment.trim(),
+                timestamp: dayjs().toISOString(),
+            };
+            Comments.push(newCommentObj);
+        }
+    }
+    else {
+        Comments = formData.comments?.trim()
+            ? [{
+                commentId: 1,
+                author: currentUser.name,
+                content: formData.comments?.trim(),
+                timestamp: dayjs().toISOString(),
+            }]
+            : [];
+    }
+
+    return {
+        ...formData,
+        taskId: existingTaskDetails ? existingTaskDetails.taskId : 0,
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        startDate: formData.startDate!.format('YYYY-MM-DD'),
+        completedDate: formData.completedDate?.format('YYYY-MM-DD') || null,
+        dueDate: formData.dueDate!.format('YYYY-MM-DD'),
+        departments: formData.departments,
+        assigned_users: formData.assignedUsers.map(user => user.userId),
+        comments: Comments,
+        project_name: formData.project_name.trim(),
+    };
+};
+
 export const handleSubmit = async (params: {
     existingTaskDetails: Task | null;
     formData: FormData | Omit<FormData, 'taskId'>;
