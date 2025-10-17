@@ -35,11 +35,12 @@ class TestAuthenticationIntegration:
         # Create tables
         Base.metadata.create_all(bind=engine)
         
-        # Create test app
+        # Create test app with test environment
+        import os
+        os.environ['ENV'] = 'test'
         app = create_app()
         app.config['TESTING'] = True
         app.config['SQLALCHEMY_DATABASE_URI'] = test_db_url
-        app.config['ENV'] = 'test'
         
         # Override database session in the app
         app.config['DATABASE_SESSION'] = TestingSessionLocal
