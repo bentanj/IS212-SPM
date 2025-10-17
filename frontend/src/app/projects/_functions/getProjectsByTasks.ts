@@ -11,8 +11,8 @@ export function getProjectsByTasks(tasks: Task[]): TProject[] {
   // Extract unique project names from tasks
   const projectNames = new Set<string>();
   tasks.forEach(task => {
-    if (task.projectName) {
-      projectNames.add(task.projectName);
+    if (task.project_name) {
+      projectNames.add(task.project_name);
     }
   });
 
@@ -27,7 +27,7 @@ export function getProjectsByTasks(tasks: Task[]): TProject[] {
 
     // Count actual tasks for this project (including subtasks)
     const taskCount = tasks.filter(
-      task => task.projectName.toLowerCase() === projectName.toLowerCase()
+      task => task.project_name.toLowerCase() === projectName.toLowerCase()
     ).length;
 
     if (mockProject) {
@@ -61,7 +61,7 @@ export function getProjectsByTasks(tasks: Task[]): TProject[] {
  */
 export function getTasksByProject(projectName: string, tasks: Task[]): Task[] {
   return tasks.filter(
-    task => task.projectName.toLowerCase() === projectName.toLowerCase()
+    task => task.project_name.toLowerCase() === projectName.toLowerCase()
   );
 }
 

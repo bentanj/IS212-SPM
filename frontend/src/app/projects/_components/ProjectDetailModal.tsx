@@ -49,7 +49,7 @@ export function ProjectDetailModal({
   const projectTasks = useMemo(() => {
     if (!project) return [];
     return tasks.filter(
-      task => task.projectName.toLowerCase() === project.name.toLowerCase()
+      task => task.project_name.toLowerCase() === project.name.toLowerCase()
     );
   }, [project, tasks]);
 
