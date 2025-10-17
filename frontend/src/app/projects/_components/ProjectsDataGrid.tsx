@@ -96,6 +96,7 @@ export function ProjectsDataGrid({ projects, loading = false, onProjectClick }: 
         onRowClick={handleRowClick}
         getRowId={(row) => row.name}
         pageSizeOptions={[10, 25, 50]}
+        showToolbar={true}
         initialState={{
           pagination: {
             paginationModel: { pageSize: 10, page: 0 },
