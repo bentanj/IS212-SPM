@@ -1,21 +1,27 @@
 import { Drawer, Paper } from "@mui/material";
+import { Task, User } from "@/types";
 import SideBarContent from "./SideBarContent"
 
 interface SideBarProps {
     isMobile: boolean
     sidebarOpen: boolean
     toggleSidebar: () => void
-    currentUser: any
-    assignedTasks: any[]
+    currentUser: User
+    tasks: Task[]
 }
 
-const SideBar: React.FC<SideBarProps> = ({
+export const SideBar: React.FC<SideBarProps> = ({
     isMobile,
     sidebarOpen,
     toggleSidebar,
     currentUser,
-    assignedTasks
+    tasks
 }) => {
+
+    const assignedTasks = tasks.filter(task =>
+        task.assignedUsers.some(assignedUser => assignedUser.userId === currentUser.userId)
+    );
+
     if (isMobile) {
         // Mobile Drawer
         return (
@@ -36,5 +42,3 @@ const SideBar: React.FC<SideBarProps> = ({
         </Paper>
     )
 }
-
-export default SideBar;
