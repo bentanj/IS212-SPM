@@ -10,6 +10,7 @@ services:
     depends_on:
       - tasks
       - authentication
+      - taskattachments
     restart: unless-stopped
 
   # Tasks
@@ -51,4 +52,22 @@ services:
       - SECRET_KEY=${SECRET_KEY}
     expose:
       - "8002"
+    restart: unless-stopped
+
+  # TaskAttachments
+  taskattachments:
+    build:
+      context: ./TaskAttachments
+      dockerfile: Dockerfile
+    container_name: taskattachments_app
+    environment:
+      - ENV=${ENV}
+      - FRONTEND_ORIGIN=${FRONTEND_ORIGIN}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - STORAGE_BUCKET=${STORAGE_BUCKET}
+      - MAX_FILE_SIZE_BYTES=${MAX_FILE_SIZE_BYTES}
+      - SECRET_KEY=${SECRET_KEY}
+    expose:
+      - "8005"
     restart: unless-stopped
