@@ -1,5 +1,6 @@
 from flask import Flask, g
 from flask_cors import CORS
+import os
 
 # Handle both relative and absolute imports
 try:
@@ -45,13 +46,14 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(users_bp)
     
-    if app.config.get('ENV') != 'test':
+    # Check environment variable directly, not app config
+    if os.getenv('ENV') != 'test':
         with app.app_context():
             init_db()
     
     return app
 
-app = create_app()
-
+# Only create app instance when running directly, not when importing
 if __name__ == "__main__":
+    app = create_app()
     app.run(debug=True, port=8002, host='0.0.0.0')
