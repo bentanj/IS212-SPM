@@ -22,6 +22,12 @@ export const SideBar: React.FC<SideBarProps> = ({
         task.assignedUsers.some(assignedUser => assignedUser.userId === currentUser.userId)
     );
 
+    const departmentTasks = tasks.filter(task =>
+        task.departments.includes(currentUser.department) &&
+        !task.assignedUsers.some(assignedUser => assignedUser.userId === currentUser.userId) &&
+        !assignedTasks.includes(task)
+    );
+
     if (isMobile) {
         // Mobile Drawer
         return (
@@ -30,7 +36,7 @@ export const SideBar: React.FC<SideBarProps> = ({
                     display: { xs: 'block', md: 'none' },
                     '& .MuiDrawer-paper': { width: 280 }
                 }}>
-                <SideBarContent isMobile={isMobile} currentUser={currentUser} assignedTasks={assignedTasks} />
+                <SideBarContent isMobile={isMobile} currentUser={currentUser} assignedTasks={assignedTasks} departmentTasks={departmentTasks} />
             </Drawer>
         )
 
@@ -38,7 +44,7 @@ export const SideBar: React.FC<SideBarProps> = ({
     // Desktop Sidebar
     return (
         <Paper sx={{ width: 280, mr: 2, height: '100vh', overflow: 'auto', flexShrink: 0 }}>
-            <SideBarContent isMobile={isMobile} currentUser={currentUser} assignedTasks={assignedTasks} />
+            <SideBarContent isMobile={isMobile} currentUser={currentUser} assignedTasks={assignedTasks} departmentTasks={departmentTasks} />
         </Paper>
     )
 }
