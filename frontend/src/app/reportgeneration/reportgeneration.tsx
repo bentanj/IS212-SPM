@@ -56,6 +56,7 @@ export default function ReportGeneration() {
   const [mounted, setMounted] = useState(false);
   const [showReportTypeDialog, setShowReportTypeDialog] = useState(false);
   const [pendingExportType, setPendingExportType] = useState<'pdf' | 'excel' | null>(null);
+  const [showDateValidation, setShowDateValidation] = useState(false);
 
   // Date filter state
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
@@ -72,6 +73,11 @@ export default function ReportGeneration() {
 
   const currentDate = useMemo(() => new Date().toLocaleDateString(), []);
 
+  // Check if date range is valid
+  const isDateRangeValid = useMemo(() => {
+    return startDate !== null && endDate !== null;
+  }, [startDate, endDate]);
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -82,17 +88,17 @@ export default function ReportGeneration() {
     startDate: Dayjs | null,
     endDate: Dayjs | null
   ): T => {
-    if (!startDate && !endDate) return report;
+    if (!startDate || !endDate) return report;
 
-    const start = startDate ? dayjs(startDate).startOf('day') : null;
-    const end = endDate ? dayjs(endDate).endOf('day') : null;
+    const start = dayjs(startDate).startOf('day');
+    const end = dayjs(endDate).endOf('day');
 
     // Helper to check if date is in range
     const isInRange = (dateStr: string | null | undefined): boolean => {
       if (!dateStr) return false;
       const date = dayjs(dateStr);
-      if (start && date.isBefore(start)) return false;
-      if (end && date.isAfter(end)) return false;
+      if (date.isBefore(start)) return false;
+      if (date.isAfter(end)) return false;
       return true;
     };
 
@@ -120,13 +126,13 @@ export default function ReportGeneration() {
       let data;
       
       if (subType === 'per-project') {
-        if (projectReport && !startDate && !endDate) return projectReport;
+        if (projectReport && startDate && endDate) return projectReport;
         data = await reportService.getProjectPerformanceReport();
         const filteredData = filterReportByDateRange(data, startDate, endDate);
         setProjectReport(filteredData);
         return filteredData;
       } else if (subType === 'per-user') {
-        if (teamReport && !startDate && !endDate) return teamReport;
+        if (teamReport && startDate && endDate) return teamReport;
         data = await reportService.getTeamProductivityReport();
         const filteredData = filterReportByDateRange(data, startDate, endDate);
         setTeamProductivityReport(filteredData);
@@ -182,13 +188,8 @@ export default function ReportGeneration() {
 
   // Generate date range string for PDF
   const getDateRangeString = (): string => {
-    if (!startDate && !endDate) return '';
-    if (startDate && endDate) {
-      return `Filtered: ${startDate.format('MMM D, YYYY')} - ${endDate.format('MMM D, YYYY')}`;
-    }
-    if (startDate) return `From: ${startDate.format('MMM D, YYYY')}`;
-    if (endDate) return `Until: ${endDate.format('MMM D, YYYY')}`;
-    return '';
+    if (!startDate || !endDate) return '';
+    return `Filtered: ${startDate.format('MMM D, YYYY')} - ${endDate.format('MMM D, YYYY')}`;
   };
 
   // Handle report type selection from dialog
@@ -231,8 +232,23 @@ export default function ReportGeneration() {
     }
   };
 
-  // Handle export button click - show dialog for report type selection
+  // Handle export button click - validate date range first
   const handleExportClick = (type: 'pdf' | 'excel') => {
+    // Validate date range
+    if (!isDateRangeValid) {
+      setShowDateValidation(true);
+      setError('Please select both start and end dates before generating a report.');
+      setShowError(true);
+      
+      // Scroll to date picker
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // Reset validation state
+    setShowDateValidation(false);
+    
+    // Proceed with export
     setPendingExportType(type);
     setShowReportTypeDialog(true);
   };
@@ -256,7 +272,10 @@ export default function ReportGeneration() {
         <ErrorNotification
           error={error}
           showError={showError}
-          onClose={() => setShowError(false)}
+          onClose={() => {
+            setShowError(false);
+            setShowDateValidation(false);
+          }}
         />
 
         {/* Header Section */}
@@ -268,6 +287,7 @@ export default function ReportGeneration() {
           endDate={endDate}
           onStartDateChange={setStartDate}
           onEndDateChange={setEndDate}
+          showValidation={showDateValidation}
         />
 
         {/* Loading Indicator */}
@@ -301,7 +321,8 @@ export default function ReportGeneration() {
                 onExportPDF={() => handleExportClick('pdf')}
                 onExportExcel={() => handleExportClick('excel')}
                 getCategoryColor={getCategoryColor}
-                hasDateFilter={!!(startDate || endDate)}
+                hasDateFilter={isDateRangeValid}
+                isDisabled={!isDateRangeValid}
               />
             </Grid>
           ))}

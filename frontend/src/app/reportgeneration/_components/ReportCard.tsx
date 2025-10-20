@@ -11,8 +11,9 @@ import {
   Box,
   useTheme,
   useMediaQuery,
+  Tooltip,
 } from '@mui/material';
-import { PictureAsPdf, TableChart, Timer } from '@mui/icons-material';
+import { PictureAsPdf, TableChart, Timer, LockOutlined } from '@mui/icons-material';
 
 interface ReportCardProps {
   report: {
@@ -31,6 +32,7 @@ interface ReportCardProps {
   onExportExcel: () => void;
   getCategoryColor: (category: string) => string;
   hasDateFilter?: boolean;
+  isDisabled?: boolean;
 }
 
 export const ReportCard: React.FC<ReportCardProps> = ({
@@ -41,9 +43,25 @@ export const ReportCard: React.FC<ReportCardProps> = ({
   onExportExcel,
   getCategoryColor,
   hasDateFilter = false,
+  isDisabled = false,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const renderButton = (
+    button: React.ReactNode,
+    tooltipText: string,
+    disabled: boolean
+  ) => {
+    if (disabled && isDisabled) {
+      return (
+        <Tooltip title={tooltipText} arrow>
+          <span style={{ width: isMobile ? '100%' : 'auto' }}>{button}</span>
+        </Tooltip>
+      );
+    }
+    return button;
+  };
 
   return (
     <Card
@@ -53,9 +71,10 @@ export const ReportCard: React.FC<ReportCardProps> = ({
         display: 'flex',
         flexDirection: 'column',
         transition: 'all 0.3s ease-in-out',
+        opacity: isDisabled ? 0.7 : 1,
         '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: theme.shadows[8],
+          transform: isDisabled ? 'none' : 'translateY(-4px)',
+          boxShadow: isDisabled ? theme.shadows[2] : theme.shadows[8],
         },
       }}
     >
@@ -66,12 +85,12 @@ export const ReportCard: React.FC<ReportCardProps> = ({
               mr: 2,
               p: 1.5,
               borderRadius: 2,
-              bgcolor: 'primary.lighter',
+              bgcolor: isDisabled ? 'action.disabledBackground' : 'primary.lighter',
               display: 'flex',
-              color: 'primary.main',
+              color: isDisabled ? 'action.disabled' : 'primary.main',
             }}
           >
-            {report.icon}
+            {isDisabled ? <LockOutlined sx={{ fontSize: 28 }} /> : report.icon}
           </Box>
           <Box sx={{ flexGrow: 1, minWidth: 0 }}>
             <Typography
@@ -119,7 +138,7 @@ export const ReportCard: React.FC<ReportCardProps> = ({
           {report.description.substring(0, 120)}...
         </Typography>
 
-        <Stack direction="row" spacing={2} sx={{ mt: 'auto' }}>
+        <Stack direction="row" spacing={2} sx={{ mt: 'auto', flexWrap: 'wrap', gap: 1 }}>
           <Chip
             icon={<Timer />}
             label={report.estimatedTime}
@@ -131,27 +150,34 @@ export const ReportCard: React.FC<ReportCardProps> = ({
           </Typography>
         </Stack>
 
-        {hasDateFilter && (
-          <Box sx={{ mt: 2 }}>
+        <Stack direction="row" spacing={1} sx={{ mt: 2, flexWrap: 'wrap', gap: 1 }}>
+          {hasDateFilter && (
             <Chip
               label="Date Filtered"
-              color="info"
+              color="success"
               size="small"
               variant="outlined"
             />
-          </Box>
-        )}
+          )}
 
-        {report.hasSubTypes && (
-          <Box sx={{ mt: 2 }}>
+          {report.hasSubTypes && (
             <Chip
               label="Multiple Options"
               color="secondary"
               size="small"
               variant="outlined"
             />
-          </Box>
-        )}
+          )}
+
+          {isDisabled && (
+            <Chip
+              label="Date Range Required"
+              color="warning"
+              size="small"
+              variant="filled"
+            />
+          )}
+        </Stack>
       </CardContent>
 
       <CardActions sx={{ px: 2, pb: 2, pt: 1 }}>
@@ -160,35 +186,43 @@ export const ReportCard: React.FC<ReportCardProps> = ({
           spacing={1}
           sx={{ width: '100%' }}
         >
-          <Button
-            variant="contained"
-            startIcon={<PictureAsPdf />}
-            onClick={onExportPDF}
-            disabled={isExportingPDF}
-            fullWidth={isMobile}
-            sx={{
-              py: { xs: 1, sm: 1.25 },
-              fontSize: { xs: '0.875rem', sm: '0.938rem' },
-              minWidth: { sm: 140 },
-            }}
-          >
-            {isExportingPDF ? 'Exporting...' : 'Export to PDF'}
-          </Button>
+          {renderButton(
+            <Button
+              variant="contained"
+              startIcon={<PictureAsPdf />}
+              onClick={onExportPDF}
+              disabled={isExportingPDF || isDisabled}
+              fullWidth={isMobile}
+              sx={{
+                py: { xs: 1, sm: 1.25 },
+                fontSize: { xs: '0.875rem', sm: '0.938rem' },
+                minWidth: { sm: 140 },
+              }}
+            >
+              {isExportingPDF ? 'Exporting...' : 'Export to PDF'}
+            </Button>,
+            'Please select a date range first',
+            isDisabled
+          )}
 
-          <Button
-            variant="outlined"
-            startIcon={<TableChart />}
-            onClick={onExportExcel}
-            disabled={isExportingExcel}
-            fullWidth={isMobile}
-            sx={{
-              py: { xs: 1, sm: 1.25 },
-              fontSize: { xs: '0.875rem', sm: '0.938rem' },
-              minWidth: { sm: 140 },
-            }}
-          >
-            {isExportingExcel ? 'Exporting...' : 'Export to Excel'}
-          </Button>
+          {renderButton(
+            <Button
+              variant="outlined"
+              startIcon={<TableChart />}
+              onClick={onExportExcel}
+              disabled={isExportingExcel || isDisabled}
+              fullWidth={isMobile}
+              sx={{
+                py: { xs: 1, sm: 1.25 },
+                fontSize: { xs: '0.875rem', sm: '0.938rem' },
+                minWidth: { sm: 140 },
+              }}
+            >
+              {isExportingExcel ? 'Exporting...' : 'Export to Excel'}
+            </Button>,
+            'Please select a date range first',
+            isDisabled
+          )}
         </Stack>
       </CardActions>
     </Card>
