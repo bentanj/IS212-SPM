@@ -73,49 +73,27 @@ export default function ReportGeneration() {
 
   const currentDate = useMemo(() => new Date().toLocaleDateString(), []);
 
-  // Check if date range is valid
+  // Check if date range is valid - FIXED: Better validation
   const isDateRangeValid = useMemo(() => {
-    return startDate !== null && endDate !== null;
+    // Check if both dates exist and are valid Dayjs objects
+    const isStartValid = startDate && dayjs(startDate).isValid();
+    const isEndValid = endDate && dayjs(endDate).isValid();
+    
+    console.log('Date validation:', { 
+      startDate: startDate?.format('YYYY-MM-DD'), 
+      endDate: endDate?.format('YYYY-MM-DD'),
+      isStartValid,
+      isEndValid
+    });
+    
+    return isStartValid && isEndValid;
   }, [startDate, endDate]);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Filter report data by date range based on dueDate
-  const filterReportByDateRange = <T extends ProjectPerformanceReport | TeamProductivityReport>(
-    report: T,
-    startDate: Dayjs | null,
-    endDate: Dayjs | null
-  ): T => {
-    if (!startDate || !endDate) return report;
-
-    const start = dayjs(startDate).startOf('day');
-    const end = dayjs(endDate).endOf('day');
-
-    // Helper to check if date is in range
-    const isInRange = (dateStr: string | null | undefined): boolean => {
-      if (!dateStr) return false;
-      const date = dayjs(dateStr);
-      if (date.isBefore(start)) return false;
-      if (date.isAfter(end)) return false;
-      return true;
-    };
-
-    if ('projects' in report.data) {
-      const projectsWithFilteredTasks = report.data.projects.map(project => project);
-      return {
-        ...report,
-        data: { projects: projectsWithFilteredTasks },
-      } as T;
-    } else if ('team_members' in report.data) {
-      return report;
-    }
-
-    return report;
-  };
-
-  // Fetch data from backend
+  // Fetch data from backend with date range
   const fetchReportData = async (
     subType: ReportSubType
   ): Promise<ProjectPerformanceReport | TeamProductivityReport> => {
@@ -123,20 +101,20 @@ export default function ReportGeneration() {
     setError(null);
 
     try {
+      // Format dates for API call
+      const startDateStr = startDate!.format('YYYY-MM-DD');
+      const endDateStr = endDate!.format('YYYY-MM-DD');
+      
       let data;
       
       if (subType === 'per-project') {
-        if (projectReport && startDate && endDate) return projectReport;
-        data = await reportService.getProjectPerformanceReport();
-        const filteredData = filterReportByDateRange(data, startDate, endDate);
-        setProjectReport(filteredData);
-        return filteredData;
+        data = await reportService.getProjectPerformanceReport(startDateStr, endDateStr);
+        setProjectReport(data);
+        return data;
       } else if (subType === 'per-user') {
-        if (teamReport && startDate && endDate) return teamReport;
-        data = await reportService.getTeamProductivityReport();
-        const filteredData = filterReportByDateRange(data, startDate, endDate);
-        setTeamProductivityReport(filteredData);
-        return filteredData;
+        data = await reportService.getTeamProductivityReport(startDateStr, endDateStr);
+        setTeamProductivityReport(data);
+        return data;
       }
 
       throw new Error('Invalid report sub-type');
@@ -192,19 +170,25 @@ export default function ReportGeneration() {
     return `Filtered: ${startDate.format('MMM D, YYYY')} - ${endDate.format('MMM D, YYYY')}`;
   };
 
-  // Handle report type selection from dialog
+  // Handle Report Type Selection
   const handleReportTypeSelection = async (subType: ReportSubType) => {
+    console.log('1. Report type selected:', subType);
+    
     if (!subType || !pendingExportType) return;
 
     setSelectedReport('task-completion');
     setExportType(pendingExportType);
 
     try {
+      console.log('2. Fetching report data...');
       const reportData = await fetchReportData(subType);
+      console.log('3. Report data received:', reportData);
+      
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       if (pendingExportType === 'pdf') {
         const dateRangeStr = getDateRangeString();
+        console.log('4. Generating PDF...', { subType, dateRangeStr });
         
         if (subType === 'per-project') {
           await ProjectPerformancePDF.generate(
@@ -213,27 +197,31 @@ export default function ReportGeneration() {
             dateRangeStr
           );
         } else if (subType === 'per-user') {
+          console.log('5. Calling TeamProductivityPDF.generate...');
           await TeamProductivityPDF.generate(
             reportData as TeamProductivityReport,
             currentDate,
             dateRangeStr
           );
         }
-      } else {
-        console.log('Excel export for:', subType);
-        alert('Excel export will be implemented next!');
+        console.log('6. PDF generated successfully!');
       }
     } catch (err) {
       console.error('Export failed:', err);
+      alert(`Export failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setSelectedReport(null);
       setExportType(null);
       setPendingExportType(null);
+      setShowDateValidation(false);
     }
   };
 
+
   // Handle export button click - validate date range first
   const handleExportClick = (type: 'pdf' | 'excel') => {
+    console.log('Export clicked. Date range valid:', isDateRangeValid);
+    
     // Validate date range
     if (!isDateRangeValid) {
       setShowDateValidation(true);
@@ -285,8 +273,16 @@ export default function ReportGeneration() {
         <DateRangePicker
           startDate={startDate}
           endDate={endDate}
-          onStartDateChange={setStartDate}
-          onEndDateChange={setEndDate}
+          onStartDateChange={(date) => {
+            console.log('Start date changed:', date?.format('YYYY-MM-DD'));
+            setStartDate(date);
+            setShowDateValidation(false);
+          }}
+          onEndDateChange={(date) => {
+            console.log('End date changed:', date?.format('YYYY-MM-DD'));
+            setEndDate(date);
+            setShowDateValidation(false);
+          }}
           showValidation={showDateValidation}
         />
 
@@ -321,7 +317,7 @@ export default function ReportGeneration() {
                 onExportPDF={() => handleExportClick('pdf')}
                 onExportExcel={() => handleExportClick('excel')}
                 getCategoryColor={getCategoryColor}
-                hasDateFilter={isDateRangeValid}
+                hasDateFilter={isDateRangeValid || false}
                 isDisabled={!isDateRangeValid}
               />
             </Grid>

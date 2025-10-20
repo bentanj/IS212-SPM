@@ -1,70 +1,125 @@
+# Controllers/ReportController.py
 from flask import Blueprint, jsonify, request
 from Services.ReportService import ReportService
+from datetime import datetime
 import logging
 
 logger = logging.getLogger(__name__)
+
 bp = Blueprint('reports', __name__, url_prefix='/api/reports')
 
 @bp.route('/health', methods=['GET'])
 def health():
     """Health check endpoint"""
-    return jsonify({"status": "ok", "service": "reports"}), 200
+    return jsonify({
+        "status": "ok", 
+        "service": "reports",
+        "port": 8003
+    }), 200
 
-@bp.route('/task-completion/data', methods=['GET'])
-def get_task_completion_report():
-    """Get task completion report data"""
+@bp.route('/project-performance/data', methods=['GET'])
+def get_project_performance_report():
+    """
+    Get project performance report (Per Project)
+    Query Parameters:
+        - start_date: Start date for filtering (YYYY-MM-DD)
+        - end_date: End date for filtering (YYYY-MM-DD)
+    """
     try:
         service = ReportService()
-        user = request.args.get('user', 'system')
         
-        # Generate report
-        report = service.generate_task_completion_report(user)
+        # Get date range parameters
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
         
-        # Convert to dict with proper field names
-        response_data = report.to_dict()
+        # Validate required parameters
+        if not start_date or not end_date:
+            return jsonify({
+                "error": "Missing required parameters",
+                "message": "Both start_date and end_date are required"
+            }), 400
         
-        logger.info(f"Task completion report generated successfully")
-        return jsonify(response_data), 200
+        # Validate date format
+        try:
+            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
+            end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+            
+            if start_dt > end_dt:
+                return jsonify({
+                    "error": "Invalid date range",
+                    "message": "start_date must be before or equal to end_date"
+                }), 400
+                
+        except ValueError:
+            return jsonify({
+                "error": "Invalid date format",
+                "message": "Dates must be in YYYY-MM-DD format"
+            }), 400
+        
+        # Generate report with date filtering
+        report = service.generate_project_performance_report(start_date, end_date)
+        
+        logger.info(f"Project performance report generated for {start_date} to {end_date}")
+        return jsonify(report.to_dict()), 200
         
     except Exception as e:
-        logger.error(f"Error generating task completion report: {str(e)}", exc_info=True)
+        logger.error(f"Error generating project performance report: {str(e)}", exc_info=True)
         return jsonify({
             "error": "Failed to generate report",
             "message": str(e)
         }), 500
 
-@bp.route('/project-performance/data', methods=['GET'])
-def get_project_performance_report():
-    """Get project performance report"""
-    try:
-        service = ReportService()
-        report = service.generate_project_performance_report()
-        return jsonify(report.to_dict()), 200
-    except Exception as e:
-        logger.error(f"Error: {str(e)}", exc_info=True)
-        return jsonify({"error": str(e)}), 500
-
 @bp.route('/team-productivity/data', methods=['GET'])
 def get_team_productivity_report():
-    """Get team productivity report"""
+    """
+    Get team productivity report (Per User)
+    Query Parameters:
+        - start_date: Start date for filtering (YYYY-MM-DD)
+        - end_date: End date for filtering (YYYY-MM-DD)
+    """
     try:
         service = ReportService()
-        report = service.generate_team_productivity_report()
+        
+        # Get date range parameters
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        
+        # Validate required parameters
+        if not start_date or not end_date:
+            return jsonify({
+                "error": "Missing required parameters",
+                "message": "Both start_date and end_date are required"
+            }), 400
+        
+        # Validate date format
+        try:
+            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
+            end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+            
+            if start_dt > end_dt:
+                return jsonify({
+                    "error": "Invalid date range",
+                    "message": "start_date must be before or equal to end_date"
+                }), 400
+                
+        except ValueError:
+            return jsonify({
+                "error": "Invalid date format",
+                "message": "Dates must be in YYYY-MM-DD format"
+            }), 400
+        
+        # Generate report with date filtering
+        report = service.generate_team_productivity_report(start_date, end_date)
+        
+        logger.info(f"Team productivity report generated for {start_date} to {end_date}")
         return jsonify(report.to_dict()), 200
+        
     except Exception as e:
-        logger.error(f"Error: {str(e)}", exc_info=True)
-        return jsonify({"error": str(e)}), 500
-
-@bp.route('/available', methods=['GET'])
-def list_available_reports():
-    """List all available report types"""
-    try:
-        service = ReportService()
-        reports = service.list_available_reports()
-        return jsonify({"reports": reports}), 200
-    except Exception as e:
-        logger.error(f"Error: {str(e)}", exc_info=True)
-        return jsonify({"error": str(e)}), 500
+        logger.error(f"Error generating team productivity report: {str(e)}", exc_info=True)
+        return jsonify({
+            "error": "Failed to generate report",
+            "message": str(e)
+        }), 500
 
 @bp.route('/summary', methods=['GET'])
 def get_reports_summary():
@@ -74,5 +129,32 @@ def get_reports_summary():
         summary = service.get_reports_summary()
         return jsonify(summary), 200
     except Exception as e:
-        logger.error(f"Error: {str(e)}", exc_info=True)
-        return jsonify({"error": str(e)}), 500
+        logger.error(f"Error generating reports summary: {str(e)}", exc_info=True)
+        return jsonify({
+            "error": "Failed to get summary",
+            "message": str(e)
+        }), 500
+
+@bp.route('/available', methods=['GET'])
+def list_available_reports():
+    """List available report types"""
+    try:
+        reports = [
+            {
+                "id": "task-completion",
+                "title": "Task Completion Report",
+                "description": "Comprehensive task completion analytics with per-user and per-project views",
+                "category": "Task Analytics",
+                "subtypes": [
+                    {"id": "per-user", "name": "Per User Report"},
+                    {"id": "per-project", "name": "Per Project Report"}
+                ]
+            }
+        ]
+        return jsonify({"reports": reports}), 200
+    except Exception as e:
+        logger.error(f"Error listing reports: {str(e)}", exc_info=True)
+        return jsonify({
+            "error": "Failed to list reports",
+            "message": str(e)
+        }), 500

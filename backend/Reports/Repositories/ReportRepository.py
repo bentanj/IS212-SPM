@@ -1,3 +1,4 @@
+# Repositories/ReportRepository.py
 from typing import Dict, Any, List
 from collections import defaultdict
 from Services.TaskServiceClient import TaskServiceClient
@@ -7,11 +8,11 @@ logger = logging.getLogger(__name__)
 
 class ReportRepository:
     """Repository for generating report data from Tasks service"""
-    
+
     def __init__(self):
         self.task_client = TaskServiceClient()
         logger.info("ReportRepository initialized")
-    
+
     def get_all_tasks(self) -> List[Dict[str, Any]]:
         """Get all tasks from Tasks service"""
         try:
@@ -21,19 +22,17 @@ class ReportRepository:
         except Exception as e:
             logger.error(f"Error fetching tasks: {str(e)}")
             raise
-    
+
     def get_task_statistics(self) -> Dict[str, Any]:
         """Calculate task statistics"""
         try:
             tasks = self.get_all_tasks()
-            
             status_counts = defaultdict(int)
             priority_counts = defaultdict(int)
             
             for task in tasks:
                 status = task.get('status', 'Unknown')
                 priority = task.get('priority', 'Unknown')
-                
                 status_counts[status] += 1
                 priority_counts[str(priority)] += 1
             
@@ -49,16 +48,19 @@ class ReportRepository:
         except Exception as e:
             logger.error(f"Error calculating statistics: {str(e)}")
             raise
-    
-    def get_project_statistics(self) -> List[Dict[str, Any]]:
-        """Get statistics grouped by project"""
+
+    def get_project_statistics_from_tasks(
+        self, 
+        tasks: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """Get statistics grouped by project from given tasks list"""
         try:
-            tasks = self.get_all_tasks()
             projects = defaultdict(lambda: {
                 'total_tasks': 0,
                 'completed': 0,
                 'in_progress': 0,
-                'to_do': 0
+                'to_do': 0,
+                'blocked': 0
             })
             
             for task in tasks:
@@ -73,16 +75,22 @@ class ReportRepository:
                     projects[project]['in_progress'] += 1
                 elif status == 'To Do':
                     projects[project]['to_do'] += 1
+                elif status == 'Blocked':
+                    projects[project]['blocked'] += 1
             
             result = []
             for project_name, stats in projects.items():
-                completion_rate = (stats['completed'] / stats['total_tasks'] * 100) if stats['total_tasks'] > 0 else 0
+                completion_rate = (
+                    (stats['completed'] / stats['total_tasks'] * 100) 
+                    if stats['total_tasks'] > 0 else 0
+                )
                 result.append({
                     'project_name': project_name,
                     'total_tasks': stats['total_tasks'],
                     'completed': stats['completed'],
                     'in_progress': stats['in_progress'],
                     'to_do': stats['to_do'],
+                    'blocked': stats['blocked'],
                     'completion_rate': round(completion_rate, 1)
                 })
             
@@ -92,14 +100,17 @@ class ReportRepository:
         except Exception as e:
             logger.error(f"Error calculating project statistics: {str(e)}")
             raise
-    
-    def get_user_productivity(self) -> List[Dict[str, Any]]:
-        """Get productivity statistics by user"""
+
+    def get_user_productivity_from_tasks(
+        self, 
+        tasks: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """Get productivity statistics by user from given tasks list"""
         try:
-            tasks = self.get_all_tasks()
             users = defaultdict(lambda: {
                 'total_tasks': 0,
-                'completed': 0
+                'completed': 0,
+                'in_progress': 0
             })
             
             for task in tasks:
@@ -108,10 +119,10 @@ class ReportRepository:
                 
                 for user_data in assigned_users:
                     if isinstance(user_data, dict):
-                        user_id = user_data.get('userId') or user_data.get('user_id')
+                        user_id = str(user_data.get('userId') or user_data.get('user_id', ''))
                         user_name = user_data.get('name', f'User {user_id}')
                     else:
-                        user_id = user_data
+                        user_id = str(user_data)
                         user_name = f'User {user_id}'
                     
                     users[user_id]['name'] = user_name
@@ -119,15 +130,20 @@ class ReportRepository:
                     
                     if status == 'Completed':
                         users[user_id]['completed'] += 1
+                    elif status == 'In Progress':
+                        users[user_id]['in_progress'] += 1
             
             result = []
             for user_id, stats in users.items():
-                completion_rate = (stats['completed'] / stats['total_tasks'] * 100) if stats['total_tasks'] > 0 else 0
+                completion_rate = (
+                    (stats['completed'] / stats['total_tasks'] * 100) 
+                    if stats['total_tasks'] > 0 else 0
+                )
                 result.append({
                     'user_id': user_id,
-                    'user_name': stats['name'],
                     'total_tasks': stats['total_tasks'],
                     'completed': stats['completed'],
+                    'in_progress': stats['in_progress'],
                     'completion_rate': round(completion_rate, 1)
                 })
             

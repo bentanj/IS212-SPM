@@ -1,23 +1,15 @@
 // src/services/reportService.ts
-
-/**
- * Reports API Service
- * Handles all API calls to the Reports backend service
- */
-
 import {
   ProjectPerformanceReport,
   TeamProductivityReport,
   ReportsSummary,
-  AvailableReport,
   ApiError,
 } from '@/types/report.types';
 
-// Configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-const API_TIMEOUT = 30000; // 30 seconds
+const API_TIMEOUT = 30000;
 const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000; // 1 second
+const RETRY_DELAY = 1000;
 
 // Cache configuration
 interface CacheEntry<T> {
@@ -28,7 +20,7 @@ interface CacheEntry<T> {
 
 class ReportCache {
   private cache = new Map<string, CacheEntry<any>>();
-  private defaultTTL = 5 * 60 * 1000; // 5 minutes
+  private defaultTTL = 5 * 60 * 1000;
 
   set<T>(key: string, data: T, ttl: number = this.defaultTTL): void {
     this.cache.set(key, {
@@ -62,7 +54,6 @@ class ReportCache {
 
 const cache = new ReportCache();
 
-// Custom error class
 export class ReportServiceError extends Error {
   constructor(
     message: string,
@@ -74,10 +65,8 @@ export class ReportServiceError extends Error {
   }
 }
 
-// Helper: Delay for retry
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Helper: Fetch with timeout
 async function fetchWithTimeout(
   url: string,
   options: RequestInit = {},
@@ -90,19 +79,30 @@ async function fetchWithTimeout(
     const response = await fetch(url, {
       ...options,
       signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
     });
     clearTimeout(timeoutId);
     return response;
   } catch (error) {
     clearTimeout(timeoutId);
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw new ReportServiceError('Request timeout', 408);
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        throw new ReportServiceError('Request timeout', 408);
+      }
+      // Network error
+      throw new ReportServiceError(
+        'Failed to connect to reports service. Please ensure the backend is running.',
+        0,
+        { originalError: error.message }
+      );
     }
     throw error;
   }
 }
 
-// Helper: Retry logic
 async function fetchWithRetry<T>(
   url: string,
   options: RequestInit = {},
@@ -112,9 +112,9 @@ async function fetchWithRetry<T>(
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
+      console.log(`Fetching: ${url} (attempt ${attempt + 1}/${retries + 1})`);
       const response = await fetchWithTimeout(url, options);
 
-      // Handle non-OK responses
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({
           error: 'Unknown error',
@@ -129,19 +129,19 @@ async function fetchWithRetry<T>(
       }
 
       const data = await response.json();
+      console.log('API Response:', data);
       return data as T;
     } catch (error) {
       lastError = error as Error;
+      console.error(`Attempt ${attempt + 1} failed:`, error);
 
-      // Don't retry on client errors (4xx)
       if (error instanceof ReportServiceError && error.statusCode && error.statusCode < 500) {
         throw error;
       }
 
-      // Retry on server errors (5xx) or network errors
       if (attempt < retries) {
         console.warn(`Retry attempt ${attempt + 1}/${retries} for ${url}`);
-        await delay(RETRY_DELAY * (attempt + 1)); // Exponential backoff
+        await delay(RETRY_DELAY * (attempt + 1));
       }
     }
   }
@@ -149,51 +149,36 @@ async function fetchWithRetry<T>(
   throw lastError || new ReportServiceError('Max retries exceeded');
 }
 
-// API Service Class
 export class ReportService {
   private baseUrl: string;
 
   constructor(baseUrl: string = API_BASE_URL) {
     this.baseUrl = baseUrl;
+    console.log('ReportService initialized with base URL:', this.baseUrl);
   }
 
-  /**
-   * Health check endpoint
-   */
   async checkHealth(): Promise<{ status: string; service: string; port: number }> {
     const url = `${this.baseUrl}/api/reports/health`;
     return fetchWithRetry(url);
   }
 
-  /**
-   * Get list of available report types
-   */
-  async getAvailableReports(useCache = true): Promise<AvailableReport[]> {
-    const cacheKey = 'available-reports';
-    if (useCache) {
-      const cached = cache.get<AvailableReport[]>(cacheKey);
-      if (cached) return cached;
-    }
-
-    const url = `${this.baseUrl}/api/reports`;
-    const data = await fetchWithRetry<AvailableReport[]>(url);
-    cache.set(cacheKey, data, 10 * 60 * 1000); // Cache for 10 minutes
-    return data;
-  }
-
-  /**
-   * Get project performance analytics report data (Per Project)
-   * This is used for the "Task Completion Report - Per Project" option
-   */
-  async getProjectPerformanceReport(useCache = false): Promise<ProjectPerformanceReport> {
-    const cacheKey = 'project-performance-report';
+  async getProjectPerformanceReport(
+    startDate: string,
+    endDate: string,
+    useCache = false
+  ): Promise<ProjectPerformanceReport> {
+    const cacheKey = `project-performance-${startDate}-${endDate}`;
     if (useCache) {
       const cached = cache.get<ProjectPerformanceReport>(cacheKey);
-      if (cached) return cached;
+      if (cached) {
+        console.log('Returning cached project performance report');
+        return cached;
+      }
     }
 
-    const url = `${this.baseUrl}/api/reports/project-performance/data`;
+    const url = `${this.baseUrl}/api/reports/project-performance/data?start_date=${startDate}&end_date=${endDate}`;
     const data = await fetchWithRetry<ProjectPerformanceReport>(url);
+    
     if (useCache) {
       cache.set(cacheKey, data, 2 * 60 * 1000);
     }
@@ -201,19 +186,23 @@ export class ReportService {
     return data;
   }
 
-  /**
-   * Get team productivity report data (Per User)
-   * This is used for the "Task Completion Report - Per User" option
-   */
-  async getTeamProductivityReport(useCache = false): Promise<TeamProductivityReport> {
-    const cacheKey = 'team-productivity-report';
+  async getTeamProductivityReport(
+    startDate: string,
+    endDate: string,
+    useCache = false
+  ): Promise<TeamProductivityReport> {
+    const cacheKey = `team-productivity-${startDate}-${endDate}`;
     if (useCache) {
       const cached = cache.get<TeamProductivityReport>(cacheKey);
-      if (cached) return cached;
+      if (cached) {
+        console.log('Returning cached team productivity report');
+        return cached;
+      }
     }
 
-    const url = `${this.baseUrl}/api/reports/team-productivity/data`;
+    const url = `${this.baseUrl}/api/reports/team-productivity/data?start_date=${startDate}&end_date=${endDate}`;
     const data = await fetchWithRetry<TeamProductivityReport>(url);
+    
     if (useCache) {
       cache.set(cacheKey, data, 2 * 60 * 1000);
     }
@@ -221,9 +210,6 @@ export class ReportService {
     return data;
   }
 
-  /**
-   * Get reports summary (high-level metrics)
-   */
   async getReportsSummary(useCache = true): Promise<ReportsSummary> {
     const cacheKey = 'reports-summary';
     if (useCache) {
@@ -234,27 +220,21 @@ export class ReportService {
     const url = `${this.baseUrl}/api/reports/summary`;
     const data = await fetchWithRetry<ReportsSummary>(url);
     if (useCache) {
-      cache.set(cacheKey, data, 1 * 60 * 1000); // Cache for 1 minute
+      cache.set(cacheKey, data, 1 * 60 * 1000);
     }
 
     return data;
   }
 
-  /**
-   * Clear cache
-   */
   clearCache(key?: string): void {
     cache.clear(key);
   }
 }
 
-// Export singleton instance
 export const reportService = new ReportService();
 
-// Export individual functions for easier imports
 export const {
   checkHealth,
-  getAvailableReports,
   getProjectPerformanceReport,
   getTeamProductivityReport,
   getReportsSummary,
