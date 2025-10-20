@@ -1,17 +1,18 @@
-from typing import Dict, Any, List, Optional
+from dataclasses import dataclass
 from datetime import datetime
-from dataclasses import dataclass, asdict
+from typing import Any, Dict
 
 @dataclass
 class ReportMetadata:
-    """Metadata for generated reports"""
+    """Metadata for a generated report"""
     report_id: str
     report_type: str
     generated_at: datetime
-    generated_by: Optional[str]
+    generated_by: str
     parameters: Dict[str, Any]
     
     def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary with proper field names"""
         return {
             "report_id": self.report_id,
             "report_type": self.report_type,
@@ -22,14 +23,15 @@ class ReportMetadata:
 
 @dataclass
 class ReportData:
-    """Container for report data and metadata"""
+    """Complete report data structure"""
     metadata: ReportMetadata
-    data: Dict[str, Any]
     summary: Dict[str, Any]
+    data: Dict[str, Any]
     
     def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for JSON serialization"""
         return {
             "metadata": self.metadata.to_dict(),
-            "data": self.data,
-            "summary": self.summary
+            "summary": self.summary,
+            "data": self.data
         }

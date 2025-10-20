@@ -1,86 +1,78 @@
-from flask import Blueprint, jsonify, request, g
-from sqlalchemy.exc import SQLAlchemyError
-from Repositories.ReportRepository import ReportRepository
+from flask import Blueprint, jsonify, request
 from Services.ReportService import ReportService
-from exceptions import ReportValidationError
+import logging
 
-bp = Blueprint("reports", __name__, url_prefix="/api/reports")
+logger = logging.getLogger(__name__)
+bp = Blueprint('reports', __name__, url_prefix='/api/reports')
 
-
-def get_report_service():
-    return ReportService()  # No session dependency
-
-
-
-@bp.get("/health")
-def health_check():
-    """
-    Health check endpoint
-    GET /api/reports/health
-    """
+@bp.route('/health', methods=['GET'])
+def health():
+    """Health check endpoint"""
     return jsonify({"status": "ok", "service": "reports"}), 200
 
+@bp.route('/task-completion/data', methods=['GET'])
+def get_task_completion_report():
+    """Get task completion report data"""
+    try:
+        service = ReportService()
+        user = request.args.get('user', 'system')
+        
+        # Generate report
+        report = service.generate_task_completion_report(user)
+        
+        # Convert to dict with proper field names
+        response_data = report.to_dict()
+        
+        logger.info(f"Task completion report generated successfully")
+        return jsonify(response_data), 200
+        
+    except Exception as e:
+        logger.error(f"Error generating task completion report: {str(e)}", exc_info=True)
+        return jsonify({
+            "error": "Failed to generate report",
+            "message": str(e)
+        }), 500
 
-@bp.get("")
+@bp.route('/project-performance/data', methods=['GET'])
+def get_project_performance_report():
+    """Get project performance report"""
+    try:
+        service = ReportService()
+        report = service.generate_project_performance_report()
+        return jsonify(report.to_dict()), 200
+    except Exception as e:
+        logger.error(f"Error: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
+
+@bp.route('/team-productivity/data', methods=['GET'])
+def get_team_productivity_report():
+    """Get team productivity report"""
+    try:
+        service = ReportService()
+        report = service.generate_team_productivity_report()
+        return jsonify(report.to_dict()), 200
+    except Exception as e:
+        logger.error(f"Error: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
+
+@bp.route('/available', methods=['GET'])
 def list_available_reports():
-    """
-    List all available report types
-    GET /api/reports
-    """
+    """List all available report types"""
     try:
-        reports = get_report_service().list_available_reports()
-        return jsonify(reports), 200
+        service = ReportService()
+        reports = service.list_available_reports()
+        return jsonify({"reports": reports}), 200
     except Exception as e:
+        logger.error(f"Error: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
 
-
-@bp.get("/task-completion/data")
-def get_task_completion_data():
-    """
-    Get task completion report data (for frontend PDF generation)
-    GET /api/reports/task-completion/data
-    """
-    try:
-        report = get_report_service().generate_task_completion_report()
-        return jsonify(report.to_dict()), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@bp.get("/project-performance/data")
-def get_project_performance_data():
-    """
-    Get project performance report data (for frontend PDF generation)
-    GET /api/reports/project-performance/data
-    """
-    try:
-        report = get_report_service().generate_project_performance_report()
-        return jsonify(report.to_dict()), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@bp.get("/team-productivity/data")
-def get_team_productivity_data():
-    """
-    Get team productivity report data (for frontend PDF generation)
-    GET /api/reports/team-productivity/data
-    """
-    try:
-        report = get_report_service().generate_team_productivity_report()
-        return jsonify(report.to_dict()), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@bp.get("/summary")
+@bp.route('/summary', methods=['GET'])
 def get_reports_summary():
-    """
-    Get high-level summary for all reports
-    GET /api/reports/summary
-    """
+    """Get summary of all reports"""
     try:
-        summary = get_report_service().get_reports_summary()
+        service = ReportService()
+        summary = service.get_reports_summary()
         return jsonify(summary), 200
     except Exception as e:
+        logger.error(f"Error: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
