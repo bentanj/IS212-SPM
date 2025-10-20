@@ -30,14 +30,9 @@ class Task(Base):
         assigned_users_data = []
         if fetch_users and self.assigned_users:
             try:
-                # For docker
-                # Get Auth service URL from environment or use default 
-                # auth_service_url = os.getenv(
-                #     'AUTH_SERVICE_URL', 'http://authentication:8002')
-                
                 # Get Auth service URL from environment or use default
                 auth_service_url = os.getenv(
-                    'AUTH_SERVICE_URL', 'http://localhost:8002')
+                    'AUTH_SERVICE_URL', 'http://authentication:8002')
 
                 # Fetch each user via HTTP request
                 for user_id in self.assigned_users:

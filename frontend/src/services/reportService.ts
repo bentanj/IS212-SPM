@@ -13,8 +13,8 @@ import {
 } from '@/types/report.types';
 
 // Configuration
-// const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost'; 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8003';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost'; 
+// const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8003';
 const API_TIMEOUT = 30000; // 30 seconds
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
