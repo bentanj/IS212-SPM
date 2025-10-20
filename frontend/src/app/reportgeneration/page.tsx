@@ -1,5 +1,6 @@
+// src/app/reportgeneration/page.tsx
 import ReportGeneration from './reportgeneration';
 
-export default function ReportsPage() {
+export default function ReportGenerationPage() {
   return <ReportGeneration />;
 }

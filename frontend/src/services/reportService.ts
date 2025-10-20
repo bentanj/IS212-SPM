@@ -1,10 +1,11 @@
+// src/services/reportService.ts
+
 /**
  * Reports API Service
  * Handles all API calls to the Reports backend service
  */
 
 import {
-  TaskCompletionReport,
   ProjectPerformanceReport,
   TeamProductivityReport,
   ReportsSummary,
@@ -13,8 +14,7 @@ import {
 } from '@/types/report.types';
 
 // Configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'; 
-// const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8003';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 const API_TIMEOUT = 30000; // 30 seconds
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
@@ -170,7 +170,6 @@ export class ReportService {
    */
   async getAvailableReports(useCache = true): Promise<AvailableReport[]> {
     const cacheKey = 'available-reports';
-
     if (useCache) {
       const cached = cache.get<AvailableReport[]>(cacheKey);
       if (cached) return cached;
@@ -178,38 +177,16 @@ export class ReportService {
 
     const url = `${this.baseUrl}/api/reports`;
     const data = await fetchWithRetry<AvailableReport[]>(url);
-
     cache.set(cacheKey, data, 10 * 60 * 1000); // Cache for 10 minutes
     return data;
   }
 
   /**
-   * Get task completion/status report data
-   */
-  async getTaskCompletionReport(useCache = false): Promise<TaskCompletionReport> {
-    const cacheKey = 'task-completion-report';
-
-    if (useCache) {
-      const cached = cache.get<TaskCompletionReport>(cacheKey);
-      if (cached) return cached;
-    }
-
-    const url = `${this.baseUrl}/api/reports/task-completion/data`;
-    const data = await fetchWithRetry<TaskCompletionReport>(url);
-
-    if (useCache) {
-      cache.set(cacheKey, data, 2 * 60 * 1000); // Cache for 2 minutes
-    }
-
-    return data;
-  }
-
-  /**
-   * Get project performance analytics report data
+   * Get project performance analytics report data (Per Project)
+   * This is used for the "Task Completion Report - Per Project" option
    */
   async getProjectPerformanceReport(useCache = false): Promise<ProjectPerformanceReport> {
     const cacheKey = 'project-performance-report';
-
     if (useCache) {
       const cached = cache.get<ProjectPerformanceReport>(cacheKey);
       if (cached) return cached;
@@ -217,7 +194,6 @@ export class ReportService {
 
     const url = `${this.baseUrl}/api/reports/project-performance/data`;
     const data = await fetchWithRetry<ProjectPerformanceReport>(url);
-
     if (useCache) {
       cache.set(cacheKey, data, 2 * 60 * 1000);
     }
@@ -226,11 +202,11 @@ export class ReportService {
   }
 
   /**
-   * Get team productivity report data
+   * Get team productivity report data (Per User)
+   * This is used for the "Task Completion Report - Per User" option
    */
   async getTeamProductivityReport(useCache = false): Promise<TeamProductivityReport> {
     const cacheKey = 'team-productivity-report';
-
     if (useCache) {
       const cached = cache.get<TeamProductivityReport>(cacheKey);
       if (cached) return cached;
@@ -238,7 +214,6 @@ export class ReportService {
 
     const url = `${this.baseUrl}/api/reports/team-productivity/data`;
     const data = await fetchWithRetry<TeamProductivityReport>(url);
-
     if (useCache) {
       cache.set(cacheKey, data, 2 * 60 * 1000);
     }
@@ -251,7 +226,6 @@ export class ReportService {
    */
   async getReportsSummary(useCache = true): Promise<ReportsSummary> {
     const cacheKey = 'reports-summary';
-
     if (useCache) {
       const cached = cache.get<ReportsSummary>(cacheKey);
       if (cached) return cached;
@@ -259,7 +233,6 @@ export class ReportService {
 
     const url = `${this.baseUrl}/api/reports/summary`;
     const data = await fetchWithRetry<ReportsSummary>(url);
-
     if (useCache) {
       cache.set(cacheKey, data, 1 * 60 * 1000); // Cache for 1 minute
     }
@@ -282,7 +255,6 @@ export const reportService = new ReportService();
 export const {
   checkHealth,
   getAvailableReports,
-  getTaskCompletionReport,
   getProjectPerformanceReport,
   getTeamProductivityReport,
   getReportsSummary,

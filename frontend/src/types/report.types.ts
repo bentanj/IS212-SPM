@@ -1,3 +1,5 @@
+// src/types/report.types.ts
+
 /**
  * Report Type Definitions
  * Matches backend API response structure
@@ -11,50 +13,9 @@ export interface ReportMetadata {
   parameters: Record<string, any>;
 }
 
-export interface TaskDetail {
-  id: number;
-  title: string;
-  status: 'Completed' | 'In Progress' | 'To Do' | 'Blocked';
-  priority: 'High' | 'Medium' | 'Low';
-  projectName: string | null;  // ✅ CHANGED: Allow null
-  startDate: string | null;
-  completedDate: string | null;
-  dueDate: string | null;
-  description: string;
-  assignedUsers: AssignedUser[] | null;  // ✅ CHANGED: Allow null
-}
-
-export interface AssignedUser {
-  id: string;
-  name: string;
-  department: string;
-  role: string;
-}
-
-export interface TaskCompletionSummary {
-  total_tasks: number;
-  completed_tasks: number;
-  in_progress_tasks: number;
-  to_do_tasks: number;
-  blocked_tasks: number;
-  completion_rate: number;
-  by_priority: Record<string, number>;
-  unique_projects: number;
-  unique_departments: number;
-}
-
-export interface TaskCompletionData {
-  tasks: TaskDetail[];
-}
-
-export interface TaskCompletionReport {
-  metadata: ReportMetadata;
-  data: TaskCompletionData;
-  summary: TaskCompletionSummary;
-}
-
+// Project Performance Report Types (Per Project)
 export interface ProjectStatistics {
-  project_name: string | null;  // ✅ CHANGED: Allow null
+  project_name: string | null;
   total_tasks: number;
   completed: number;
   in_progress: number;
@@ -80,6 +41,7 @@ export interface ProjectPerformanceReport {
   summary: ProjectPerformanceSummary;
 }
 
+// Team Productivity Report Types (Per User)
 export interface TeamMemberStats {
   user_id: string;
   total_tasks: number;
@@ -105,6 +67,10 @@ export interface TeamProductivityReport {
   summary: TeamProductivitySummary;
 }
 
+// Combined Task Completion Report Type
+export type TaskCompletionReport = ProjectPerformanceReport | TeamProductivityReport;
+
+// Reports Summary
 export interface ReportsSummary {
   total_tasks: number;
   completion_rate: number;
@@ -113,6 +79,7 @@ export interface ReportsSummary {
   generated_at: string;
 }
 
+// Available Report
 export interface AvailableReport {
   id: string;
   title: string;
@@ -121,8 +88,12 @@ export interface AvailableReport {
   estimatedTime: string;
 }
 
+// Error handling
 export interface ApiError {
   error: string;
   message?: string;
   details?: any;
 }
+
+// Report Sub-Type identifier
+export type ReportSubType = 'per-user' | 'per-project';
