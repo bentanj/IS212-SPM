@@ -1,9 +1,6 @@
 import os
-from flask import Flask, g, jsonify
+from flask import Flask, jsonify
 from flask_cors import CORS
-from sqlalchemy.orm import scoped_session
-from sqlalchemy.exc import SQLAlchemyError
-from db import SessionLocal, engine
 from Controllers.ReportController import bp as reports_bp
 
 # Initialize Flask app
@@ -31,31 +28,6 @@ CORS(app, resources={
     }
 })
 
-
-# Database session management
-@app.before_request
-def before_request():
-    """Create database session before each request"""
-    try:
-        g.db_session = SessionLocal()
-    except Exception as e:
-        app.logger.error(f"Database connection error: {str(e)}")
-        return jsonify({"error": "Database connection failed"}), 500
-
-
-@app.teardown_request
-def teardown_request(exception=None):
-    """Close database session after each request"""
-    session = getattr(g, 'db_session', None)
-    if session:
-        try:
-            if exception:
-                session.rollback()
-            session.close()
-        except Exception as e:
-            app.logger.error(f"Error closing database session: {str(e)}")
-
-
 # Error handlers
 @app.errorhandler(404)
 def not_found(error):
@@ -64,7 +36,6 @@ def not_found(error):
         "error": "Not found",
         "message": "The requested resource was not found"
     }), 404
-
 
 @app.errorhandler(500)
 def internal_error(error):
@@ -75,20 +46,8 @@ def internal_error(error):
         "message": "An unexpected error occurred"
     }), 500
 
-
-@app.errorhandler(SQLAlchemyError)
-def handle_db_error(error):
-    """Handle database errors"""
-    app.logger.error(f"Database error: {str(error)}")
-    return jsonify({
-        "error": "Database error",
-        "message": "A database error occurred"
-    }), 500
-
-
 # Register blueprints
 app.register_blueprint(reports_bp)
-
 
 # Root endpoint
 @app.route('/')
@@ -98,7 +57,6 @@ def index():
         "service": "Reports API",
         "version": "1.0.0",
         "status": "running",
-        "port": 8003,
         "endpoints": {
             "health": "/api/reports/health",
             "reports": "/api/reports",
@@ -109,31 +67,15 @@ def index():
         }
     }), 200
 
-
-# Health check endpoint (global)
+# Health check endpoint
 @app.route('/health')
 def health():
     """Global health check endpoint"""
-    try:
-        # Test database connection
-        session = SessionLocal()
-        from sqlalchemy import text
-        session.execute(text("SELECT 1"))
-        session.close()
-        db_status = "healthy"
-    except Exception as e:
-        app.logger.error(f"Health check failed: {str(e)}")
-        db_status = "unhealthy"
-    
-    status_code = 200 if db_status == "healthy" else 503
-    
     return jsonify({
-        "status": "ok" if db_status == "healthy" else "degraded",
+        "status": "ok",
         "service": "reports",
-        "database": db_status,
-        "port": 8003
-    }), status_code
-
+        "note": "Reports service uses HTTP calls to Task service"
+    }), 200
 
 # Run the application
 if __name__ == "__main__":

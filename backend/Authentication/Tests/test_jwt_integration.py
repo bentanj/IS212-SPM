@@ -10,6 +10,7 @@ from Services.JWTService import JWTService, jwt_required, role_required
 from config import Config
 from flask import Flask, jsonify, g
 
+@pytest.mark.integration
 class TestJWTIntegration:
     """Test JWT integration with Flask routes"""
     

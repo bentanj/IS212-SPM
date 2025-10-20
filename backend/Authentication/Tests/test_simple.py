@@ -3,10 +3,12 @@
 Simple test to verify test structure and basic functionality
 """
 
+import pytest
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+@pytest.mark.unit
 def test_basic_imports():
     """Test basic imports work"""
     try:
@@ -17,6 +19,7 @@ def test_basic_imports():
         print(f"✗ AuthService import failed: {e}")
         return False
 
+@pytest.mark.unit
 def test_auth_service_basic():
     """Test basic OAuth service functionality"""
     try:
@@ -43,6 +46,7 @@ def test_auth_service_basic():
         print(f"✗ Auth service test failed: {e}")
         return False
 
+@pytest.mark.unit
 def test_authentication_service_read_only():
     """Test that Authentication service is configured for read-only operations"""
     try:
@@ -62,36 +66,5 @@ def test_authentication_service_read_only():
         print(f"✗ Authentication service test failed: {e}")
         return False
 
-def main():
-    """Run all tests"""
-    print("Running Authentication Service Tests")
-    print("=" * 40)
-    
-    tests = [
-        test_basic_imports,
-        test_auth_service_basic,
-        test_authentication_service_read_only
-    ]
-    
-    passed = 0
-    total = len(tests)
-    
-    for test in tests:
-        try:
-            if test():
-                passed += 1
-        except Exception as e:
-            print(f"✗ Test {test.__name__} failed with exception: {e}")
-    
-    print("=" * 40)
-    print(f"Tests completed: {passed}/{total} passed")
-    
-    if passed == total:
-        print("🎉 All tests passed!")
-        return 0
-    else:
-        print("❌ Some tests failed!")
-        return 1
-
 if __name__ == "__main__":
-    sys.exit(main())
+    pytest.main([__file__, "-v"])

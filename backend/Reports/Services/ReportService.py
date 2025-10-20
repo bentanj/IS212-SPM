@@ -9,8 +9,9 @@ from exceptions import ReportValidationError
 class ReportService:
     """Service for generating various types of reports"""
 
-    def __init__(self, repo: ReportRepository):
-        self.repo = repo
+    def __init__(self):
+        self.repo = ReportRepository()  # No session parameter
+
 
     def generate_task_completion_report(self, user: Optional[str] = None) -> ReportData:
         """Generate comprehensive task completion/status report"""

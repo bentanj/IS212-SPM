@@ -7,10 +7,9 @@ from exceptions import ReportValidationError
 bp = Blueprint("reports", __name__, url_prefix="/api/reports")
 
 
-def _report_service() -> ReportService:
-    """Create report service instance with repository"""
-    repo = ReportRepository(g.db_session)
-    return ReportService(repo)
+def get_report_service():
+    return ReportService()  # No session dependency
+
 
 
 @bp.get("/health")
@@ -29,7 +28,7 @@ def list_available_reports():
     GET /api/reports
     """
     try:
-        reports = _report_service().list_available_reports()
+        reports = get_report_service().list_available_reports()
         return jsonify(reports), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -42,7 +41,7 @@ def get_task_completion_data():
     GET /api/reports/task-completion/data
     """
     try:
-        report = _report_service().generate_task_completion_report()
+        report = get_report_service().generate_task_completion_report()
         return jsonify(report.to_dict()), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -55,7 +54,7 @@ def get_project_performance_data():
     GET /api/reports/project-performance/data
     """
     try:
-        report = _report_service().generate_project_performance_report()
+        report = get_report_service().generate_project_performance_report()
         return jsonify(report.to_dict()), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -68,7 +67,7 @@ def get_team_productivity_data():
     GET /api/reports/team-productivity/data
     """
     try:
-        report = _report_service().generate_team_productivity_report()
+        report = get_report_service().generate_team_productivity_report()
         return jsonify(report.to_dict()), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -81,7 +80,7 @@ def get_reports_summary():
     GET /api/reports/summary
     """
     try:
-        summary = _report_service().get_reports_summary()
+        summary = get_report_service().get_reports_summary()
         return jsonify(summary), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

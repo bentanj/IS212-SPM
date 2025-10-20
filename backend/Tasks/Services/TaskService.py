@@ -1,9 +1,11 @@
 from typing import Iterable, Optional, Dict, Any, List
 from datetime import datetime
-from uuid import UUID
 from Repositories.TaskRepository import TaskRepository
 from Models.Task import Task
 from exceptions import TaskNotFoundError, TaskValidationError, InvalidTaskStatusError
+
+# Maximum number of users that can be assigned to a single task
+MAX_ASSIGNED_USERS = 5
 
 class TaskService:
     def __init__(self, repo: TaskRepository):
@@ -21,11 +23,17 @@ class TaskService:
     def create_task(self, task_data: Dict[str, Any]) -> Task:
         self._validate_task_data(task_data)
 
+        # Validate parent_id if provided
+        if 'parent_id' in task_data and task_data['parent_id'] is not None:
+            parent_task = self.repo.get(task_data['parent_id'])
+            if not parent_task:
+                raise TaskValidationError(f"Parent task with id {task_data['parent_id']} not found")
+
         if 'start_date' not in task_data or task_data['start_date'] is None:
             task_data['start_date'] = datetime.now()
 
         if 'status' not in task_data or task_data['status'] is None:
-            task_data['status'] = 'pending'
+            task_data['status'] = 'To Do'
 
         if 'description' not in task_data or task_data['description'] is None:
             task_data['description'] = ''
@@ -37,7 +45,7 @@ class TaskService:
             task_data['due_date'] = start_date + timedelta(days=7)
 
         if 'priority' not in task_data or task_data['priority'] is None:
-            task_data['priority'] = 'medium'
+            task_data['priority'] = 5
 
         return self.repo.create(task_data)
 
@@ -49,7 +57,15 @@ class TaskService:
         self._validate_task_data(task_data, is_update=True)
         self._validate_status_transition(existing_task, task_data.get('status'))
 
-        if 'status' in task_data and task_data['status'] == 'completed':
+        # Validate parent_id if being updated
+        if 'parent_id' in task_data and task_data['parent_id'] is not None:
+            if task_data['parent_id'] == task_id:
+                raise TaskValidationError("A task cannot be its own parent")
+            parent_task = self.repo.get(task_data['parent_id'])
+            if not parent_task:
+                raise TaskValidationError(f"Parent task with id {task_data['parent_id']} not found")
+
+        if 'status' in task_data and task_data['status'] == 'Completed':
             if not existing_task.completed_date:
                 task_data['completed_date'] = datetime.now()
 
@@ -67,10 +83,10 @@ class TaskService:
     def get_tasks_by_project(self, project_name: str) -> Iterable[Task]:
         return self.repo.find_by_project(project_name)
 
-    def get_tasks_by_user(self, user_id: UUID) -> Iterable[Task]:
+    def get_tasks_by_user(self, user_id: int) -> Iterable[Task]:
         return self.repo.find_by_assigned_user(user_id)
 
-    def get_tasks_by_priority(self, priority: str) -> Iterable[Task]:
+    def get_tasks_by_priority(self, priority: int) -> Iterable[Task]:
         return self.repo.find_by_priority(priority)
 
     def get_overdue_tasks(self) -> Iterable[Task]:
@@ -79,28 +95,39 @@ class TaskService:
     def search_tasks(self, filters: Dict[str, Any]) -> Iterable[Task]:
         return self.repo.find_by_criteria(filters)
 
+    def get_subtasks(self, parent_id: int) -> Iterable[Task]:
+        parent_task = self.repo.get(parent_id)
+        if not parent_task:
+            raise TaskNotFoundError(f"Parent task with id {parent_id} not found")
+        return self.repo.find_by_parent(parent_id)
+
+    def get_root_tasks(self) -> Iterable[Task]:
+        return self.repo.find_root_tasks()
+
     def mark_task_completed(self, task_id: int) -> Optional[Task]:
         return self.update_task(task_id, {
-            'status': 'completed',
+            'status': 'Completed',
             'completed_date': datetime.now()
         })
 
-    def assign_users_to_task(self, task_id: int, user_ids: List[UUID]) -> Optional[Task]:
+    def assign_users_to_task(self, task_id: int, user_ids: List[int]) -> Optional[Task]:
         return self.update_task(task_id, {'assigned_users': user_ids})
 
-    def add_user_to_task(self, task_id: int, user_id: UUID) -> Optional[Task]:
+    def add_user_to_task(self, task_id: int, user_id: int) -> Optional[Task]:
         task = self.repo.get(task_id)
         if not task:
             return None
 
         current_users = task.assigned_users or []
         if user_id not in current_users:
+            if len(current_users) >= MAX_ASSIGNED_USERS:
+                raise TaskValidationError(f"Cannot assign more than {MAX_ASSIGNED_USERS} users to a task")
             current_users.append(user_id)
             return self.update_task(task_id, {'assigned_users': current_users})
 
         return task
 
-    def remove_user_from_task(self, task_id: int, user_id: UUID) -> Optional[Task]:
+    def remove_user_from_task(self, task_id: int, user_id: int) -> Optional[Task]:
         task = self.repo.get(task_id)
         if not task:
             return None
@@ -116,7 +143,7 @@ class TaskService:
         all_tasks = list(self.repo.list())
 
         total_tasks = len(all_tasks)
-        completed_tasks = len([t for t in all_tasks if t.status == 'completed'])
+        completed_tasks = len([t for t in all_tasks if t.status == 'Completed'])
         overdue_tasks = len(list(self.repo.find_overdue_tasks()))
 
         status_counts = {}
@@ -141,12 +168,12 @@ class TaskService:
             raise TaskValidationError("Task title is required")
 
         if 'priority' in task_data and task_data['priority']:
-            valid_priorities = ['low', 'medium', 'high', 'urgent']
+            valid_priorities = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
             if task_data['priority'] not in valid_priorities:
-                raise TaskValidationError(f"Priority must be one of: {', '.join(valid_priorities)}")
+                raise TaskValidationError(f"Priority must be one of: {', '.join(map(str, valid_priorities))}")
 
         if 'status' in task_data and task_data['status']:
-            valid_statuses = ['pending', 'in_progress', 'completed', 'cancelled']
+            valid_statuses = ["To Do", "In Progress", "Completed", "Blocked"]
             if task_data['status'] not in valid_statuses:
                 raise TaskValidationError(f"Status must be one of: {', '.join(valid_statuses)}")
 
@@ -155,18 +182,22 @@ class TaskService:
                 task_data['due_date'] < task_data['start_date']):
                 raise TaskValidationError("Due date cannot be before start date")
 
+        if 'assigned_users' in task_data and task_data['assigned_users']:
+            if len(task_data['assigned_users']) > MAX_ASSIGNED_USERS:
+                raise TaskValidationError(f"Cannot assign more than {MAX_ASSIGNED_USERS} users to a task")
+
     def _validate_status_transition(self, task: Task, new_status: Optional[str]) -> None:
         if not new_status or new_status == task.status:
             return
 
         valid_transitions = {
-            'pending': ['in_progress', 'cancelled'],
-            'in_progress': ['completed', 'pending', 'cancelled'],
-            'completed': [],  # Cannot change from completed
-            'cancelled': ['pending']  # Can reopen cancelled tasks
+            'To Do': ['In Progress', 'Blocked'],
+            'In Progress': ['Completed', 'To Do', 'Blocked'],
+            'Completed': [],  # Cannot change from completed
+            'Blocked': ['To Do']  # Can reopen blocked tasks
         }
 
-        current_status = task.status or 'pending'
+        current_status = task.status or 'To Do'
         if new_status not in valid_transitions.get(current_status, []):
             raise InvalidTaskStatusError(
                 f"Cannot transition from '{current_status}' to '{new_status}'"
