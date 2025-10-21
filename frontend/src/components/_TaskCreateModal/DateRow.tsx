@@ -43,7 +43,7 @@ export const DateRow: React.FC<DateRowProps> = ({
                     }}
                 />
 
-                <CustomDatePicker label="Completed Date"
+                {/* <CustomDatePicker label="Completed Date"
                     value={formData.completedDate ? formData.completedDate.toDate() : null}
                     onChange={(date) => setFormData(prev => ({ ...prev, completedDate: date ? dayjs(date) : null }))}
                     minSelectableDate={formData.startDate ? formData.startDate.toDate() : null}
@@ -51,7 +51,7 @@ export const DateRow: React.FC<DateRowProps> = ({
                         error: !!errors.completedDate,
                         helperText: errors.completedDate,
                     }}
-                />
+                /> */}
             </Stack>
         </LocalizationProvider>
     )

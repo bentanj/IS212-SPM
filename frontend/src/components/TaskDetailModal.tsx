@@ -61,6 +61,8 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   }
 
   function changeStatus(newStatus: Status) {
+    if (newStatus == "Completed") task!.completedDate = dayjs().format('YYYY-MM-DD');
+    else task!.completedDate = null;
     setSelectedTask(prev => prev ? { ...prev, status: newStatus } : prev);
   }
 

@@ -192,7 +192,13 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
           <DropDownMenu
             label="Status"
             value={formData.status}
-            onChange={(val) => setFormData((prev) => ({ ...prev, status: val as Status }))}
+            onChange={(val) => {
+              if (val === "Completed") {
+                setFormData((prev) => ({ ...prev, status: val as Status, completedDate: dayjs() }))
+              } else {
+                setFormData((prev) => ({ ...prev, status: val as Status, completedDate: null }))
+              }
+            }}
             options={StatusOptions}
             error={!!errors.status}
             helperText={errors.status}
