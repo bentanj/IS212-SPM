@@ -18,13 +18,14 @@ import {
   FormHelperText
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
+import { Roles } from '@/types';
 
 interface UserCreateModalProps {
   open: boolean;
   formData: {
     name: string;
     email: string;
-    role: 'Staff' | 'Manager' | 'Admin';
+    role: Roles;
     department: string;
   };
   departments: string[];
@@ -45,7 +46,7 @@ const UserCreateModal = memo(function UserCreateModal({
 }: UserCreateModalProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
   const [showNewDepartment, setShowNewDepartment] = useState(false);
   const [newDepartment, setNewDepartment] = useState('');
   const [errors, setErrors] = useState({
@@ -80,7 +81,7 @@ const UserCreateModal = memo(function UserCreateModal({
   const handleFieldChange = (field: string) => (event: any) => {
     const value = event.target.value;
     onFormDataChange(field, value);
-    
+
     // Clear error when user starts typing
     if (errors[field as keyof typeof errors]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
@@ -127,7 +128,7 @@ const UserCreateModal = memo(function UserCreateModal({
     const nameError = validateField('name', formData.name);
     const emailError = validateField('email', formData.email);
     const departmentError = validateField('department', formData.department);
-    
+
     setErrors({
       name: nameError,
       email: emailError,
@@ -159,10 +160,10 @@ const UserCreateModal = memo(function UserCreateModal({
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={handleClose} 
-      maxWidth="sm" 
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="sm"
       fullWidth
       fullScreen={isMobile}
     >
@@ -170,11 +171,11 @@ const UserCreateModal = memo(function UserCreateModal({
         Add New User
       </DialogTitle>
       <DialogContent>
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: 'column', 
-          gap: { xs: 1.5, sm: 2 }, 
-          pt: 1 
+        <Box sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: { xs: 1.5, sm: 2 },
+          pt: 1
         }}>
           <TextField
             label="Full Name"
@@ -188,7 +189,7 @@ const UserCreateModal = memo(function UserCreateModal({
             error={touched.name && !!errors.name}
             helperText={touched.name ? errors.name || 'Only letters and spaces are allowed' : 'Only letters and spaces are allowed'}
           />
-          
+
           <TextField
             label="Email Address"
             type="email"
@@ -212,13 +213,13 @@ const UserCreateModal = memo(function UserCreateModal({
             >
               <MenuItem value="Staff">Staff</MenuItem>
               <MenuItem value="Manager">Manager</MenuItem>
-              <MenuItem value="Admin">Admin</MenuItem>
+              <MenuItem value="HR/Admin">Admin</MenuItem>
             </Select>
           </FormControl>
 
-          <FormControl 
-            fullWidth 
-            required 
+          <FormControl
+            fullWidth
+            required
             size={isMobile ? "small" : "medium"}
             error={touched.department && !!errors.department}
           >
@@ -235,10 +236,10 @@ const UserCreateModal = memo(function UserCreateModal({
               {departments.map(dept => (
                 <MenuItem key={dept} value={dept}>{dept}</MenuItem>
               ))}
-              <MenuItem 
-                value="ADD_NEW" 
-                sx={{ 
-                  color: 'primary.main', 
+              <MenuItem
+                value="ADD_NEW"
+                sx={{
+                  color: 'primary.main',
                   fontWeight: 'bold',
                   borderTop: '1px solid #e0e0e0',
                   mt: 1,
@@ -255,11 +256,11 @@ const UserCreateModal = memo(function UserCreateModal({
           </FormControl>
 
           {showNewDepartment && (
-            <Box sx={{ 
-              border: '1px solid #e0e0e0', 
-              borderRadius: 1, 
-              p: 2, 
-              backgroundColor: '#f9f9f9' 
+            <Box sx={{
+              border: '1px solid #e0e0e0',
+              borderRadius: 1,
+              p: 2,
+              backgroundColor: '#f9f9f9'
             }}>
               <TextField
                 label="New Department Name"
@@ -290,19 +291,19 @@ const UserCreateModal = memo(function UserCreateModal({
           )}
         </Box>
       </DialogContent>
-      <DialogActions sx={{ 
+      <DialogActions sx={{
         p: { xs: 2, sm: 3 },
         flexDirection: { xs: 'column', sm: 'row' },
         gap: { xs: 1, sm: 0 }
       }}>
-        <Button 
+        <Button
           onClick={handleClose}
           sx={{ width: { xs: '100%', sm: 'auto' } }}
         >
           Cancel
         </Button>
-        <Button 
-          onClick={handleCreate} 
+        <Button
+          onClick={handleCreate}
           variant="contained"
           sx={{ width: { xs: '100%', sm: 'auto' } }}
         >

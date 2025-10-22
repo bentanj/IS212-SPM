@@ -8,7 +8,7 @@ export default function UserManagementPage() {
   const currentUser = taskMockData.currentUser;
   
   // Only allow HR/Admin access
-  if (!currentUser || (currentUser.role !== 'Admin' && currentUser.department !== 'Human Resources')) {
+  if (!currentUser || (currentUser.role !== 'HR/Admin' && currentUser.department !== 'Human Resources')) {
     return (
       <div style={{
         display: 'flex',

@@ -829,7 +829,7 @@ export const taskMockData: MockData = {
 // Expanded user base with multiple departmentss
 export const allUsers: User[] = [
   { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Engineering Operation Division" },
-  { userId: 2, name: "Sarah Davis", email: "sarah.davis@company.com", role: "Admin", department: "Senior Engineers" },
+  { userId: 2, name: "Sarah Davis", email: "sarah.davis@company.com", role: "HR/Admin", department: "Senior Engineers" },
   { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" },
   { userId: 4, name: "Mike Wilson", email: "mike.wilson@company.com", role: "Manager", department: "Operation Planning Team" },
   { userId: 5, name: "Emma Thompson", email: "emma.thompson@company.com", role: "Staff", department: "Engineering Operation Division" },

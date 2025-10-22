@@ -47,6 +47,7 @@ import { allUsers, taskMockData } from '@/mocks/staff/taskMockData';
 import { User } from '@/types';
 import UserEditModal from './UserEditModal';
 import UserCreateModal from './UserCreateModal';
+import { ALL_ROLES } from '@/constants/Organisation';
 
 interface ExtendedUser extends User {
 }
@@ -176,17 +177,17 @@ export default function UserManagement() {
   const [roleFilter, setRoleFilter] = useState('');
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
-  const [createFormData, setCreateFormData] = useState({
+  const [createFormData, setCreateFormData] = useState<Omit<ExtendedUser, "userId">>({
     name: '',
     email: '',
-    role: 'Staff' as 'Staff' | 'Manager' | 'Admin',
+    role: 'Staff',
     department: ''
   });
 
-  const [editFormData, setEditFormData] = useState({
+  const [editFormData, setEditFormData] = useState<Omit<ExtendedUser, "userId">>({
     name: '',
     email: '',
-    role: 'Staff' as 'Staff' | 'Manager' | 'Admin',
+    role: 'Staff',
     department: ''
   });
 
@@ -217,7 +218,7 @@ export default function UserManagement() {
     setDepartments([...new Set(allUsers.map(user => user.department))]);
   }, []);
 
-  const roles = useMemo(() => ['Staff', 'Manager', 'Admin'], []);
+  const roles = useMemo(() => ALL_ROLES, []);
 
   // Memoized filtered users with debounced search
   const filteredUsers = useMemo(() => {
@@ -372,7 +373,7 @@ export default function UserManagement() {
 
   const getRoleColor = useCallback((role: string): "primary" | "secondary" | "error" => {
     switch (role) {
-      case 'Admin': return 'error';
+      case 'HR/Admin': return 'error';
       case 'Manager': return 'secondary';
       case 'Staff': return 'primary';
       default: return 'primary';

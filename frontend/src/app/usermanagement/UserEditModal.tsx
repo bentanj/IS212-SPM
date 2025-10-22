@@ -18,7 +18,7 @@ import {
   FormHelperText
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
-import { User } from '@/types';
+import { User, Roles } from '@/types';
 
 interface ExtendedUser extends User {
   // Removed status and lastLogin properties
@@ -30,7 +30,7 @@ interface UserEditModalProps {
   formData: {
     name: string;
     email: string;
-    role: 'Staff' | 'Manager' | 'Admin';
+    role: Roles;
     department: string;
   };
   departments: string[];
@@ -217,7 +217,7 @@ const UserEditModal = memo(function UserEditModal({
             >
               <MenuItem value="Staff">Staff</MenuItem>
               <MenuItem value="Manager">Manager</MenuItem>
-              <MenuItem value="Admin">Admin</MenuItem>
+              <MenuItem value="HR/Admin">Admin</MenuItem>
             </Select>
           </FormControl>
 
