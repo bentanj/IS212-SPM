@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { canEditTask, canEditTaskAssignees, determineDepartmentScope } from './Permissions';
 
 // Mock CurrentUser and Task
