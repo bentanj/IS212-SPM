@@ -61,7 +61,8 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   // To be replaced by API call to fetch all tasks where parentTaskId not null
   const availableParentTasks = allTasks.filter(task =>
     !task.parentTaskId && // Only allow main tasks as parents
-    (!isEditMode || task.taskId !== existingTaskDetails!.taskId) // Exclude current task in edit mode
+    (!isEditMode || task.taskId !== existingTaskDetails!.taskId) && // Exclude current task in edit mode
+    task.status !== "Completed" // Exclude completed tasks
   );
 
   // Initialize form data when editing

@@ -183,7 +183,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 
         <DialogActions>
           {/* Create Subtask Button - Only show if onCreateSubtask prop is provided and task is not already a subtask */}
-          {onCreateSubtask && !task.parentTaskId && (
+          {onCreateSubtask && !task.parentTaskId && task.status != "Completed" && (
             <Button variant="outlined" startIcon={<Add />}
               sx={{ mr: 'auto' }} // Pushes button to the left
               onClick={() => { onCreateSubtask(task); }}>
