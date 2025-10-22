@@ -104,3 +104,26 @@ export async function getUserTask(user: User): Promise<Task[]> {
     }
     return Array.from(uniqueTasksMap.values());
 }
+
+export async function getSubtasks(parentTaskId: string): Promise<Task[]> {
+
+    let targetURL = `http://localhost:${TASK_PORT}/api/tasks/${parentTaskId}/subtasks`;
+
+    try {
+        const response = await fetch(targetURL, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (!response.ok) {
+            const errorMessage = await response.json();
+            throw new Error(`HTTP error! Status: ${response.status}.\n${errorMessage.error}`);
+        }
+
+        return await response.json();
+    }
+    catch (error) {
+        console.error("Error getting subtasks:", error);
+        throw error;
+    }
+}
