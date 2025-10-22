@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { AlertColor, Box, Typography, Paper, CircularProgress, Alert, Stack, Snackbar, useMediaQuery, useTheme } from '@mui/material';
 
 import { taskMockData } from '@/mocks/staff/taskMockData';
@@ -53,11 +53,7 @@ export default function ProjectsUI() {
     setSnackbarSeverity('success');
   }
 
-  useEffect(() => {
-    loadProjectsAndTasks();
-  }, []);
-
-  const loadProjectsAndTasks = async () => {
+  const loadProjectsAndTasks = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -75,7 +71,11 @@ export default function ProjectsUI() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser]);
+
+  useEffect(() => {
+    loadProjectsAndTasks();
+  }, [loadProjectsAndTasks]);
 
   const filteredProjects = applyProjectFilters(projects, searchTerm, statusFilter);
 
