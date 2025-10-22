@@ -1,4 +1,4 @@
-import { FormData, RecurrenceFrequency } from "@/types";
+import { APITaskParams, RecurrenceFrequency } from "@/types";
 import dayjs from "dayjs";
 
 const RecurrenceFreqOptionsMap: Record<RecurrenceFrequency, dayjs.ManipulateType | null> = {
@@ -9,21 +9,22 @@ const RecurrenceFreqOptionsMap: Record<RecurrenceFrequency, dayjs.ManipulateType
     "Yearly": "year",
 }
 
-export function ReplicateRecurringTaskData(task: FormData): Omit<FormData, "taskId"> | null {
+export default function ReplicateRecurringTaskData(task: APITaskParams) {
     if (task.recurrenceFrequency === "One-Off") return null;
 
     const newStartDate = recurringTaskDate(task);
     if (newStartDate === null) return null;
 
-    const { taskId, ...newTask } = {
+    const newTask = {
         ...task,
-        startDate: newStartDate,
+        taskId: 0,  // Passing value of 0 to database will auto-generate a new ID
+        startDate: newStartDate.toISOString(),
         completedDate: null,
     };
     return newTask;
 }
 
-function recurringTaskDate(task: Omit<FormData, "taskId">): dayjs.Dayjs | null {
+function recurringTaskDate(task: Omit<APITaskParams, "taskId">): dayjs.Dayjs | null {
     const existingStartDate = dayjs(task.startDate);
     const dueDate = dayjs(task.dueDate);
     const freq = RecurrenceFreqOptionsMap[task.recurrenceFrequency];
