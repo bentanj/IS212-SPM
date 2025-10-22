@@ -4,6 +4,7 @@ import { AlertColor } from '@mui/material';
 import DefaultFormData from '@/constants/DefaultFormData';
 import updateTask from '@/utils/Tasks/updateTask';
 import createTask from '@/utils/Tasks/createTask';
+import ReplicateRecurringTaskData from './recurringTask';
 
 // Filter out already assigned users from available options
 export const getAvailableUsers = (allUsers: User[], assignedUsers: User[]): User[] => {
@@ -135,6 +136,25 @@ export const handleSubmit = async (params: {
     } catch (error) {
         setSnackbarContent(`Failed to create task. Please try again`, 'error');
         console.error('Error submitting form:', error);
+    }
+};
+
+export const TaskCompletedTrigger = async (
+    task: APITaskParams,
+    setSnackbarContent: (message: string, severity: AlertColor) => void
+) => {
+    const newTask = ReplicateRecurringTaskData(task);
+    if (!newTask) return null;
+
+    try {
+        const response = await createTask(newTask);
+        setSnackbarContent('Replicated task created', 'success');
+        return response;
+    }
+    catch (error) {
+        setSnackbarContent('Failed to create replicated task. Please try again', 'error');
+        console.error('Error creating replicated task:', error);
+        return null;
     }
 };
 

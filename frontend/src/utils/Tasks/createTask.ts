@@ -4,8 +4,6 @@ const TASK_PORT = process.env.TASK_SERVICE_PORT || 8000;
 
 export default async function createTask(newTask: APITaskParams) {
 
-
-    // console.log("Jsonified",JSON.stringify(newTask));
     try {
         const response = await fetch(`http://localhost:${TASK_PORT}/api/tasks`, {
             method: 'POST',
