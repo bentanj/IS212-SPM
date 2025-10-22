@@ -1,7 +1,7 @@
 // src/services/reportService.ts
 import {
   ProjectPerformanceReport,
-  TeamProductivityReport,
+  UserProductivityReport,
   ReportsSummary,
   ApiError,
 } from '@/types/report.types';
@@ -186,22 +186,22 @@ export class ReportService {
     return data;
   }
 
-  async getTeamProductivityReport(
+  async getUserProductivityReport(
     startDate: string,
     endDate: string,
     useCache = false
-  ): Promise<TeamProductivityReport> {
-    const cacheKey = `team-productivity-${startDate}-${endDate}`;
+  ): Promise<UserProductivityReport> {
+    const cacheKey = `user-productivity-${startDate}-${endDate}`;
     if (useCache) {
-      const cached = cache.get<TeamProductivityReport>(cacheKey);
+      const cached = cache.get<UserProductivityReport>(cacheKey);
       if (cached) {
-        console.log('Returning cached team productivity report');
+        console.log('Returning cached user productivity report');
         return cached;
       }
     }
 
-    const url = `${this.baseUrl}/api/reports/team-productivity/data?start_date=${startDate}&end_date=${endDate}`;
-    const data = await fetchWithRetry<TeamProductivityReport>(url);
+    const url = `${this.baseUrl}/api/reports/user-productivity/data?start_date=${startDate}&end_date=${endDate}`;
+    const data = await fetchWithRetry<UserProductivityReport>(url);
     
     if (useCache) {
       cache.set(cacheKey, data, 2 * 60 * 1000);
@@ -236,7 +236,7 @@ export const reportService = new ReportService();
 export const {
   checkHealth,
   getProjectPerformanceReport,
-  getTeamProductivityReport,
+  getUserProductivityReport,
   getReportsSummary,
   clearCache,
 } = reportService;

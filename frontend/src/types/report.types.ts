@@ -41,34 +41,37 @@ export interface ProjectPerformanceReport {
   summary: ProjectPerformanceSummary;
 }
 
-// Team Productivity Report Types (Per User)
+// User Productivity Report Types (Per User)
 export interface TeamMemberStats {
   user_id: string;
+  first_name?: string;       
+  last_name?: string;         
+  full_name?: string;         
   total_tasks: number;
   completed: number;
   in_progress: number;
   completion_rate: number;
 }
 
-export interface TeamProductivityData {
+export interface UserProductivityData {
   team_members: TeamMemberStats[];
 }
 
-export interface TeamProductivitySummary {
+export interface UserProductivitySummary {
   total_team_members: number;
   total_tasks_assigned: number;
   total_completed: number;
   average_completion_rate: number;
 }
 
-export interface TeamProductivityReport {
+export interface UserProductivityReport {
   metadata: ReportMetadata;
-  data: TeamProductivityData;
-  summary: TeamProductivitySummary;
+  data: UserProductivityData;
+  summary: UserProductivitySummary;
 }
 
 // Combined Task Completion Report Type
-export type TaskCompletionReport = ProjectPerformanceReport | TeamProductivityReport;
+export type TaskCompletionReport = ProjectPerformanceReport | UserProductivityReport;
 
 // Reports Summary
 export interface ReportsSummary {

@@ -134,12 +134,16 @@ export class ChartGenerator {
     };
   }
 
-  static createTeamProductivityChart(teamMembers: any[]): ChartConfiguration {
+  static createUserProductivityChart(teamMembers: any[]): ChartConfiguration {
     const topUsers = [...teamMembers].sort((a, b) => b.completion_rate - a.completion_rate).slice(0, 10);
     return {
       type: 'bar',
       data: {
-        labels: topUsers.map(u => u.user_id.length > 12 ? u.user_id.substring(0, 12) + '...' : u.user_id),
+        labels: topUsers.map(u => {
+          const name = u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || `User ${u.user_id}`;
+          return name.length > 20 ? name.substring(0, 20) + '...' : name;
+        }),
+
         datasets: [{
           label: 'Completion Rate (%)',
           data: topUsers.map(u => u.completion_rate),
@@ -159,7 +163,7 @@ export class ChartGenerator {
         },
         plugins: {
           legend: { display: false },
-          title: { display: true, text: 'Top 10 Team Members by Completion Rate', font: { size: 16, weight: 'bold' }, padding: { bottom: 15 } },
+          title: { display: true, text: 'Top 10 Users by Completion Rate', font: { size: 16, weight: 'bold' }, padding: { bottom: 15 } },
           datalabels: { display: true, anchor: 'end', align: 'end', color: '#424242', font: { weight: 'bold', size: 10 }, formatter: (v: number) => `${v.toFixed(1)}%` },
         },
       },

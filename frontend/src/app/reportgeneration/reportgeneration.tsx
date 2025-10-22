@@ -12,7 +12,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { reportService, ReportServiceError } from '@/services/reportService';
 import type {
   ProjectPerformanceReport,
-  TeamProductivityReport,
+  UserProductivityReport,
 } from '@/types/report.types';
 
 // Import components
@@ -27,7 +27,7 @@ import { ReportTypeSelector } from './_components/ReportTypeSelector';
 // Import PDF services
 import {
   ProjectPerformancePDF,
-  TeamProductivityPDF,
+  UserProductivityPDF,
 } from './services/pdf';
 
 // Register Chart.js components
@@ -64,7 +64,7 @@ export default function ReportGeneration() {
 
   // API Data States
   const [projectReport, setProjectReport] = useState<ProjectPerformanceReport | null>(null);
-  const [teamReport, setTeamProductivityReport] = useState<TeamProductivityReport | null>(null);
+  const [teamReport, setUserProductivityReport] = useState<UserProductivityReport | null>(null);
 
   // Loading and Error States
   const [isLoading, setIsLoading] = useState(false);
@@ -96,7 +96,7 @@ export default function ReportGeneration() {
   // Fetch data from backend with date range
   const fetchReportData = async (
     subType: ReportSubType
-  ): Promise<ProjectPerformanceReport | TeamProductivityReport> => {
+  ): Promise<ProjectPerformanceReport | UserProductivityReport> => {
     setIsLoading(true);
     setError(null);
 
@@ -112,8 +112,8 @@ export default function ReportGeneration() {
         setProjectReport(data);
         return data;
       } else if (subType === 'per-user') {
-        data = await reportService.getTeamProductivityReport(startDateStr, endDateStr);
-        setTeamProductivityReport(data);
+        data = await reportService.getUserProductivityReport(startDateStr, endDateStr);
+        setUserProductivityReport(data);
         return data;
       }
 
@@ -197,9 +197,9 @@ export default function ReportGeneration() {
             dateRangeStr
           );
         } else if (subType === 'per-user') {
-          console.log('5. Calling TeamProductivityPDF.generate...');
-          await TeamProductivityPDF.generate(
-            reportData as TeamProductivityReport,
+          console.log('5. Calling UserProductivityPDF.generate...');
+          await UserProductivityPDF.generate(
+            reportData as UserProductivityReport,
             currentDate,
             dateRangeStr
           );

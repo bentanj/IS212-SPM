@@ -69,10 +69,10 @@ def get_project_performance_report():
             "message": str(e)
         }), 500
 
-@bp.route('/team-productivity/data', methods=['GET'])
-def get_team_productivity_report():
+@bp.route('/user-productivity/data', methods=['GET'])
+def get_user_productivity_report():
     """
-    Get team productivity report (Per User)
+    Get user productivity report (Per User)
     Query Parameters:
         - start_date: Start date for filtering (YYYY-MM-DD)
         - end_date: End date for filtering (YYYY-MM-DD)
@@ -109,13 +109,13 @@ def get_team_productivity_report():
             }), 400
         
         # Generate report with date filtering
-        report = service.generate_team_productivity_report(start_date, end_date)
+        report = service.generate_user_productivity_report(start_date, end_date)
         
-        logger.info(f"Team productivity report generated for {start_date} to {end_date}")
+        logger.info(f"User productivity report generated for {start_date} to {end_date}")
         return jsonify(report.to_dict()), 200
         
     except Exception as e:
-        logger.error(f"Error generating team productivity report: {str(e)}", exc_info=True)
+        logger.error(f"Error generating user productivity report: {str(e)}", exc_info=True)
         return jsonify({
             "error": "Failed to generate report",
             "message": str(e)

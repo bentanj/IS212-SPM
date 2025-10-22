@@ -5,6 +5,8 @@ from uuid import uuid4
 from Repositories.ReportRepository import ReportRepository
 from Models.Report import ReportMetadata, ReportData
 import logging
+import requests
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +16,30 @@ class ReportService:
     def __init__(self):
         self.repo = ReportRepository()
         logger.info("ReportService initialized successfully")
+        # ADD THIS LINE - Set the authentication service URL
+        self.auth_service_url = os.getenv('AUTHENTICATION_SERVICE_URL', 'http://authentication:8002')
+        logger.info("ReportService initialized successfully")
+
+    # ADD THIS NEW METHOD
+    def _get_user_info(self, user_id: str) -> Dict[str, str]:
+        """Fetch user information from authentication service"""
+        try:
+            response = requests.get(
+                f"{self.auth_service_url}/api/users/{user_id}",
+                timeout=5
+            )
+            if response.status_code == 200:
+                user_data = response.json()
+                return {
+                    'first_name': user_data.get('first_name', ''),
+                    'last_name': user_data.get('last_name', ''),
+                    'email': user_data.get('email', '')
+                }
+        except Exception as e:
+            logger.warning(f"Failed to fetch user {user_id}: {str(e)}")
+        
+        # Return fallback if fetch fails
+        return {'first_name': 'User', 'last_name': str(user_id), 'email': ''}
 
     def _filter_tasks_by_date(
         self, 
@@ -120,14 +146,14 @@ class ReportService:
             logger.error(f"Error generating project performance report: {str(e)}", exc_info=True)
             raise
 
-    def generate_team_productivity_report(
+    def generate_user_productivity_report(
         self, 
         start_date: str, 
         end_date: str
     ) -> ReportData:
-        """Generate team productivity report (Per User) with date filtering"""
+        """Generate user productivity report (Per User) with date filtering"""
         try:
-            logger.info(f"Generating team productivity report from {start_date} to {end_date}")
+            logger.info(f"Generating user productivity report from {start_date} to {end_date}")
             report_id = str(uuid4())
             
             # Get all tasks and filter by date range
@@ -136,10 +162,21 @@ class ReportService:
             
             # Generate user productivity from filtered tasks
             users = self.repo.get_user_productivity_from_tasks(filtered_tasks)
+
+            # Fetch user names for each user
+            for user in users:
+                user_id = user.get('user_id')
+                if user_id:
+                    user_info = self._get_user_info(user_id)
+                    user['first_name'] = user_info['first_name']
+                    user['last_name'] = user_info['last_name']
+                    # Create full_name by combining first and last name
+                    full_name = f"{user_info['first_name']} {user_info['last_name']}".strip()
+                    user['full_name'] = full_name if full_name else f"User {user_id}"
             
             metadata = ReportMetadata(
                 report_id=report_id,
-                report_type="team_productivity",
+                report_type="user_productivity",
                 generated_at=datetime.utcnow(),
                 generated_by="system",
                 parameters={
@@ -161,13 +198,13 @@ class ReportService:
             )
             
             summary = {
-                "total_team_members": total_users,
+                "total_users": total_users,
                 "total_tasks_assigned": total_tasks,
                 "total_completed": total_completed,
                 "average_completion_rate": round(avg_completion, 1)
             }
             
-            logger.info(f"Team productivity report generated. Users: {total_users}, Tasks: {total_tasks}")
+            logger.info(f"User productivity report generated. Users: {total_users}, Tasks: {total_tasks}")
             return ReportData(
                 metadata=metadata,
                 summary=summary,
@@ -175,7 +212,7 @@ class ReportService:
             )
             
         except Exception as e:
-            logger.error(f"Error generating team productivity report: {str(e)}", exc_info=True)
+            logger.error(f"Error generating user productivity report: {str(e)}", exc_info=True)
             raise
 
     def get_reports_summary(self) -> Dict[str, Any]:
@@ -190,7 +227,7 @@ class ReportService:
             return {
                 "total_tasks": stats["total_tasks"],
                 "total_projects": len(projects),
-                "total_team_members": len(users),
+                "total_user": len(users),
                 "completion_rate": round(
                     (stats["by_status"].get("Completed", 0) / stats["total_tasks"] * 100), 1
                 ) if stats["total_tasks"] > 0 else 0.0,
