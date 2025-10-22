@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Alert, AlertColor, Box, useTheme, useMediaQuery, Snackbar } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -53,18 +53,18 @@ const TaskCalendar: React.FC = () => {
     setSnackbarSeverity('success');
   }
 
-  useEffect(() => {
-    fetchTasks();
-  }, [mockJWT]);
-
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     try {
       const TaskData = await getUserTask(mockJWT);
       setTasks(TaskData);
     } catch (error) {
       console.error("Error fetching tasks:", error);
     }
-  };
+  }, [mockJWT]);
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));

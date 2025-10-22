@@ -90,7 +90,7 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
     else {
       setFormData(DefaultFormData);
     }
-  }, [open, isEditMode, existingTaskDetails, allTasks]);
+  }, [preselectedParentTask, open, isEditMode, existingTaskDetails, allTasks]);
 
   const handleReset = () => {
     resetForm(setFormData, setErrors, setTagInput, setNewComment)
