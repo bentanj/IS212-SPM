@@ -68,28 +68,28 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   useEffect(() => {
     setErrors({});
     setParentTask(preselectedParentTask);
-    if (open) {
-      if (isEditMode && existingTaskDetails) {
-        // Pre-populate form with existing task data
-        setFormData({
-          ...existingTaskDetails,
-          startDate: dayjs(existingTaskDetails.startDate),
-          completedDate: existingTaskDetails.completedDate ? dayjs(existingTaskDetails.completedDate) : null,
-          dueDate: dayjs(existingTaskDetails.dueDate),
-          comments: "",
-          attachedFile: null,
-        });
+    if (isEditMode && existingTaskDetails) {
+      // Pre-populate form with existing task data
+      setFormData({
+        ...existingTaskDetails,
+        startDate: dayjs(existingTaskDetails.startDate),
+        completedDate: existingTaskDetails.completedDate ? dayjs(existingTaskDetails.completedDate) : null,
+        dueDate: dayjs(existingTaskDetails.dueDate),
+        comments: "",
+        attachedFile: null,
+      });
 
-
-        if (existingTaskDetails.parentTaskId) {
-          const parentTaskObj = allTasks.find(t => t.taskId === existingTaskDetails.parentTaskId);
-          setParentTask(parentTaskObj || null);
-        }
+      if (existingTaskDetails.parentTaskId) {
+        const parentTaskObj = allTasks.find(t => t.taskId === existingTaskDetails.parentTaskId);
+        setParentTask(parentTaskObj || null);
       }
     }
     else {
       setFormData(DefaultFormData);
     }
+
+    if (preselectedParentTask) { setFormData(prev => ({ ...prev, parentTaskId: preselectedParentTask.taskId })) }
+
   }, [preselectedParentTask, open, isEditMode, existingTaskDetails, allTasks]);
 
   const handleReset = () => {
