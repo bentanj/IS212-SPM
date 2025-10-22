@@ -89,7 +89,13 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
       setFormData(DefaultFormData);
     }
 
-    if (preselectedParentTask) { setFormData(prev => ({ ...prev, parentTaskId: preselectedParentTask.taskId })) }
+    if (preselectedParentTask) {
+      setFormData(prev => ({
+        ...prev,
+        parentTaskId: preselectedParentTask.taskId,
+        project_name: preselectedParentTask.project_name
+      }))
+    }
 
   }, [preselectedParentTask, open, isEditMode, existingTaskDetails, allTasks]);
 
@@ -160,6 +166,7 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
           value={formData.project_name}
           onChange={(event: React.SyntheticEvent, value: string | null) => setFormData(prev => ({ ...prev, project_name: value || '' }))}
           onInputChange={(event: React.SyntheticEvent, value: string) => setFormData(prev => ({ ...prev, project_name: value }))}
+          disabled={!!preselectedParentTask}
           renderInput={(params) => (
             <TextField label="Project Name"
               {...params} required margin="normal"
