@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { canEditTask, canEditTaskAssignees, determineDepartmentScope } from './Permissions';
+import { canEditTask, canEditTaskAssignees, determineDepartmentScope } from '../Permissions';
 
 // Mock CurrentUser and Task
 const Staff_1 = { userId: 1, name: "Staff 1", email: "staff1@example.com", role: "Staff", department: "Sales Division" };

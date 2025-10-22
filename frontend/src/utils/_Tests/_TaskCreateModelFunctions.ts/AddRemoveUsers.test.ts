@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { canAddMoreUsers, canRemoveUser } from './TaskCreateModelFunctions';
+import { canAddMoreUsers, canRemoveUser } from '../../TaskCreateModelFunctions';
 
 describe('canAddMoreUsers', () => {
     it('returns true if less than 5 users assigned', () => {

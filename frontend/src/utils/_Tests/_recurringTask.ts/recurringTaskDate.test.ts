@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { recurringTaskDate } from './recurringTask';
+import { recurringTaskDate } from '../../recurringTask';
 import dayjs from 'dayjs';
 
 describe('recurringTaskDate utility', () => {

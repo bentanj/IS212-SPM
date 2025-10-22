@@ -4,7 +4,7 @@ import {
     getTaskTypeColor,
     getStatusColor,
     isTaskOverdue,
-} from './TaskRenderingFunctions';
+} from '../TaskRenderingFunctions';
 import dayjs from 'dayjs';
 
 describe('getPriorityColor', () => {

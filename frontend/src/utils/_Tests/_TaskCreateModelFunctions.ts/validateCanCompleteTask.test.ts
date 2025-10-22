@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { validateCanCompleteTask } from './TaskCreateModelFunctions';
+import { validateCanCompleteTask } from '../../TaskCreateModelFunctions';
 import { APITaskParams } from '@/types';
 import { AlertColor } from '@mui/material';
 
