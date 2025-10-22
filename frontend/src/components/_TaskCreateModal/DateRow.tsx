@@ -2,6 +2,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { Stack } from '@mui/material'
 import dayjs from 'dayjs'
+import minMax from 'dayjs/plugin/minMax';
+dayjs.extend(minMax)
 import CustomDatePicker from '@/components/DatePickerInput'
 import { FormData, Task } from '@/types';
 
@@ -21,7 +23,7 @@ export const DateRow: React.FC<DateRowProps> = ({
                 <CustomDatePicker label="Start Date"
                     value={formData.startDate ? formData.startDate.toDate() : null}
                     onChange={(date) => setFormData(prev => ({ ...prev, startDate: date ? dayjs(date) : null }))}
-                    minSelectableDate={dayjs(parentTask?.startDate).toDate()}
+                    minSelectableDate={dayjs.max(dayjs(parentTask?.startDate), dayjs()).toDate()}
                     textFieldProps={{
                         required: true,
                         error: !!errors.startDate,
