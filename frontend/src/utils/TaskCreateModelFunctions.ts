@@ -4,7 +4,7 @@ import { AlertColor } from '@mui/material';
 import DefaultFormData from '@/constants/DefaultFormData';
 import updateTask from '@/utils/Tasks/updateTask';
 import createTask from '@/utils/Tasks/createTask';
-import ReplicateRecurringTaskData from './recurringTask';
+import replicateRecurringTaskData from './recurringTask';
 
 // Filter out already assigned users from available options
 export const getAvailableUsers = (allUsers: User[], assignedUsers: User[]): User[] => {
@@ -127,10 +127,14 @@ export const handleSubmit = async (params: {
             setSnackbarContent('Task created successfully', 'success');
         }
 
+        if (TaskData.status == 'Completed') {
+            await taskCompletedTrigger(TaskData, setSnackbarContent);
+        }
+
         setTimeout(() => {
-            handleReset()
+            handleReset();
             onClose();
-        }, 1500);
+        }, 1500 + (TaskData.status === "Completed" ? 2000 : 0));
 
         return response;
     } catch (error) {
@@ -139,11 +143,12 @@ export const handleSubmit = async (params: {
     }
 };
 
-export const TaskCompletedTrigger = async (
+export const taskCompletedTrigger = async (
     task: APITaskParams,
     setSnackbarContent: (message: string, severity: AlertColor) => void
 ) => {
-    const newTask = ReplicateRecurringTaskData(task);
+    const newTask = replicateRecurringTaskData(task);
+
     if (!newTask) return null;
 
     try {

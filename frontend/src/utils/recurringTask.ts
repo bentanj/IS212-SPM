@@ -9,24 +9,26 @@ const RecurrenceFreqOptionsMap: Record<RecurrenceFrequency, dayjs.ManipulateType
     "Yearly": "year",
 }
 
-export default function ReplicateRecurringTaskData(task: APITaskParams) {
-    if (task.recurrenceFrequency === "One-Off") return null;
+export default function replicateRecurringTaskData(task: APITaskParams) {
+    if (task.recurrenceFrequency == "One-Off") return null;
 
     const newStartDate = recurringTaskDate(task);
-    if (newStartDate === null) return null;
+    if (newStartDate == null) return null;
 
     const newTask = {
         ...task,
         taskId: 0,  // Passing value of 0 to database will auto-generate a new ID
         startDate: newStartDate.toISOString(),
         completedDate: null,
+        status: "To Do",
+        comments: [],
     };
     return newTask;
 }
 
 function recurringTaskDate(task: Omit<APITaskParams, "taskId">): dayjs.Dayjs | null {
-    const existingStartDate = dayjs(task.startDate);
-    const dueDate = dayjs(task.dueDate);
+    const existingStartDate = dayjs(task.startDate.replace(" ", "T"));
+    const dueDate = dayjs(task.dueDate.replace(" ", "T"));
     const freq = RecurrenceFreqOptionsMap[task.recurrenceFrequency];
     const interval = task.recurrenceInterval;
 
@@ -39,5 +41,5 @@ function recurringTaskDate(task: Omit<APITaskParams, "taskId">): dayjs.Dayjs | n
     if (newStartDate.isAfter(dueDate)) return null;
 
     // Otherwise, return the original due date
-    return dueDate;
+    return newStartDate;
 }
