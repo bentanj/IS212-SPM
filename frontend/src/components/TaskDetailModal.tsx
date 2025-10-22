@@ -67,6 +67,13 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     setSelectedTask(prev => prev ? { ...prev, status: newStatus } : prev);
   }
 
+  const renderCreateSubtaskButton = () => {
+    return onCreateSubtask &&                     // onCreateSubtask prop is provided
+      !task.parentTaskId &&                       // Task is not already a subtask
+      task.status != "Completed" &&               // Task is not completed
+      dayjs(task.dueDate).isAfter(dayjs())        // Due date is in the future
+  }
+
   const onSave = async () => {
     const TaskData = {
       ...task,
@@ -182,14 +189,14 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         </DialogContent>
 
         <DialogActions>
-          {/* Create Subtask Button - Only show if onCreateSubtask prop is provided and task is not already a subtask */}
-          {onCreateSubtask && !task.parentTaskId && task.status != "Completed" && (
-            <Button variant="outlined" startIcon={<Add />}
+          {/* Create Subtask Button - Only show if   */}
+          {renderCreateSubtaskButton() &&
+            (<Button variant="outlined" startIcon={<Add />}
               sx={{ mr: 'auto' }} // Pushes button to the left
-              onClick={() => { onCreateSubtask(task); }}>
+              onClick={() => { onCreateSubtask!(task); }}>
               {isMobile ? 'Subtask' : 'Create Subtask'}
             </Button>
-          )}
+            )}
 
           <Button onClick={onClose} variant="outlined">
             Close
