@@ -24,6 +24,8 @@ class Task(Base):
     parent_id = Column('parentID', BigInteger, nullable=True)
     departments = Column(ARRAY(Text), nullable=True)
     comments = Column(JSONB, nullable=True, default=[])
+    recurrence_frequency = Column('recurrenceFrequency', Text, nullable=True)
+    recurrence_interval = Column('recurrenceInterval', Integer, nullable=True)
 
     def to_dict(self, db_session: Optional[Session] = None, fetch_users: bool = True) -> Dict[str, Any]:
         # Fetch assigned users via HTTP call to Authentication service
@@ -75,7 +77,9 @@ class Task(Base):
             "assignedUsers": assigned_users_data,
             "parentTaskId": self.parent_id,
             "departments": self.departments if self.departments else [],
-            "comments": self.comments if self.comments else []
+            "comments": self.comments if self.comments else [],
+            "recurrenceFrequency": self.recurrence_frequency,
+            "recurrenceInterval": self.recurrence_interval
         }
 
     def __repr__(self):

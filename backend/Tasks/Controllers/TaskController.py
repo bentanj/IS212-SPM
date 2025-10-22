@@ -295,6 +295,8 @@ def _parse_task_data(data: dict, is_update: bool = False):
         'status': 'status',
         'project_name': 'project_name',  # backend: frontend
         'parent_id': 'parentTaskId',
+        'recurrence_frequency': 'recurrenceFrequency',
+        'recurrence_interval': 'recurrenceInterval',
     }
 
     for backend_key, frontend_key in field_mappings.items():
