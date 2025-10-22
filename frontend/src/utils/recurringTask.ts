@@ -26,7 +26,7 @@ export default function replicateRecurringTaskData(task: APITaskParams) {
     return newTask;
 }
 
-function recurringTaskDate(task: Omit<APITaskParams, "taskId">): dayjs.Dayjs | null {
+export function recurringTaskDate(task: Omit<APITaskParams, "taskId">): dayjs.Dayjs | null {
     const existingStartDate = dayjs(task.startDate.replace(" ", "T"));
     const dueDate = dayjs(task.dueDate.replace(" ", "T"));
     const freq = RecurrenceFreqOptionsMap[task.recurrenceFrequency];
