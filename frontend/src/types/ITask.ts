@@ -1,4 +1,4 @@
-import { Departments, Priority, Status, User, Comment } from "@/types";
+import { Departments, Priority, Status, RecurrenceFrequency, User, Comment } from "@/types";
 
 export interface Task {
     taskId: number;
@@ -10,6 +10,8 @@ export interface Task {
     status: Status;
     startDate: string;
     dueDate: string;
+    recurrenceFrequency: RecurrenceFrequency;
+    recurrenceInterval: number | null;
     completedDate: string | null;
     assignedUsers: User[];
     tags: string[];

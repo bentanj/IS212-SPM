@@ -6,9 +6,6 @@ export interface FormData extends
     startDate: Dayjs | null;
     dueDate: Dayjs | null;
     completedDate: Dayjs | null;
-    recurrenceFrequency?: string | null;
-    recurrenceInterval?: number | null;
-    recurrenceEndDate?: Dayjs | null;
     comments?: string | null;
     attachedFile?: File | null;
 }

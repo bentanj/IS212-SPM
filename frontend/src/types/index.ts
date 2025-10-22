@@ -7,4 +7,5 @@ export * from "./TPriority";
 export * from "./TProject";
 export * from "./TRoles";
 export * from "./TStatus";
+export * from "./TRecurrenceFreq";
 export * from "./TRecurringDateParams";

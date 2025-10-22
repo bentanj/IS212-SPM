@@ -3,8 +3,8 @@ import { Priority, Status } from "@/types";
 
 interface DropDownMenuProps {
     label: string;
-    value: string | number;
-    onChange: (value: string | number) => void;
+    value: string | number | null;
+    onChange: (value: string | number | null) => void;
     options: Priority[] | Status[];
     error?: boolean;
     helperText?: string;
