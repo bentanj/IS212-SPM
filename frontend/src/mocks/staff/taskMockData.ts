@@ -1,7 +1,7 @@
-import { Task, User } from '@/types';
+import { Task, User, APITaskParams } from '@/types';
 
-interface MigrateTask extends Omit<Task, "assignedUsers"> {
-  assignedUsers: number[]; // Array of user IDs
+interface MigrateTask extends APITaskParams {
+  assigned_users: number[]; // Array of user IDs
 }
 
 export interface MockData {
@@ -27,7 +27,9 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-01",
       priority: 7,
-      assignedUsers: [1, 3],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null,
+      assigned_users: [1, 3],
       tags: ["authentication", "security", "backend"],
       status: "In Progress",
       comments: [
@@ -55,7 +57,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-25",
       priority: 7,
-      assignedUsers: [1],
+      assigned_users: [1],
       tags: ["oauth2", "integration", "google", "facebook"],
       status: "In Progress",
       comments: [
@@ -69,6 +71,8 @@ export const taskMockData: MockData = {
       project_name: "E-Commerce Platform",
       parentTaskId: 1,
       departments: ["Sales Manager"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null,
     },
     {
       taskId: 102,
@@ -78,13 +82,15 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-28",
       priority: 4,
-      assignedUsers: [3],
+      assigned_users: [3],
       tags: ["password-reset", "email", "security", "tokens"],
       status: "To Do",
       comments: [],
       project_name: "E-Commerce Platform",
       parentTaskId: 1,
       departments: ["IT Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null,
     },
     {
       taskId: 103,
@@ -94,13 +100,15 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-30",
       priority: 7,
-      assignedUsers: [3],
+      assigned_users: [3],
       tags: ["unit-tests", "testing", "authentication", "coverage"],
       status: "To Do",
       comments: [],
       project_name: "E-Commerce Platform",
       parentTaskId: 1,
       departments: ["IT Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null,
     },
     {
       taskId: 104,
@@ -110,13 +118,16 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-01",
       priority: 4,
-      assignedUsers: [1],
+      assigned_users: [1],
       tags: ["documentation", "api", "authentication", "examples"],
       status: "To Do",
       comments: [],
       project_name: "E-Commerce Platform",
       parentTaskId: 1,
       departments: ["IT Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null,
+
     },
     {
       taskId: 3,
@@ -126,7 +137,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-25",
       priority: 4,
-      assignedUsers: [2],
+      assigned_users: [2],
       tags: ["api", "security", "performance"],
       status: "Blocked",
       comments: [
@@ -145,6 +156,8 @@ export const taskMockData: MockData = {
       ],
       project_name: "API Gateway Project",
       departments: ["Support Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 301,
@@ -154,7 +167,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-23",
       priority: 7,
-      assignedUsers: [1],
+      assigned_users: [1],
       tags: ["redis", "configuration", "clustering", "persistence"],
       status: "In Progress",
       comments: [
@@ -168,6 +181,8 @@ export const taskMockData: MockData = {
       project_name: "API Gateway Project",
       parentTaskId: 3,
       departments: ["Support Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 302,
@@ -177,13 +192,15 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-24",
       priority: 7,
-      assignedUsers: [2],
+      assigned_users: [2],
       tags: ["algorithms", "token-bucket", "sliding-window", "rate-limiting"],
       status: "To Do",
       comments: [],
       project_name: "API Gateway Project",
       parentTaskId: 3,
       departments: ["Support Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 303,
@@ -193,13 +210,15 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-26",
       priority: 4,
-      assignedUsers: [3],
+      assigned_users: [3],
       tags: ["dashboard", "admin", "configuration", "monitoring"],
       status: "To Do",
       comments: [],
       project_name: "API Gateway Project",
       parentTaskId: 3,
       departments: ["Support Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 21,
@@ -209,7 +228,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-28",
       priority: 4,
-      assignedUsers: [3],
+      assigned_users: [3],
       tags: ["frontend", "components", "login", "ui"],
       status: "In Progress",
       comments: [
@@ -222,6 +241,8 @@ export const taskMockData: MockData = {
       ],
       project_name: "E-Commerce Platform",
       departments: ["IT Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 201,
@@ -231,7 +252,7 @@ export const taskMockData: MockData = {
       completedDate: "2025-09-18",
       dueDate: "2025-09-17",
       priority: 4,
-      assignedUsers: [3],
+      assigned_users: [3],
       tags: ["ui-design", "responsive", "accessibility", "mobile"],
       status: "Completed",
       comments: [
@@ -245,6 +266,8 @@ export const taskMockData: MockData = {
       project_name: "E-Commerce Platform",
       parentTaskId: 21,
       departments: ["IT Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 202,
@@ -254,7 +277,7 @@ export const taskMockData: MockData = {
       completedDate: "2025-09-19",
       dueDate: "2025-09-20",
       priority: 7,
-      assignedUsers: [3],
+      assigned_users: [3],
       tags: ["validation", "client-side", "real-time", "error-handling"],
       status: "Completed",
       comments: [
@@ -268,6 +291,8 @@ export const taskMockData: MockData = {
       project_name: "E-Commerce Platform",
       parentTaskId: 21,
       departments: ["IT Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 203,
@@ -277,7 +302,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-26",
       priority: 7,
-      assignedUsers: [3],
+      assigned_users: [3],
       tags: ["api-integration", "authentication", "endpoints", "error-handling"],
       status: "In Progress",
       comments: [
@@ -291,6 +316,8 @@ export const taskMockData: MockData = {
       project_name: "E-Commerce Platform",
       parentTaskId: 21,
       departments: ["IT Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 204,
@@ -300,13 +327,15 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-28",
       priority: 4,
-      assignedUsers: [3],
+      assigned_users: [3],
       tags: ["testing", "unit-tests", "integration", "components"],
       status: "To Do",
       comments: [],
       project_name: "E-Commerce Platform",
       parentTaskId: 21,
       departments: ["IT Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 24,
@@ -316,12 +345,14 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-30",
       priority: 4,
-      assignedUsers: [4, 6],
+      assigned_users: [4, 6],
       tags: ["load-testing", "infrastructure", "performance", "validation"],
       status: "To Do",
       comments: [],
       project_name: "Quality Assurance",
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 401,
@@ -331,7 +362,7 @@ export const taskMockData: MockData = {
       completedDate: "2025-09-21",
       dueDate: "2025-09-21",
       priority: 7,
-      assignedUsers: [4],
+      assigned_users: [4],
       tags: ["research", "tools", "k6", "jmeter", "selection"],
       status: "Completed",
       comments: [
@@ -345,6 +376,8 @@ export const taskMockData: MockData = {
       project_name: "Quality Assurance",
       parentTaskId: 24,
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 402,
@@ -354,7 +387,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-24",
       priority: 7,
-      assignedUsers: [6],
+      assigned_users: [6],
       tags: ["environment", "configuration", "infrastructure", "isolation"],
       status: "In Progress",
       comments: [
@@ -368,6 +401,8 @@ export const taskMockData: MockData = {
       project_name: "Quality Assurance",
       parentTaskId: 24,
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 403,
@@ -377,13 +412,15 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-28",
       priority: 7,
-      assignedUsers: [4],
+      assigned_users: [4],
       tags: ["scripts", "scenarios", "endpoints", "user-simulation"],
       status: "To Do",
       comments: [],
       project_name: "Quality Assurance",
       parentTaskId: 24,
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 404,
@@ -393,13 +430,15 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-30",
       priority: 4,
-      assignedUsers: [6],
+      assigned_users: [6],
       tags: ["dashboard", "metrics", "real-time", "monitoring"],
       status: "To Do",
       comments: [],
       project_name: "Quality Assurance",
       parentTaskId: 24,
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 39,
@@ -409,7 +448,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-01",
       priority: 7,
-      assignedUsers: [1, 6],
+      assigned_users: [1, 6],
       tags: ["integration", "testing", "oauth", "automation"],
       status: "In Progress",
       comments: [
@@ -422,6 +461,8 @@ export const taskMockData: MockData = {
       ],
       project_name: "Quality Assurance",
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     // SUBTASKS FOR TASK 39: Integration Testing Automation
     {
@@ -432,7 +473,7 @@ export const taskMockData: MockData = {
       completedDate: "2025-09-24",
       dueDate: "2025-09-24",
       priority: 7,
-      assignedUsers: [6],
+      assigned_users: [6],
       tags: ["oauth", "test-setup", "mock-services", "providers"],
       status: "Completed",
       comments: [
@@ -446,6 +487,8 @@ export const taskMockData: MockData = {
       project_name: "Quality Assurance",
       parentTaskId: 39,
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 502,
@@ -455,7 +498,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-30",
       priority: 7,
-      assignedUsers: [1],
+      assigned_users: [1],
       tags: ["payment", "gateway", "integration", "error-handling"],
       status: "In Progress",
       comments: [
@@ -469,6 +512,8 @@ export const taskMockData: MockData = {
       project_name: "Quality Assurance",
       parentTaskId: 39,
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 503,
@@ -478,13 +523,15 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-01",
       priority: 4,
-      assignedUsers: [6],
+      assigned_users: [6],
       tags: ["test-data", "lifecycle", "cleanup", "isolation"],
       status: "To Do",
       comments: [],
       project_name: "Quality Assurance",
       parentTaskId: 39,
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     // Other original tasks without subtasks with default org fields added
     {
@@ -495,7 +542,7 @@ export const taskMockData: MockData = {
       completedDate: "2025-09-18",
       dueDate: "2025-09-20",
       priority: 4,
-      assignedUsers: [1],
+      assigned_users: [1],
       tags: ["database", "migration", "sql"],
       status: "Completed",
       comments: [
@@ -508,6 +555,8 @@ export const taskMockData: MockData = {
       ],
       project_name: "E-Commerce Platform",
       departments: ["IT Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 4,
@@ -517,12 +566,14 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-28",
       priority: 1,
-      assignedUsers: [1, 4],
+      assigned_users: [1, 4],
       tags: ["documentation", "process", "guidelines"],
       status: "To Do",
       comments: [],
       project_name: "Development Process Improvement",
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 5,
@@ -532,7 +583,7 @@ export const taskMockData: MockData = {
       completedDate: "2025-09-14",
       dueDate: "2025-09-15",
       priority: 7,
-      assignedUsers: [1],
+      assigned_users: [1],
       tags: ["performance", "optimization", "research"],
       status: "Completed",
       comments: [
@@ -545,6 +596,8 @@ export const taskMockData: MockData = {
       ],
       project_name: "Performance Enhancement",
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     // New tasks with expanded team across more departmentss
     {
@@ -555,7 +608,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-08",
       priority: 7,
-      assignedUsers: [7, 8],
+      assigned_users: [7, 8],
       tags: ["mobile", "ux", "research", "usability"],
       status: "In Progress",
       comments: [
@@ -568,6 +621,8 @@ export const taskMockData: MockData = {
       ],
       project_name: "Mobile App Redesign",
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 41,
@@ -577,12 +632,14 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-15",
       priority: 10,
-      assignedUsers: [9, 10, 8],
+      assigned_users: [9, 10, 8],
       tags: ["cloud", "migration", "strategy", "infrastructure"],
       status: "To Do",
       comments: [],
       project_name: "Digital Transformation",
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 42,
@@ -592,12 +649,14 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-20",
       priority: 7,
-      assignedUsers: [2, 3],
+      assigned_users: [2, 3],
       tags: ["analytics", "dashboard", "marketing", "metrics"],
       status: "To Do",
       comments: [],
       project_name: "Marketing Intelligence",
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 43,
@@ -607,7 +666,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-10",
       priority: 7,
-      assignedUsers: [4, 5],
+      assigned_users: [4, 5],
       tags: ["ai", "chatbot", "nlp", "customer-support"],
       status: "In Progress",
       comments: [
@@ -620,6 +679,8 @@ export const taskMockData: MockData = {
       ],
       project_name: "Customer Experience Enhancement",
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 44,
@@ -629,12 +690,14 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-25",
       priority: 10,
-      assignedUsers: [6, 7],
+      assigned_users: [6, 7],
       tags: ["finance", "automation", "reporting", "validation"],
       status: "To Do",
       comments: [],
       project_name: "Financial Process Optimization",
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 45,
@@ -644,7 +707,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-18",
       priority: 7,
-      assignedUsers: [8, 9, 3],
+      assigned_users: [8, 9, 3],
       tags: ["hr", "onboarding", "portal", "training"],
       status: "In Progress",
       comments: [
@@ -657,6 +720,8 @@ export const taskMockData: MockData = {
       ],
       project_name: "HR Digitization",
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 46,
@@ -666,12 +731,14 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-11-05",
       priority: 8,
-      assignedUsers: [2],
+      assigned_users: [2],
       tags: ["legal", "compliance", "audit", "automation"],
       status: "To Do",
       comments: [],
       project_name: "Compliance Management",
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 47,
@@ -681,7 +748,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-12",
       priority: 9,
-      assignedUsers: [1, 3],
+      assigned_users: [1, 3],
       tags: ["sales", "dashboard", "analytics", "forecasting"],
       status: "In Progress",
       comments: [
@@ -694,6 +761,8 @@ export const taskMockData: MockData = {
       ],
       project_name: "Sales Intelligence Platform",
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 48,
@@ -703,12 +772,14 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-15",
       priority: 5,
-      assignedUsers: [2, 7],
+      assigned_users: [2, 7],
       tags: ["product", "roadmap", "visualization", "planning"],
       status: "To Do",
       comments: [],
       project_name: "Product Strategy Tools",
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     // Add some security-focused tasks that Sarah might own as Security Admin
     {
@@ -719,7 +790,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-20",
       priority: 10,
-      assignedUsers: [2, 1],
+      assigned_users: [2, 1],
       tags: ["security", "vulnerability", "assessment", "remediation"],
       status: "In Progress",
       comments: [
@@ -732,6 +803,8 @@ export const taskMockData: MockData = {
       ],
       project_name: "Security Enhancement",
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 50,
@@ -741,12 +814,14 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-11-15",
       priority: 5,
-      assignedUsers: [1, 3],
+      assigned_users: [1, 3],
       tags: ["identity", "access", "authentication", "sso"],
       status: "To Do",
       comments: [],
       project_name: "Identity Management",
       departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null,
     }
   ]
 };
