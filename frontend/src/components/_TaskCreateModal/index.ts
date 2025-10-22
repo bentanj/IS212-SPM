@@ -7,4 +7,5 @@ export * from "./ModalTitle";
 export * from "./MultiSelectInput";
 export * from "./NoPermission";
 export * from "./ParentTaskField";
+export * from "./RecurringParams";
 export * from "./Tags";

@@ -19,7 +19,7 @@ import { ALL_DEPARTMENTS } from '@/constants/Organisation';
 import { Task, User, FormData, Departments, Priority, Status } from '@/types'
 
 // Components
-import { ModalTitle, ParentTaskField, DateRow, MultiSelectInput, DropDownMenu, Tags, AssignedUsersAutocomplete, Comments, FileUpload } from './_TaskCreateModal/';
+import { ModalTitle, ParentTaskField, DateRow, RecurringParams, MultiSelectInput, DropDownMenu, Tags, AssignedUsersAutocomplete, Comments, FileUpload } from './_TaskCreateModal/';
 
 interface TaskCreateModalProps {
   open: boolean;
@@ -168,6 +168,9 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
 
         {/* Dates Row */}
         <DateRow formData={formData} setFormData={setFormData} errors={errors} parentTask={parentTask} />
+
+        {/* Recurring Params */}
+        <RecurringParams formData={formData} setFormData={setFormData} errors={errors} />
 
         {/* Department, Priority and Status Row */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }}>

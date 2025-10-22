@@ -125,6 +125,11 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 : "Pending Completion"
               }
             </Subtitle1>
+
+            <Subtitle1 label="Recurrence Frequency">{task.recurrenceFrequency}</Subtitle1>
+            {task.recurrenceFrequency != "One-Off" &&
+              <Subtitle1 label="Recurrence Interval">{task.recurrenceInterval}</Subtitle1>
+            }
           </Stack>
 
           {/* Assigned Users Section */}

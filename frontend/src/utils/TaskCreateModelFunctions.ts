@@ -21,8 +21,9 @@ const validateForm = (formData: FormData | Omit<FormData, 'taskId'>, setErrors: 
     if (!formData.dueDate) newErrors.dueDate = 'Due date is required';
     if (formData.startDate && formData.dueDate && formData.startDate.isAfter(formData.dueDate))
         newErrors.dueDate = 'Due date must be after start date';
-    if (formData.completedDate && formData.startDate && formData.completedDate.isBefore(formData.startDate))
-        newErrors.completedDate = 'Completed date cannot be before start date';
+    // if (formData.completedDate && formData.startDate && formData.completedDate.isBefore(formData.startDate))
+    //     newErrors.completedDate = 'Completed date cannot be before start date';
+    if (formData.recurrenceFrequency && !formData.recurrenceInterval) newErrors.recurrenceInterval = 'Recurrence interval is required when frequency is set';
     if (!formData.priority) newErrors.priority = 'Priority is required';
     if (formData.assignedUsers.length === 0) newErrors.assignedUsers = 'At least one user must be assigned';
     if (formData.assignedUsers.length > 5) newErrors.assignedUsers = 'Maximum 5 users can be assigned to a task';
