@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import { User, Task, Comment, FormData, APITaskParams } from '@/types'
 import { AlertColor } from '@mui/material';
 import DefaultFormData from '@/constants/DefaultFormData';
+import { getSubtasks } from './Tasks/getTask';
 import updateTask from '@/utils/Tasks/updateTask';
 import createTask from '@/utils/Tasks/createTask';
 import replicateRecurringTaskData from './recurringTask';
@@ -118,6 +119,11 @@ export const handleSubmit = async (params: {
     const TaskData = transformFormDataToAPITaskParams(currentUser, existingTaskDetails, formData, newComment);
     let response: any;
 
+    if (TaskData.status === 'Completed') {
+        const canComplete = await validateCanCompleteTask(TaskData, setSnackbarContent);
+        if (!canComplete) return;
+    }
+
     try {
         if (existingTaskDetails) {
             response = await updateTask(TaskData);
@@ -127,7 +133,7 @@ export const handleSubmit = async (params: {
             setSnackbarContent('Task created successfully', 'success');
         }
 
-        if (TaskData.status == 'Completed') {
+        if (TaskData.status === 'Completed') {
             await taskCompletedTrigger(TaskData, setSnackbarContent);
         }
 
@@ -141,6 +147,25 @@ export const handleSubmit = async (params: {
         setSnackbarContent(`Failed to create task. Please try again`, 'error');
         console.error('Error submitting form:', error);
     }
+};
+
+export const validateCanCompleteTask = async (
+    task: APITaskParams,
+    setSnackbarContent: (message: string, severity: AlertColor) => void
+) => {
+    // If subtask, no dependencies. Allow completion
+    if (task.parentTaskId) return true;
+
+    // If main task, check for incomplete subtasks
+    const subtasks = await getSubtasks(String(task.taskId));
+    const incompleteSubtasks = subtasks.filter(subtask => subtask.status !== 'Completed');
+
+    if (incompleteSubtasks.length > 0) {
+        setSnackbarContent('Complete all subtasks before completing the main task.', 'error');
+        return false;
+    }
+
+    return true;
 };
 
 export const taskCompletedTrigger = async (

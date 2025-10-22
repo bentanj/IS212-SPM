@@ -12,7 +12,7 @@ import dayjs from 'dayjs';
 import { canEditTask } from '@/utils/Permissions';
 import { ModalTitle, Subtitle1, SubTaskSection, CommentSection } from './_TaskDetailModal';
 import updateTask from '@/utils/Tasks/updateTask';
-import { taskCompletedTrigger } from '@/utils/TaskCreateModelFunctions';
+import { validateCanCompleteTask, taskCompletedTrigger } from '@/utils/TaskCreateModelFunctions';
 
 interface TaskDetailModalProps {
   task: Task | null;
@@ -67,18 +67,22 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     setSelectedTask(prev => prev ? { ...prev, status: newStatus } : prev);
   }
 
-  const onSave = () => {
+  const onSave = async () => {
     const TaskData = {
       ...task,
       assigned_users: task.assignedUsers.map(user => user.userId),
     }
+
+    if (task.status == "Completed") {
+      const canComplete = await validateCanCompleteTask(TaskData, setSnackbarContent)
+      if (!canComplete) return;
+      taskCompletedTrigger(TaskData, setSnackbarContent);
+    }
+
     updateTask(TaskData)
       .then(() => {
         setSnackbarContent("Task updated successfully", "success");
 
-        if (task.status == "Completed") {
-          taskCompletedTrigger(TaskData, setSnackbarContent);
-        }
         refetchTasks();
 
         setTimeout(() => {
