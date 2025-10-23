@@ -28,34 +28,33 @@ class Task(Base):
     recurrence_interval = Column('recurrenceInterval', Integer, nullable=True)
 
     def to_dict(self, db_session: Optional[Session] = None, fetch_users: bool = True) -> Dict[str, Any]:
-        # Fetch assigned users via HTTP call to Authentication service
+        # Fetch assigned users via HTTP call to Users service
         assigned_users_data = []
         if fetch_users and self.assigned_users:
             try:
-                # Get Auth service URL from environment or use default
-                auth_service_url = os.getenv(
-                    'AUTH_SERVICE_URL', 'http://authentication:8002')
+                # Get Users service URL from environment or use default
+                users_service_url = os.getenv(
+                    'USERS_SERVICE_URL', 'http://users:8003')
 
-                # Fetch each user via HTTP request
-                for user_id in self.assigned_users:
-                    try:
-                        response = requests.get(
-                            f"{auth_service_url}/api/users/{user_id}",
-                            timeout=2
-                        )
-                        if response.status_code == 200:
-                            assigned_users_data.append(response.json())
-                        else:
-                            # User not found, skip
-                            print(
-                                f"Warning: User {user_id} not found (status {response.status_code})")
-                    except requests.exceptions.RequestException as e:
-                        print(f"Warning: Failed to fetch user {user_id}: {e}")
+                # Use filter endpoint for efficient batch fetching
+                response = requests.post(
+                    f"{users_service_url}/api/users/filter",
+                    json={"userIds": self.assigned_users},
+                    headers={"Content-Type": "application/json"},
+                    timeout=2
+                )
+
+                if response.status_code == 200:
+                    assigned_users_data = response.json()
+                else:
+                    # Failed to fetch users, fall back to user IDs
+                    print(f"Warning: Failed to fetch users (status {response.status_code})")
+                    assigned_users_data = self.assigned_users
 
                 # If no users were fetched successfully, fall back to user IDs
                 if not assigned_users_data:
                     assigned_users_data = self.assigned_users
-            except Exception as e:
+            except requests.exceptions.RequestException as e:
                 # If fetching users fails, fall back to returning user IDs
                 print(f"Warning: Failed to fetch user details: {e}")
                 assigned_users_data = self.assigned_users if self.assigned_users else []
