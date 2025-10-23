@@ -17,6 +17,7 @@ import { taskMockData } from '@/mocks/staff/taskMockData';
 import DefaultFormData, { PriorityOptions, StatusOptions } from '@/constants/DefaultFormData';
 import { ALL_DEPARTMENTS } from '@/constants/Organisation';
 import { Task, User, FormData, Departments, Priority, Status } from '@/types'
+import { getProjectsByTasks } from '../app/projects/_functions/getProjectsByTasks'
 
 // Components
 import { ModalTitle, ParentTaskField, DateRow, RecurringParams, MultiSelectInput, DropDownMenu, Tags, AssignedUsersAutocomplete, Comments, FileUpload } from './_TaskCreateModal/';
@@ -117,8 +118,10 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
       })
   }
 
-  // Get unique project names from existing tasks [TO CHANGE TO API CALL LATER]
-  const existingProjects = Array.from(new Set(taskMockData.tasks.map(t => t.project_name)));
+  // Get unique project names from existing tasks using function from getProjectsByTasks
+  const existingProjects = getProjectsByTasks(allTasks).map(p => p.name);
+
+
 
   return (
     <Dialog open={open} onClose={onClose}
