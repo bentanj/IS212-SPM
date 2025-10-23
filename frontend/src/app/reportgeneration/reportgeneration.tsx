@@ -23,12 +23,26 @@ import { LoadingIndicator } from './_components/LoadingIndicator';
 import { ReportFooter } from './_components/ReportFooter';
 import { DateRangePicker } from './_components/DateRangePicker';
 import { ReportTypeSelector } from './_components/ReportTypeSelector';
+// NEW: Import the Logged Time Report Card component
+import { LoggedTimeReportCard } from './_components/LoggedTimeReportCard';
 
 // Import PDF services
 import {
   ProjectPerformancePDF,
   TeamProductivityPDF,
 } from './services/pdf';
+// NEW: Import Logged Time Report PDF generator
+import { LoggedTimeReportPDF } from './services/pdf/LoggedTimeReportPDF';
+
+// NEW: Import mock logged time data
+import { mockLoggedTimeData } from '../../mocks/report/loggedTimeMockData'
+
+// NEW: Import organization departments
+import { ALL_DEPARTMENTS } from '../../constants/Organisation';
+
+// NEW: Import function to get projects from tasks
+// change this to call the function when merging the branch
+// import { getProjectsByTasks } from '@/path/to/getProjectsByTasks';
 
 // Register Chart.js components
 Chart.register(...registerables, ChartDataLabels);
@@ -241,6 +255,76 @@ export default function ReportGeneration() {
     setShowReportTypeDialog(true);
   };
 
+  // NEW: Function to get unique projects from mock logged time data
+  // Extract projects from tasks and return just the project names
+  const getProjects = (): string[] => {
+    // Extract unique projects from mock logged time data
+    const projects = Array.from(new Set(mockLoggedTimeData.map(entry => entry.projectName))).sort();
+    return projects;
+    
+    // OR if you want to use getProjectsByTasks later:
+    // const projectObjects = getProjectsByTasks(allTasks);
+    // return projectObjects.map(p => p.name);
+  };
+
+  // NEW: Function to get unique departments
+  // Uses the ALL_DEPARTMENTS from Organisation.ts
+  const getDepartments = (): string[] => {
+    return ALL_DEPARTMENTS;
+  };
+
+  // NEW: Handle Logged Time Report PDF export
+  // Uses the same selectedReport and exportType pattern as Task Completion Report
+  const handleLoggedTimeExportPDF = async (
+    filterType: 'department' | 'project',
+    filterValue: string
+  ) => {
+    console.log('Exporting Logged Time Report PDF:', { filterType, filterValue });
+    
+    // Validate date range
+    if (!isDateRangeValid) {
+      setError('Please select both start and end dates before generating a report.');
+      setShowError(true);
+      return;
+    }
+
+    // Set the generic export states (same pattern as existing reports)
+    setSelectedReport('logged-time');
+    setExportType('pdf');
+    
+    try {
+      // Generate PDF using the mock logged time data
+      await LoggedTimeReportPDF.generate(
+        mockLoggedTimeData,
+        startDate!,
+        endDate!,
+        filterType,
+        filterValue,
+        currentDate
+      );
+      
+      console.log('Logged Time PDF generated successfully!');
+    } catch (err) {
+      console.error('Logged Time PDF export failed:', err);
+      setError(`Failed to export PDF: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setShowError(true);
+    } finally {
+      // Reset the generic export states
+      setSelectedReport(null);
+      setExportType(null);
+    }
+  };
+
+  // NEW: Handle Logged Time Report Excel export
+  // Placeholder for future implementation
+  const handleLoggedTimeExportExcel = async (
+    filterType: 'department' | 'project',
+    filterValue: string
+  ) => {
+    console.log('Exporting Logged Time Report Excel:', { filterType, filterValue });
+    alert('Excel export coming soon!');
+  };
+
   // Helper function for category colors
   const getCategoryColor = (category: string) => {
     const colors: { [key: string]: string } = {
@@ -308,6 +392,7 @@ export default function ReportGeneration() {
         </Typography>
 
         <Grid container spacing={{ xs: 2, sm: 3 }}>
+          {/* Existing Task Completion Report Card */}
           {reportTypes.map((report) => (
             <Grid size={{ xs: 12 }} key={report.id}>
               <ReportCard
@@ -322,6 +407,21 @@ export default function ReportGeneration() {
               />
             </Grid>
           ))}
+
+          {/* NEW: Logged Time Report Card */}
+          {/* Uses the same selectedReport pattern as other reports for consistency */}
+          <Grid size={{ xs: 12 }}>
+            <LoggedTimeReportCard
+              startDate={startDate}
+              endDate={endDate}
+              onExportPDF={handleLoggedTimeExportPDF}
+              onExportExcel={handleLoggedTimeExportExcel}
+              getProjects={getProjects}
+              getDepartments={getDepartments}
+              isExportingPDF={selectedReport === 'logged-time' && exportType === 'pdf'}
+              isExportingExcel={selectedReport === 'logged-time' && exportType === 'excel'}
+            />
+          </Grid>
         </Grid>
 
         {/* Footer Info */}

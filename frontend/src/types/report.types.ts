@@ -5,6 +5,8 @@
  * Matches backend API response structure
  */
 
+import { Dayjs } from 'dayjs';
+
 export interface ReportMetadata {
   report_id: string;
   report_type: string;
@@ -97,3 +99,20 @@ export interface ApiError {
 
 // Report Sub-Type identifier
 export type ReportSubType = 'per-user' | 'per-project';
+
+
+// LoggedTimeEntry Project
+export interface LoggedTimeEntry {
+  userName: string;           // Name of the user who logged the time
+  loginTime: Dayjs;           // Dayjs object for easy date manipulation
+  logoutTime: Dayjs;          // Dayjs object for easy date manipulation
+  projectName: string;        // Name of the project worked on
+  department: string;         // User's department (e.g., "Engineering", "Design")
+}
+
+// Aggregated time statistics for a single user
+export interface UserTimeStats {
+  userName: string;           // Name of the user
+  totalHours: number;         // Total hours worked (calculated from all entries)
+  totalSessions: number;      // Number of logged time sessions
+}

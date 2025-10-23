@@ -2,3 +2,4 @@
 export { ChartGenerator } from './ChartGenerator';
 export { ProjectPerformancePDF } from './ProjectPerformancePDF';
 export { TeamProductivityPDF } from './TeamProductivityPDF';
+export { LoggedTimeReportPDF } from './LoggedTimeReportPDF';
