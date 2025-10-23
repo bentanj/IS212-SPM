@@ -63,9 +63,9 @@ def filter_users():
     Returns users that match ANY of the provided IDs or emails (OR condition)
     """
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True)
 
-        if not data:
+        if data is None:
             return jsonify({'error': 'Request body is required'}), 400
 
         user_ids = data.get('userIds', [])
