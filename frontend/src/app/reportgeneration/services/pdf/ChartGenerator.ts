@@ -169,4 +169,55 @@ export class ChartGenerator {
       },
     };
   }
+
+
+  static createDepartmentTaskActivityChart(data: any[], title: string): ChartConfiguration {
+    return {
+      type: 'bar',
+      data: {
+        labels: data.map(d => d.label),
+        datasets: [
+          {
+            label: 'To Do',
+            data: data.map(d => d.to_do || 0),
+            backgroundColor: '#9E9E9E',
+          },
+          {
+            label: 'In Progress',
+            data: data.map(d => d.in_progress || 0),
+            backgroundColor: '#2196F3',
+          },
+          {
+            label: 'Blocked',
+            data: data.map(d => d.blocked || 0),
+            backgroundColor: '#FF9800',
+          },
+          {
+            label: 'Completed',
+            data: data.map(d => d.completed || 0),
+            backgroundColor: '#4CAF50',
+          },
+          {
+            label: 'Overdue',
+            data: data.map(d => d.overdue || 0),
+            backgroundColor: '#F44336',
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        animation: { duration: 0 },
+        scales: {
+          x: { stacked: true, ticks: { font: { size: 9 } } },
+          y: { stacked: true, beginAtZero: true, ticks: { font: { size: 10 } } },
+        },
+        plugins: {
+          legend: { display: true, position: 'bottom' },
+          title: { display: true, text: title, font: { size: 14, weight: 'bold' } },
+        },
+      },
+    };
+  }
+
 }

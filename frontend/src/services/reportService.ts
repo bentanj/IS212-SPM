@@ -1,7 +1,9 @@
 // src/services/reportService.ts
+
 import {
   ProjectPerformanceReport,
   UserProductivityReport,
+  DepartmentTaskActivityReport,
   ReportsSummary,
   ApiError,
 } from '@/types/report.types';
@@ -84,14 +86,17 @@ async function fetchWithTimeout(
         ...options.headers,
       },
     });
+
     clearTimeout(timeoutId);
     return response;
   } catch (error) {
     clearTimeout(timeoutId);
+
     if (error instanceof Error) {
       if (error.name === 'AbortError') {
         throw new ReportServiceError('Request timeout', 408);
       }
+
       // Network error
       throw new ReportServiceError(
         'Failed to connect to reports service. Please ensure the backend is running.',
@@ -99,6 +104,7 @@ async function fetchWithTimeout(
         { originalError: error.message }
       );
     }
+
     throw error;
   }
 }
@@ -157,6 +163,14 @@ export class ReportService {
     console.log('ReportService initialized with base URL:', this.baseUrl);
   }
 
+  // ADD THIS METHOD - It was missing!
+  private getHeaders(): HeadersInit {
+    return {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+  }
+
   async checkHealth(): Promise<{ status: string; service: string; port: number }> {
     const url = `${this.baseUrl}/api/reports/health`;
     return fetchWithRetry(url);
@@ -168,6 +182,7 @@ export class ReportService {
     useCache = false
   ): Promise<ProjectPerformanceReport> {
     const cacheKey = `project-performance-${startDate}-${endDate}`;
+
     if (useCache) {
       const cached = cache.get<ProjectPerformanceReport>(cacheKey);
       if (cached) {
@@ -178,7 +193,7 @@ export class ReportService {
 
     const url = `${this.baseUrl}/api/reports/project-performance/data?start_date=${startDate}&end_date=${endDate}`;
     const data = await fetchWithRetry<ProjectPerformanceReport>(url);
-    
+
     if (useCache) {
       cache.set(cacheKey, data, 2 * 60 * 1000);
     }
@@ -192,6 +207,7 @@ export class ReportService {
     useCache = false
   ): Promise<UserProductivityReport> {
     const cacheKey = `user-productivity-${startDate}-${endDate}`;
+
     if (useCache) {
       const cached = cache.get<UserProductivityReport>(cacheKey);
       if (cached) {
@@ -202,7 +218,7 @@ export class ReportService {
 
     const url = `${this.baseUrl}/api/reports/user-productivity/data?start_date=${startDate}&end_date=${endDate}`;
     const data = await fetchWithRetry<UserProductivityReport>(url);
-    
+
     if (useCache) {
       cache.set(cacheKey, data, 2 * 60 * 1000);
     }
@@ -210,8 +226,51 @@ export class ReportService {
     return data;
   }
 
+  async getDepartmentTaskActivityReport(
+    department: string,
+    aggregation: 'weekly' | 'monthly',
+    startDate: string,
+    endDate: string
+  ): Promise<DepartmentTaskActivityReport> {
+    try {
+      const params = new URLSearchParams({
+        department,
+        aggregation,
+        start_date: startDate,
+        end_date: endDate,
+      });
+
+      const response = await fetch(
+        `${this.baseUrl}/reports/department-activity?${params.toString()}`,
+        {
+          method: 'GET',
+          headers: this.getHeaders(), // ✅ Now this method exists!
+        }
+      );
+
+      if (!response.ok) {
+        throw new ReportServiceError(
+          `Failed to fetch department report: ${response.statusText}`,
+          response.status
+        );
+      }
+
+      const data: DepartmentTaskActivityReport = await response.json();
+      return data;
+    } catch (error) {
+      if (error instanceof ReportServiceError) {
+        throw error;
+      }
+
+      throw new ReportServiceError(
+        `Network error: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
   async getReportsSummary(useCache = true): Promise<ReportsSummary> {
     const cacheKey = 'reports-summary';
+
     if (useCache) {
       const cached = cache.get<ReportsSummary>(cacheKey);
       if (cached) return cached;
@@ -219,6 +278,7 @@ export class ReportService {
 
     const url = `${this.baseUrl}/api/reports/summary`;
     const data = await fetchWithRetry<ReportsSummary>(url);
+
     if (useCache) {
       cache.set(cacheKey, data, 1 * 60 * 1000);
     }

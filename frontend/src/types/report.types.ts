@@ -44,9 +44,9 @@ export interface ProjectPerformanceReport {
 // User Productivity Report Types (Per User)
 export interface TeamMemberStats {
   user_id: string;
-  first_name?: string;       
-  last_name?: string;         
-  full_name?: string;         
+  first_name?: string;
+  last_name?: string;
+  full_name?: string;
   total_tasks: number;
   completed: number;
   in_progress: number;
@@ -70,8 +70,54 @@ export interface UserProductivityReport {
   summary: UserProductivitySummary;
 }
 
+// Department Task Activity Report Types
+export interface TaskStatusCount {
+  to_do: number;
+  in_progress: number;
+  blocked: number;
+  completed: number;
+  overdue: number;
+}
+
+// FIXED: Extend TaskStatusCount instead of using spread
+export interface WeeklyData extends TaskStatusCount {
+  week_start: string;  // ISO date string
+  week_end: string;
+}
+
+// FIXED: Extend TaskStatusCount instead of using spread
+export interface MonthlyData extends TaskStatusCount {
+  month: string;  // e.g., "2025-10"
+  month_name: string;  // e.g., "October 2025"
+}
+
+export interface DepartmentTaskActivityData {
+  department: string;
+  aggregation: 'weekly' | 'monthly';
+  weekly_data?: WeeklyData[];
+  monthly_data?: MonthlyData[];
+  total_tasks: number;
+}
+
+export interface DepartmentTaskActivitySummary {
+  department: string;
+  date_range: {
+    start_date: string;
+    end_date: string;
+  };
+  total_tasks: number;
+  status_totals: TaskStatusCount;
+  aggregation_type: 'weekly' | 'monthly';
+}
+
+export interface DepartmentTaskActivityReport {
+  metadata: ReportMetadata;
+  data: DepartmentTaskActivityData;
+  summary: DepartmentTaskActivitySummary;
+}
+
 // Combined Task Completion Report Type
-export type TaskCompletionReport = ProjectPerformanceReport | UserProductivityReport;
+export type TaskCompletionReport = ProjectPerformanceReport | UserProductivityReport | DepartmentTaskActivityReport;
 
 // Reports Summary
 export interface ReportsSummary {

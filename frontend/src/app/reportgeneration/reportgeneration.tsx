@@ -1,9 +1,10 @@
 // src/app/reportgeneration/reportgeneration.tsx
+
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Box, Container, Typography, Grid, useTheme, useMediaQuery } from '@mui/material';
-import { Assessment } from '@mui/icons-material';
+import { Assessment, Business } from '@mui/icons-material';
 import { Chart, registerables } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import dayjs, { Dayjs } from 'dayjs';
@@ -13,6 +14,7 @@ import { reportService, ReportServiceError } from '@/services/reportService';
 import type {
   ProjectPerformanceReport,
   UserProductivityReport,
+  DepartmentTaskActivityReport,
 } from '@/types/report.types';
 
 // Import components
@@ -28,6 +30,7 @@ import { ReportTypeSelector } from './_components/ReportTypeSelector';
 import {
   ProjectPerformancePDF,
   UserProductivityPDF,
+  DepartmentTaskActivityPDF,
 } from './services/pdf';
 
 // Register Chart.js components
@@ -65,6 +68,7 @@ export default function ReportGeneration() {
   // API Data States
   const [projectReport, setProjectReport] = useState<ProjectPerformanceReport | null>(null);
   const [teamReport, setUserProductivityReport] = useState<UserProductivityReport | null>(null);
+  const [departmentReport, setDepartmentReport] = useState<DepartmentTaskActivityReport | null>(null);
 
   // Loading and Error States
   const [isLoading, setIsLoading] = useState(false);
@@ -73,19 +77,18 @@ export default function ReportGeneration() {
 
   const currentDate = useMemo(() => new Date().toLocaleDateString(), []);
 
-  // Check if date range is valid - FIXED: Better validation
+  // Check if date range is valid
   const isDateRangeValid = useMemo(() => {
-    // Check if both dates exist and are valid Dayjs objects
     const isStartValid = startDate && dayjs(startDate).isValid();
     const isEndValid = endDate && dayjs(endDate).isValid();
-    
-    console.log('Date validation:', { 
-      startDate: startDate?.format('YYYY-MM-DD'), 
+
+    console.log('Date validation:', {
+      startDate: startDate?.format('YYYY-MM-DD'),
       endDate: endDate?.format('YYYY-MM-DD'),
       isStartValid,
-      isEndValid
+      isEndValid,
     });
-    
+
     return isStartValid && isEndValid;
   }, [startDate, endDate]);
 
@@ -93,7 +96,7 @@ export default function ReportGeneration() {
     setMounted(true);
   }, []);
 
-  // Fetch data from backend with date range
+  // Fetch data from backend with date range (for task-completion reports)
   const fetchReportData = async (
     subType: ReportSubType
   ): Promise<ProjectPerformanceReport | UserProductivityReport> => {
@@ -101,12 +104,11 @@ export default function ReportGeneration() {
     setError(null);
 
     try {
-      // Format dates for API call
       const startDateStr = startDate!.format('YYYY-MM-DD');
       const endDateStr = endDate!.format('YYYY-MM-DD');
-      
+
       let data;
-      
+
       if (subType === 'per-project') {
         data = await reportService.getProjectPerformanceReport(startDateStr, endDateStr);
         setProjectReport(data);
@@ -126,6 +128,41 @@ export default function ReportGeneration() {
       setError(errorMessage);
       setShowError(true);
       console.error('Error fetching report data:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // NEW: Fetch department report
+  const fetchDepartmentReport = async (
+    department: string,
+    aggregation: string
+  ): Promise<DepartmentTaskActivityReport> => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const startDateStr = startDate!.format('YYYY-MM-DD');
+      const endDateStr = endDate!.format('YYYY-MM-DD');
+
+      const data = await reportService.getDepartmentTaskActivityReport(
+        department,
+        aggregation as 'weekly' | 'monthly',
+        startDateStr,
+        endDateStr
+      );
+
+      setDepartmentReport(data);
+      return data;
+    } catch (err) {
+      const errorMessage =
+        err instanceof ReportServiceError
+          ? err.message
+          : 'Failed to fetch department report. Please ensure the backend is running.';
+      setError(errorMessage);
+      setShowError(true);
+      console.error('Error fetching department report:', err);
       throw err;
     } finally {
       setIsLoading(false);
@@ -162,6 +199,17 @@ export default function ReportGeneration() {
       dataPoints: displayData.totalTasks,
       hasSubTypes: true,
     },
+    {
+      id: 'department-activity',
+      title: 'Department Task Activity',
+      description:
+        'Track department task activity with weekly or monthly aggregation. View task status breakdowns including To Do, In Progress, Blocked, Completed, and Overdue counts.',
+      icon: <Business sx={{ fontSize: 28 }} />,
+      category: 'Department Analytics',
+      estimatedTime: '2-3 minutes',
+      dataPoints: 1500,
+      hasSubTypes: false,
+    },
   ];
 
   // Generate date range string for PDF
@@ -170,10 +218,10 @@ export default function ReportGeneration() {
     return `Filtered: ${startDate.format('MMM D, YYYY')} - ${endDate.format('MMM D, YYYY')}`;
   };
 
-  // Handle Report Type Selection
+  // Handle Report Type Selection (for task-completion)
   const handleReportTypeSelection = async (subType: ReportSubType) => {
     console.log('1. Report type selected:', subType);
-    
+
     if (!subType || !pendingExportType) return;
 
     setSelectedReport('task-completion');
@@ -183,13 +231,13 @@ export default function ReportGeneration() {
       console.log('2. Fetching report data...');
       const reportData = await fetchReportData(subType);
       console.log('3. Report data received:', reportData);
-      
+
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       if (pendingExportType === 'pdf') {
         const dateRangeStr = getDateRangeString();
         console.log('4. Generating PDF...', { subType, dateRangeStr });
-        
+
         if (subType === 'per-project') {
           await ProjectPerformancePDF.generate(
             reportData as ProjectPerformanceReport,
@@ -217,34 +265,81 @@ export default function ReportGeneration() {
     }
   };
 
-
-  // Handle export button click - validate date range first
+  // Handle export button click for task-completion (opens dialog)
   const handleExportClick = (type: 'pdf' | 'excel') => {
     console.log('Export clicked. Date range valid:', isDateRangeValid);
-    
+
     // Validate date range
     if (!isDateRangeValid) {
       setShowDateValidation(true);
       setError('Please select both start and end dates before generating a report.');
       setShowError(true);
-      
-      // Scroll to date picker
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
-    // Reset validation state
     setShowDateValidation(false);
-    
+
     // Proceed with export
     setPendingExportType(type);
     setShowReportTypeDialog(true);
+  };
+
+  // NEW: Handle department report export (direct, no dialog)
+  const handleDepartmentExport = async (
+    type: 'pdf' | 'excel',
+    params: { department?: string; aggregation?: string }
+  ) => {
+    console.log('Department export clicked:', { type, params, isDateRangeValid });
+
+    // Validate date range first
+    if (!isDateRangeValid) {
+      setShowDateValidation(true);
+      setError('Please select both start and end dates before generating a report.');
+      setShowError(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // Validate department params
+    if (!params.department || !params.aggregation) {
+      setError('Please select a department and aggregation type.');
+      setShowError(true);
+      return;
+    }
+
+    setShowDateValidation(false);
+    setSelectedReport('department-activity');
+    setExportType(type);
+
+    try {
+      console.log('Fetching department report...', params);
+      const reportData = await fetchDepartmentReport(params.department, params.aggregation);
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      if (type === 'pdf') {
+        const dateRangeStr = getDateRangeString();
+        console.log('Generating Department PDF...', { dateRangeStr });
+        await DepartmentTaskActivityPDF.generate(reportData, currentDate, dateRangeStr);
+        console.log('Department PDF generated successfully!');
+      } else if (type === 'excel') {
+        alert('Excel export for department reports coming soon!');
+      }
+    } catch (err) {
+      console.error('Department export failed:', err);
+      alert(`Export failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setSelectedReport(null);
+      setExportType(null);
+    }
   };
 
   // Helper function for category colors
   const getCategoryColor = (category: string) => {
     const colors: { [key: string]: string } = {
       'Task Analytics': 'primary',
+      'Department Analytics': 'secondary',
     };
     return colors[category] || 'default';
   };
@@ -314,11 +409,24 @@ export default function ReportGeneration() {
                 report={report}
                 isExportingPDF={selectedReport === report.id && exportType === 'pdf'}
                 isExportingExcel={selectedReport === report.id && exportType === 'excel'}
-                onExportPDF={() => handleExportClick('pdf')}
-                onExportExcel={() => handleExportClick('excel')}
+                onExportPDF={(params) => {
+                  if (report.id === 'department-activity' && params) {
+                    handleDepartmentExport('pdf', params);
+                  } else {
+                    handleExportClick('pdf');
+                  }
+                }}
+                onExportExcel={(params) => {
+                  if (report.id === 'department-activity' && params) {
+                    handleDepartmentExport('excel', params);
+                  } else {
+                    handleExportClick('excel');
+                  }
+                }}
                 getCategoryColor={getCategoryColor}
                 hasDateFilter={isDateRangeValid || false}
                 isDisabled={!isDateRangeValid}
+                reportType={report.id}
               />
             </Grid>
           ))}
@@ -332,7 +440,7 @@ export default function ReportGeneration() {
           currentDate={currentDate}
         />
 
-        {/* Report Type Selection Dialog */}
+        {/* Report Type Selection Dialog (for task-completion only) */}
         <ReportTypeSelector
           open={showReportTypeDialog}
           onClose={() => {
