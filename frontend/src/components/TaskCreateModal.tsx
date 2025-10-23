@@ -66,6 +66,15 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
     task.status !== "Completed" // Exclude completed tasks
   );
 
+  const parentTaskChange = (parentTask: Task | null) => {
+    setParentTask(parentTask);
+    setFormData(prev => ({
+      ...prev,
+      parentTaskId: parentTask ? parentTask.taskId : null,
+      project_name: parentTask ? parentTask.project_name : ''
+    }));
+  }
+
   // Initialize form data when editing
   useEffect(() => {
     setErrors({});
@@ -119,8 +128,9 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
   }
 
   // Get unique project names from existing tasks using function from getProjectsByTasks
-  const existingProjects = getProjectsByTasks(allTasks).map(p => p.name);
-
+  const existingProjects = getProjectsByTasks(allTasks)
+    .filter(value => value.name == parentTask?.project_name || !parentTask)
+    .map(p => p.name)
 
 
   return (
@@ -140,7 +150,7 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
         <ParentTaskField
           parentTask={parentTask}
           availableParentTasks={availableParentTasks}
-          onChange={setParentTask}
+          onChange={parentTaskChange}
           error={!!errors.parentTaskId}
           helperText={errors.parentTaskId}
           disabled={isEditMode} // Disable editing parent in edit mode
