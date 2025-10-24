@@ -16,6 +16,9 @@ export function replicateRecurringTaskData(task: APITaskParams) {
     const newStartDate = recurringTaskDate(task);
     if (newStartDate == null) return null;
 
+    let IsReplicateFromCompletedSubtask = {}
+    if (task.parentTaskId) IsReplicateFromCompletedSubtask = { IsReplicateFromCompletedSubtask: true }
+
     const newTask = {
         ...task,
         taskId: 0,  // Passing value of 0 to database will auto-generate a new ID
@@ -23,7 +26,9 @@ export function replicateRecurringTaskData(task: APITaskParams) {
         completedDate: null,
         status: "To Do",
         comments: [],
+        ...IsReplicateFromCompletedSubtask,
     };
+
     return newTask;
 }
 
