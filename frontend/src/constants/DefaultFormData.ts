@@ -23,6 +23,7 @@ const DefaultFormData: Omit<FormData, "taskId"> = {
     comments: '',
     attachedFile: null,
     parentTaskId: null,
+    IsReplicateFromCompletedSubstask: false,
 }
 
 export default DefaultFormData;
