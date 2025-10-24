@@ -1,5 +1,5 @@
 // @ts-nocheck
-import replicateRecurringTaskData from '../../recurringTask';
+import { replicateRecurringTaskData } from '../../recurringTask';
 import dayjs from 'dayjs';
 import { APITaskParams } from '@/types';
 
