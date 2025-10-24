@@ -114,6 +114,7 @@ export function replicateRecurringSubtaskData(
         dueDate: newSubtaskDueDate.toISOString(),
         completedDate: null,
         status: "To Do",
+        comments: [],
     };
 
     return newSubtask;
