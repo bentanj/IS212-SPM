@@ -45,7 +45,7 @@ describe('autoReplicateAllSubtasks', () => {
         (createTask as jest.Mock).mockResolvedValue({});
         recurringTaskModule.replicateRecurringSubtaskData.mockImplementation((parent, subtask) => subtask);
 
-        await autoReplicateAllSubtasks(parentTask, setSnackBarContent);
+        await autoReplicateAllSubtasks(parentTask, 2, setSnackBarContent);
 
         expect(getSubtasks).toHaveBeenCalledWith('1');
         expect(createTask).toHaveBeenCalledTimes(subtasks.length);
@@ -63,7 +63,7 @@ describe('autoReplicateAllSubtasks', () => {
         (getSubtasks as jest.Mock).mockResolvedValue(subtasks);
         recurringTaskModule.replicateRecurringSubtaskData.mockReturnValueOnce('Error replicating subtask');
 
-        await autoReplicateAllSubtasks(parentTask, setSnackBarContent);
+        await autoReplicateAllSubtasks(parentTask, 2, setSnackBarContent);
 
         expect(setSnackBarContent).toHaveBeenCalledWith(
             expect.stringContaining('Only 0 out of 1 recurring subtasks have been created.'),
@@ -79,7 +79,7 @@ describe('autoReplicateAllSubtasks', () => {
         (getSubtasks as jest.Mock).mockResolvedValue(subtasks);
         recurringTaskModule.replicateRecurringSubtaskData.mockReturnValueOnce('Error replicating subtask');
 
-        await autoReplicateAllSubtasks(parentTask, setSnackBarContent);
+        await autoReplicateAllSubtasks(parentTask, 2, setSnackBarContent);
 
         expect(setSnackBarContent).toHaveBeenCalledWith(
             expect.stringContaining('Only 0 out of 1 recurring subtasks have been created.'),

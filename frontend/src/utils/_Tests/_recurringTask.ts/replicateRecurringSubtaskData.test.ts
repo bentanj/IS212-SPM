@@ -21,7 +21,7 @@ describe('replicateRecurringSubtaskData', () => {
             status: 'In Progress',
         } as any;
 
-        const result = replicateRecurringSubtaskData(parentTask, subtask);
+        const result = replicateRecurringSubtaskData(parentTask, 2, subtask);
 
         expect(typeof result).toBe('object');
         expect(result.taskId).toBe(0);
@@ -39,7 +39,7 @@ describe('replicateRecurringSubtaskData', () => {
             title: 'Bad Subtask',
         } as any;
 
-        const result = replicateRecurringSubtaskData(badParent, subtask);
+        const result = replicateRecurringSubtaskData(badParent, 2, subtask);
 
         expect(typeof result).toBe('string');
         expect(result).toContain('start date exceeds parent task due date');
@@ -53,7 +53,7 @@ describe('replicateRecurringSubtaskData', () => {
             title: 'Bad DueDate Subtask',
         } as any;
 
-        const result = replicateRecurringSubtaskData(badParent, subtask);
+        const result = replicateRecurringSubtaskData(badParent, 2, subtask);
 
         expect(typeof result).toBe('string');
         expect(result).toContain('due date exceeds parent task due date');
