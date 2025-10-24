@@ -52,6 +52,9 @@ export async function autoReplicateAllSubtasks(
     setSnackBarContent: (message: string, severity: AlertColor) => void
 ) {
     const subtasks = await getSubtasks(String(parentTask.taskId));
+    // If no subtasks, return
+    if (subtasks.length === 0) return;
+
     let newSubtasksCreated = 0;
     let errorMessages = [];
     for (const subtask of subtasks) {
