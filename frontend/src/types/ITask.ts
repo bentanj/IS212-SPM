@@ -17,6 +17,7 @@ export interface Task {
     tags: string[];
     comments: Comment[];
     parentTaskId?: number | null;
+    IsReplicateFromCompletedSubstask: boolean;
 }
 
 export interface APITaskParams extends Omit<Task, 'assignedUsers'> {
