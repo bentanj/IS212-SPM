@@ -10,7 +10,7 @@ const RecurrenceFreqOptionsMap: Record<RecurrenceFrequency, dayjs.ManipulateType
     "Yearly": "year",
 }
 
-export default function replicateRecurringTaskData(task: APITaskParams) {
+export function replicateRecurringTaskData(task: APITaskParams) {
     if (task.recurrenceFrequency == "One-Off") return null;
 
     const newStartDate = recurringTaskDate(task);
