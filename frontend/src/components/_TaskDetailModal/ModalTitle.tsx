@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useMemo, useState } from "react";
 import { DialogTitle, Box, Typography, Stack, Chip, Menu, MenuItem, Button } from "@mui/material"
 import { Task, Priority, Status } from "@/types"
 import { getPriorityColor, getStatusColor } from "@/utils/TaskRenderingFunctions";
@@ -19,10 +19,11 @@ export const ModalTitle: React.FC<ModalTitleProps> = ({
     const [statusAnchorEl, setStatusAnchorEl] = useState<null | HTMLElement>(null);
 
     // Preserve original priority and status to detect changes
-    const originalPriorityRef = useRef<Priority>(task?.priority);
-    const originalStatusRef = useRef<Status>(task?.status);
-    const originalPriority = originalPriorityRef.current;
-    const originalStatus = originalStatusRef.current;
+    const [originalPriority, originalStatus] = useMemo(() => [task.priority, task.status], [task.taskId]);
+    // const originalPriorityRef = useRef<Priority>(task?.priority);
+    // const originalStatusRef = useRef<Status>(task?.status);
+    // const originalPriority = originalPriorityRef.current;
+    // const originalStatus = originalStatusRef.current;
 
     const handlePriorityClick = (event: React.MouseEvent<HTMLElement>) => {
         setPriorityAnchorEl(event.currentTarget);
