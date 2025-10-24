@@ -1,4 +1,4 @@
-from sqlalchemy import Column, BigInteger, Text, DateTime, ARRAY, Integer
+from sqlalchemy import Column, BigInteger, Text, DateTime, ARRAY, Integer, Boolean
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Session
 from typing import Optional, List, Dict, Any
@@ -26,6 +26,7 @@ class Task(Base):
     comments = Column(JSONB, nullable=True, default=[])
     recurrence_frequency = Column('recurrenceFrequency', Text, nullable=True)
     recurrence_interval = Column('recurrenceInterval', Integer, nullable=True)
+    is_replicate_from_completed_subtask = Column('IsReplicateFromCompletedSubtask', Boolean, nullable=True, default=False)
 
     def to_dict(self, db_session: Optional[Session] = None, fetch_users: bool = True) -> Dict[str, Any]:
         # Fetch assigned users via HTTP call to Users service
@@ -78,7 +79,8 @@ class Task(Base):
             "departments": self.departments if self.departments else [],
             "comments": self.comments if self.comments else [],
             "recurrenceFrequency": self.recurrence_frequency,
-            "recurrenceInterval": self.recurrence_interval
+            "recurrenceInterval": self.recurrence_interval,
+            "IsReplicateFromCompletedSubtask": self.is_replicate_from_completed_subtask if self.is_replicate_from_completed_subtask is not None else False
         }
 
     def __repr__(self):
