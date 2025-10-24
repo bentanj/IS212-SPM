@@ -180,7 +180,8 @@ export const taskCompletedTrigger = async (
     try {
         const response = await createTask(newTask);
         setSnackbarContent('Replicated task created', 'success');
-        return response;
+
+        await autoReplicateAllSubtasks(task, setSnackbarContent);
     }
     catch (error) {
         setSnackbarContent('Failed to create replicated task. Please try again', 'error');
