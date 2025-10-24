@@ -49,6 +49,7 @@ import { getSubtasks } from "@/utils/Tasks/getTask";
 import createTask from "./Tasks/createTask";
 export async function autoReplicateAllSubtasks(
     parentTask: APITaskParams,
+    newParentTaskId: number,
     setSnackBarContent: (message: string, severity: AlertColor) => void
 ) {
     const subtasks = await getSubtasks(String(parentTask.taskId));
@@ -58,7 +59,7 @@ export async function autoReplicateAllSubtasks(
     let newSubtasksCreated = 0;
     let errorMessages = [];
     for (const subtask of subtasks) {
-        const newSubtaskData = replicateRecurringSubtaskData(parentTask, subtask);
+        const newSubtaskData = replicateRecurringSubtaskData(parentTask, newParentTaskId, subtask);
         if (typeof newSubtaskData !== "string") {
             try {
                 const newSubtask = {
@@ -91,6 +92,7 @@ export async function autoReplicateAllSubtasks(
 
 export function replicateRecurringSubtaskData(
     parentTask: APITaskParams,
+    newParentTaskId: number,
     subtask: Task,
 ) {
     const parentFreq = RecurrenceFreqOptionsMap[parentTask.recurrenceFrequency];
@@ -118,6 +120,7 @@ export function replicateRecurringSubtaskData(
         completedDate: null,
         status: "To Do",
         comments: [],
+        parentTaskId: newParentTaskId,
     };
 
     return newSubtask;
