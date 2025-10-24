@@ -5,7 +5,7 @@ import DefaultFormData from '@/constants/DefaultFormData';
 import { getSubtasks } from './Tasks/getTask';
 import updateTask from '@/utils/Tasks/updateTask';
 import createTask from '@/utils/Tasks/createTask';
-import replicateRecurringTaskData from './recurringTask';
+
 
 // Filter out already assigned users from available options
 export const getAvailableUsers = (allUsers: User[], assignedUsers: User[]): User[] => {
@@ -168,6 +168,7 @@ export const validateCanCompleteTask = async (
     return true;
 };
 
+import { replicateRecurringTaskData, autoReplicateAllSubtasks } from './recurringTask';
 export const taskCompletedTrigger = async (
     task: APITaskParams,
     setSnackbarContent: (message: string, severity: AlertColor) => void
