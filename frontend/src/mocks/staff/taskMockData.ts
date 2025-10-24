@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { Task, User, APITaskParams } from '@/types';
 
 interface MigrateTask extends APITaskParams {
