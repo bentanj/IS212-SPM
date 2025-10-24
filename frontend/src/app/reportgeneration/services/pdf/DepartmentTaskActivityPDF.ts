@@ -45,11 +45,11 @@ export class DepartmentTaskActivityPDF {
     // Department and Aggregation Info
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
-    doc.text(`Department: ${summary.department}`, 14, yPos);
+    doc.text(`Department: ${data.department}`, 14, yPos);
     yPos += 7;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
-    doc.text(`Aggregation: ${summary.aggregation_type === 'weekly' ? 'Weekly' : 'Monthly'}`, 14, yPos);
+    doc.text(`Aggregation: ${data.aggregation === 'weekly' ? 'Weekly' : 'Monthly'}`, 14, yPos);  
     yPos += 10;
 
     // Summary Statistics
@@ -201,7 +201,7 @@ export class DepartmentTaskActivityPDF {
     }
 
     // Save PDF
-    doc.save(`Department-Task-Activity-${summary.department}-${Date.now()}.pdf`);
+    doc.save(`Department-Task-Activity-${data.department}-${Date.now()}.pdf`);  
     console.log('PDF generated successfully!');
   }
 }

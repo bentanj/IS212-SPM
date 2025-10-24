@@ -240,11 +240,12 @@ export class ReportService {
         end_date: endDate,
       });
 
+      // ✅ FIXED: Added /api prefix to match backend route structure
       const response = await fetch(
-        `${this.baseUrl}/reports/department-activity?${params.toString()}`,
+        `${this.baseUrl}/api/reports/department-activity?${params.toString()}`,
         {
           method: 'GET',
-          headers: this.getHeaders(), // ✅ Now this method exists!
+          headers: this.getHeaders(),
         }
       );
 
@@ -267,6 +268,36 @@ export class ReportService {
       );
     }
   }
+
+  async getDepartments(): Promise<string[]> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/reports/departments`,
+        {
+          method: 'GET',
+          headers: this.getHeaders(),
+        }
+      );
+
+      if (!response.ok) {
+        throw new ReportServiceError(
+          `Failed to fetch departments: ${response.statusText}`,
+          response.status
+        );
+      }
+
+      const data = await response.json();
+      return data.departments || [];
+    } catch (error) {
+      if (error instanceof ReportServiceError) {
+        throw error;
+      }
+
+      console.error('Error fetching departments:', error);
+      // Return empty array on error
+      return [];
+    }
+}
 
   async getReportsSummary(useCache = true): Promise<ReportsSummary> {
     const cacheKey = 'reports-summary';
