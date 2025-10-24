@@ -297,6 +297,7 @@ def _parse_task_data(data: dict, is_update: bool = False):
         'parent_id': 'parentTaskId',
         'recurrence_frequency': 'recurrenceFrequency',
         'recurrence_interval': 'recurrenceInterval',
+        'is_replicate_from_completed_subtask': 'IsReplicateFromCompletedSubtask',
     }
 
     for backend_key, frontend_key in field_mappings.items():
