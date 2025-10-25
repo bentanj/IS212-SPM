@@ -16,42 +16,69 @@ class ReportService:
     def __init__(self):
         self.repo = ReportRepository()
         logger.info("ReportService initialized successfully")
-        # ADD THIS LINE - Set the authentication service URL
-        self.auth_service_url = os.getenv('AUTHENTICATION_SERVICE_URL', 'http://users:8003')
+        # ADD THIS LINE - Set the User service URL
+        self.user_service_url = os.getenv('USER_SERVICE_URL', 'http://users:8003')
         logger.info("ReportService initialized successfully")
 
     def _get_user_info(self, user_id: str) -> Dict[str, str]:
         """
         Fetch user information from user service
         
-        ✅ UPDATED: Now calls User Service instead of auth service
-        Maintains 100% backward compatibility with same return format
         """
         try:
-            # ✅ CHANGED: New endpoint format for User Service
-            response = requests.get(
-                f"{self.user_service_url}/api/users/{user_id}",
+            # Convert user_id to integer
+            user_id_int = int(user_id) if isinstance(user_id, str) else user_id
+            
+            logger.info(f"Fetching user info for user_id: {user_id_int} from {self.user_service_url}")
+            
+            # Use the batch filter endpoint like Task.py does
+            response = requests.post(
+                f"{self.user_service_url}/api/users/filter",
+                json={"userIds": [user_id_int]},
+                headers={"Content-Type": "application/json"},
                 timeout=5
             )
             
+            logger.info(f"User Service response status: {response.status_code}")
+            
             if response.status_code == 200:
-                user_data = response.json()
+                users_data = response.json()
+                logger.info(f"User data received: {users_data}")
                 
-                # ✅ ADAPTED: Map User Service fields to expected format
-                # User Service returns: staff_fname, staff_lname, email
-                # We need to return: first_name, last_name, email
-                return {
-                    'first_name': user_data.get('staff_fname', ''),  
-                    'last_name': user_data.get('staff_lname', ''),   
-                    'email': user_data.get('email', '')             
-                }
+                # Extract first user from array
+                if users_data and len(users_data) > 0:
+                    user_data = users_data[0]
+                    
+                    # ✅ FIX: Your User Service returns 'name' field, not 'staff_fname'/'staff_lname'
+                    full_name = user_data.get('name', '')
+                    
+                    # Split the full name into first and last name
+                    name_parts = full_name.split(' ', 1) if full_name else ['User', str(user_id)]
+                    first_name = name_parts[0] if len(name_parts) > 0 else 'User'
+                    last_name = name_parts[1] if len(name_parts) > 1 else str(user_id)
+                    
+                    logger.info(f"Mapped user {user_id}: {first_name} {last_name}")
+                    
+                    return {
+                        'first_name': first_name,
+                        'last_name': last_name,
+                        'email': user_data.get('email', '')
+                    }
+                else:
+                    logger.warning(f"No user found in response for user_id {user_id}")
             else:
                 logger.warning(f"User Service returned status {response.status_code} for user {user_id}")
-                
+                logger.warning(f"Response content: {response.text}")
+            
+        except ValueError as e:
+            logger.error(f"Invalid user_id format '{user_id}': {str(e)}")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Network error fetching user {user_id}: {str(e)}")
         except Exception as e:
-            logger.warning(f"Failed to fetch user {user_id} from User Service: {str(e)}")
+            logger.error(f"Unexpected error fetching user {user_id}: {str(e)}", exc_info=True)
         
-        
+        # Fallback logic
+        logger.warning(f"Using fallback name for user {user_id}")
         return {'first_name': 'User', 'last_name': str(user_id), 'email': ''}
 
 
@@ -187,7 +214,10 @@ class ReportService:
                     # Create full_name by combining first and last name
                     full_name = f"{user_info['first_name']} {user_info['last_name']}".strip()
                     user['full_name'] = full_name if full_name else f"User {user_id}"
-            
+
+            # ✅ ADD THIS LINE: Sort users by completion_rate in descending order
+            users = sorted(users, key=lambda x: x.get('completion_rate', 0), reverse=True)
+
             metadata = ReportMetadata(
                 report_id=report_id,
                 report_type="user_productivity",
