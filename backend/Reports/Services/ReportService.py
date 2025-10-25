@@ -17,28 +17,43 @@ class ReportService:
         self.repo = ReportRepository()
         logger.info("ReportService initialized successfully")
         # ADD THIS LINE - Set the authentication service URL
-        self.auth_service_url = os.getenv('AUTHENTICATION_SERVICE_URL', 'http://authentication:8002')
+        self.auth_service_url = os.getenv('AUTHENTICATION_SERVICE_URL', 'http://users:8003')
         logger.info("ReportService initialized successfully")
 
     def _get_user_info(self, user_id: str) -> Dict[str, str]:
-        """Fetch user information from authentication service"""
+        """
+        Fetch user information from user service
+        
+        ✅ UPDATED: Now calls User Service instead of auth service
+        Maintains 100% backward compatibility with same return format
+        """
         try:
+            # ✅ CHANGED: New endpoint format for User Service
             response = requests.get(
-                f"{self.auth_service_url}/api/users/{user_id}",
+                f"{self.user_service_url}/api/users/{user_id}",
                 timeout=5
             )
+            
             if response.status_code == 200:
                 user_data = response.json()
+                
+                # ✅ ADAPTED: Map User Service fields to expected format
+                # User Service returns: staff_fname, staff_lname, email
+                # We need to return: first_name, last_name, email
                 return {
-                    'first_name': user_data.get('first_name', ''),
-                    'last_name': user_data.get('last_name', ''),
-                    'email': user_data.get('email', '')
+                    'first_name': user_data.get('staff_fname', ''),  
+                    'last_name': user_data.get('staff_lname', ''),   
+                    'email': user_data.get('email', '')             
                 }
+            else:
+                logger.warning(f"User Service returned status {response.status_code} for user {user_id}")
+                
         except Exception as e:
-            logger.warning(f"Failed to fetch user {user_id}: {str(e)}")
+            logger.warning(f"Failed to fetch user {user_id} from User Service: {str(e)}")
         
-        # Return fallback if fetch fails
+        
         return {'first_name': 'User', 'last_name': str(user_id), 'email': ''}
+
 
     def _filter_tasks_by_date(
         self, 
