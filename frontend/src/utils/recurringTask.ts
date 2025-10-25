@@ -61,9 +61,12 @@ export async function autoReplicateAllSubtasks(
     // If no subtasks, return
     if (subtasks.length === 0) return;
 
+    // Only consider original subtasks, not those replicated because the subtask has its own recurrence
+    const originalSubtasks = subtasks.filter(subtask => !subtask.IsReplicateFromCompletedSubtask);
+
     let newSubtasksCreated = 0;
     let errorMessages = [];
-    for (const subtask of subtasks) {
+    for (const subtask of originalSubtasks) {
         const newSubtaskData = replicateRecurringSubtaskData(parentTask, newParentTaskId, subtask);
         if (typeof newSubtaskData !== "string") {
             try {
@@ -90,7 +93,7 @@ export async function autoReplicateAllSubtasks(
     else {
         const combinedErrors = errorMessages.join(" | ");
         setSnackBarContent(
-            `Only ${newSubtasksCreated} out of ${subtasks.length} recurring subtasks have been created. Errors: ${combinedErrors}`,
+            `Only ${newSubtasksCreated} out of ${originalSubtasks.length} recurring subtasks have been created. Errors: ${combinedErrors}`,
             "warning");
     }
 }
