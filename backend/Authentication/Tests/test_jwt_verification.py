@@ -359,57 +359,5 @@ class TestJWTVerification:
         
         assert passed == total
 
-def main():
-    """Run all verification tests"""
-    print_header("JWT Implementation Verification")
-    print("This test verifies that the JWT-based session tracking")
-    print("implementation is working correctly.")
-    
-    tests = [
-        ("Dependencies", test_dependencies),
-        ("Imports", test_imports),
-        ("Configuration", test_configuration),
-        ("JWT Service", test_jwt_service),
-        ("User Model", test_user_model),
-        ("Endpoints", test_endpoints),
-        ("Decorators", test_decorators),
-    ]
-    
-    results = []
-    for test_name, test_func in tests:
-        try:
-            result = test_func()
-            results.append((test_name, result))
-        except Exception as e:
-            print_error(f"{test_name} test failed with exception: {e}")
-            results.append((test_name, False))
-    
-    # Summary
-    print_header("Verification Summary")
-    
-    passed = 0
-    total = len(results)
-    
-    for test_name, result in results:
-        if result:
-            print_success(f"{test_name}: PASSED")
-            passed += 1
-        else:
-            print_error(f"{test_name}: FAILED")
-    
-    print(f"\nOverall Result: {passed}/{total} tests passed")
-    
-    if passed == total:
-        print_success("🎉 JWT implementation is working correctly!")
-        print("\nNext steps:")
-        print("1. Add JWT secrets to your .env file")
-        print("2. Test the OAuth flow with JWT tokens")
-        print("3. Implement frontend integration")
-    else:
-        print_error("❌ Some tests failed. Please check the errors above.")
-        return 1
-    
-    return 0
-
 if __name__ == "__main__":
-    sys.exit(main())
+    pytest.main([__file__, "-v"])

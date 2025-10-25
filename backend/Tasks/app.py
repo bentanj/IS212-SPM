@@ -1,5 +1,6 @@
 from flask import Flask, g
 from flask_cors import CORS
+import os
 from config import Config
 from db import SessionLocal, init_db
 from Controllers.TaskController import bp as task_bp
@@ -33,13 +34,14 @@ def create_app():
     
     app.register_blueprint(task_bp)
     
-    if app.config.get('ENV') != 'test':
+    # Check environment variable directly, not app config
+    if os.getenv('ENV') != 'test':
         with app.app_context():
             init_db()
     
     return app
 
-app = create_app()
-
+# Only create app instance when running directly, not when importing
 if __name__ == "__main__":
+    app = create_app()
     app.run(debug=True, port=8001, host='0.0.0.0')
