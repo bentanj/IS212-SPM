@@ -55,6 +55,9 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     return allTasks!.filter(t => t.parentTaskId === task.taskId);
   }, [task, allTasks]); // ✅ Add allTasks to dependency array
 
+  // Preserve original priority and status to detect changes
+  const [originalPriority, originalStatus] = useMemo(() => [task?.priority, task?.status], [task?.taskId]);
+
   if (!task) return null;
 
   function changePriority(newPriority: Priority) {
@@ -81,6 +84,10 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     }
 
     if (task.status == "Completed") {
+      if (originalStatus == "To Do") {
+        setSnackbarContent('Task can only be "Completed" from "In Progress" status.', 'error');
+        return;
+      }
       const canComplete = await validateCanCompleteTask(TaskData, setSnackbarContent)
       if (!canComplete) return;
       taskCompletedTrigger(TaskData, setSnackbarContent);
@@ -111,6 +118,8 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         maxWidth="md" fullWidth fullScreen={isMobile}>
 
         <ModalTitle task={task} isMobile={isMobile}
+          originalPriority={originalPriority as Priority}
+          originalStatus={originalStatus as Status}
           changePriority={changePriority}
           changeStatus={changeStatus}
           onSaveButtonClick={onSave} />

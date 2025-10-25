@@ -7,23 +7,21 @@ import { PriorityOptions, StatusOptions } from "@/constants/DefaultFormData";
 interface ModalTitleProps {
     task: Task;
     isMobile: boolean;
+    originalPriority: Priority;
+    originalStatus: Status;
     changePriority: (priority: Priority) => void;
     changeStatus: (status: Status) => void;
     onSaveButtonClick: () => void;
 }
 
 export const ModalTitle: React.FC<ModalTitleProps> = ({
-    task, isMobile, changePriority, changeStatus, onSaveButtonClick
+    task, isMobile,
+    originalPriority, originalStatus,
+    changePriority, changeStatus, onSaveButtonClick
 }) => {
     const [priorityAnchorEl, setPriorityAnchorEl] = useState<null | HTMLElement>(null);
     const [statusAnchorEl, setStatusAnchorEl] = useState<null | HTMLElement>(null);
 
-    // Preserve original priority and status to detect changes
-    const [originalPriority, originalStatus] = useMemo(() => [task.priority, task.status], [task.taskId]);
-    // const originalPriorityRef = useRef<Priority>(task?.priority);
-    // const originalStatusRef = useRef<Status>(task?.status);
-    // const originalPriority = originalPriorityRef.current;
-    // const originalStatus = originalStatusRef.current;
 
     const handlePriorityClick = (event: React.MouseEvent<HTMLElement>) => {
         setPriorityAnchorEl(event.currentTarget);
