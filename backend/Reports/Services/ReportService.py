@@ -20,7 +20,6 @@ class ReportService:
         self.auth_service_url = os.getenv('AUTHENTICATION_SERVICE_URL', 'http://authentication:8002')
         logger.info("ReportService initialized successfully")
 
-    # ADD THIS NEW METHOD
     def _get_user_info(self, user_id: str) -> Dict[str, str]:
         """Fetch user information from authentication service"""
         try:
@@ -237,3 +236,254 @@ class ReportService:
         except Exception as e:
             logger.error(f"Error getting reports summary: {str(e)}", exc_info=True)
             raise
+
+    ################## Helper Methods for Department Report ##################
+    def _aggregate_by_week(self, tasks: List[Dict], start_date: str, end_date: str) -> List[Dict]:
+        """Aggregate tasks by week"""
+        from datetime import timedelta
+        
+        start_dt = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_dt = datetime.strptime(end_date, '%Y-%m-%d').date()
+        
+        weekly_data = []
+        current = start_dt
+        
+        while current <= end_dt:
+            week_end = min(current + timedelta(days=6), end_dt)
+            
+            # Filter tasks for this week
+            week_tasks = [
+                task for task in tasks
+                if self._get_task_date(task) and
+                current <= self._get_task_date(task) <= week_end
+            ]
+            
+            # Count by status
+            status_counts = self._count_by_status(week_tasks)
+            
+            weekly_data.append({
+                'week_start': current.strftime('%Y-%m-%d'),
+                'week_end': week_end.strftime('%Y-%m-%d'),
+                **status_counts
+            })
+            
+            current = week_end + timedelta(days=1)
+        
+        return weekly_data
+
+    def _aggregate_by_month(self, tasks: List[Dict], start_date: str, end_date: str) -> List[Dict]:
+        """Aggregate tasks by month"""
+        from calendar import monthrange
+        
+        start_dt = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_dt = datetime.strptime(end_date, '%Y-%m-%d').date()
+        
+        monthly_data = []
+        current_year = start_dt.year
+        current_month = start_dt.month
+        
+        while (current_year < end_dt.year) or (current_year == end_dt.year and current_month <= end_dt.month):
+            # Get month boundaries
+            month_start = max(start_dt, datetime(current_year, current_month, 1).date())
+            last_day = monthrange(current_year, current_month)[1]
+            month_end = min(end_dt, datetime(current_year, current_month, last_day).date())
+            
+            # Filter tasks for this month
+            month_tasks = [
+                task for task in tasks
+                if self._get_task_date(task) and
+                month_start <= self._get_task_date(task) <= month_end
+            ]
+            
+            # Count by status
+            status_counts = self._count_by_status(month_tasks)
+            
+            month_name = datetime(current_year, current_month, 1).strftime('%B %Y')
+            
+            monthly_data.append({
+                'month': f"{current_year}-{current_month:02d}",
+                'month_name': month_name,
+                **status_counts
+            })
+            
+            # Move to next month
+            if current_month == 12:
+                current_month = 1
+                current_year += 1
+            else:
+                current_month += 1
+        
+        return monthly_data
+
+    def _get_task_date(self, task: Dict) -> Optional[datetime.date]:
+        """Extract date from task"""
+        due_date_str = task.get('due_date') or task.get('dueDate')
+        if not due_date_str:
+            return None
+        
+        try:
+            if 'T' in str(due_date_str):
+                return datetime.fromisoformat(str(due_date_str).replace('Z', '+00:00')).date()
+            else:
+                return datetime.strptime(str(due_date_str), '%Y-%m-%d').date()
+        except (ValueError, TypeError, AttributeError):
+            return None
+
+    def _count_by_status(self, tasks: List[Dict]) -> Dict[str, int]:
+        """Count tasks by status"""
+        now = datetime.now().date()
+        
+        counts = {
+            'to_do': 0,
+            'in_progress': 0,
+            'blocked': 0,
+            'completed': 0,
+            'overdue': 0
+        }
+        
+        for task in tasks:
+            status = task.get('status', '').lower()
+            due_date = self._get_task_date(task)
+            
+            # Check if overdue
+            if status not in ['completed', 'done'] and due_date and due_date < now:
+                counts['overdue'] += 1
+            elif status in ['to do', 'todo', 'to_do']:
+                counts['to_do'] += 1
+            elif status in ['in progress', 'in_progress', 'inprogress']:
+                counts['in_progress'] += 1
+            elif status == 'blocked':
+                counts['blocked'] += 1
+            elif status in ['completed', 'done']:
+                counts['completed'] += 1
+        
+        return counts
+    ################## End ##################
+    
+    def get_unique_departments(self) -> List[str]:
+        """Get list of unique departments from all tasks"""
+        try:
+            logger.info("Fetching unique departments from tasks")
+            
+            # Get all tasks
+            all_tasks = self.repo.get_all_tasks()
+            logger.info(f"Retrieved {len(all_tasks)} total tasks")
+            
+            # Extract unique departments
+            departments = set()
+            for task in all_tasks:
+                # ✅ FIX: Access 'departments' (plural) array instead of 'department'
+                task_departments = task.get('departments', [])
+                
+                # Handle if it's a list (array)
+                if isinstance(task_departments, list):
+                    for dept in task_departments:
+                        if dept and dept.strip():  # Only add non-empty departments
+                            departments.add(dept.strip())
+                # Handle if it's a string (fallback for backwards compatibility)
+                elif isinstance(task_departments, str):
+                    if task_departments.strip():
+                        departments.add(task_departments.strip())
+            
+            # Sort alphabetically
+            sorted_departments = sorted(list(departments))
+            
+            logger.info(f"Found {len(sorted_departments)} unique departments: {sorted_departments}")
+            return sorted_departments
+            
+        except Exception as e:
+            logger.error(f"Error getting unique departments: {str(e)}", exc_info=True)
+            # Return empty list on error rather than crashing
+            return []
+
+    # ✅ ADD THIS NEW METHOD - Main department report generator
+    def generate_department_activity_report(
+            self,
+            department: str,
+            aggregation: str,
+            start_date: str,
+            end_date: str
+        ) -> ReportData:
+        """Generate department task activity report with weekly or monthly aggregation"""
+        try:
+            logger.info(f"Generating department activity report for {department} ({aggregation}) from {start_date} to {end_date}")
+            report_id = str(uuid4())
+            
+            # Get all tasks and filter by date range
+            all_tasks = self.repo.get_all_tasks()
+            filtered_tasks = self._filter_tasks_by_date(all_tasks, start_date, end_date)
+            
+            # ✅ FIX: Filter tasks by department (handle array field)
+            department_tasks = []
+            for task in filtered_tasks:
+                task_departments = task.get('departments', [])
+                
+                # Handle if it's a list (array)
+                if isinstance(task_departments, list):
+                    # Check if department exists in the array
+                    if any(dept.strip().lower() == department.lower() for dept in task_departments if dept):
+                        department_tasks.append(task)
+                # Handle if it's a string (fallback)
+                elif isinstance(task_departments, str):
+                    if task_departments.strip().lower() == department.lower():
+                        department_tasks.append(task)
+            
+            logger.info(f"Found {len(department_tasks)} tasks for department '{department}' out of {len(filtered_tasks)} filtered tasks")
+            
+            # Get aggregated data
+            if aggregation == 'weekly':
+                aggregated_data = self._aggregate_by_week(department_tasks, start_date, end_date)
+                data_key = 'weekly_data'
+            else:  # monthly
+                aggregated_data = self._aggregate_by_month(department_tasks, start_date, end_date)
+                data_key = 'monthly_data'
+            
+            # Calculate status totals across all periods
+            status_totals = {
+                'to_do': sum(period.get('to_do', 0) for period in aggregated_data),
+                'in_progress': sum(period.get('in_progress', 0) for period in aggregated_data),
+                'blocked': sum(period.get('blocked', 0) for period in aggregated_data),
+                'completed': sum(period.get('completed', 0) for period in aggregated_data),
+                'overdue': sum(period.get('overdue', 0) for period in aggregated_data),
+            }
+            
+            total_tasks = len(department_tasks)
+            
+            metadata = ReportMetadata(
+                report_id=report_id,
+                report_type="department_activity",
+                generated_at=datetime.utcnow(),
+                generated_by="system",
+                parameters={
+                    "department": department,
+                    "aggregation": aggregation,
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "tasks_in_range": total_tasks
+                }
+            )
+            
+            summary = {
+                "total_tasks": total_tasks,
+                "status_totals": status_totals
+            }
+            
+            data = {
+                "department": department,
+                "aggregation": aggregation,
+                data_key: aggregated_data
+            }
+            
+            logger.info(f"Department activity report generated. Total tasks: {total_tasks}")
+            
+            return ReportData(
+                metadata=metadata,
+                summary=summary,
+                data=data
+            )
+            
+        except Exception as e:
+            logger.error(f"Error generating department activity report: {str(e)}", exc_info=True)
+            raise
+
+                
