@@ -7,7 +7,7 @@ interface MonthHeaderProps {
     navigateMonth: (direction: 'prev' | 'next') => void
 }
 
-const MonthHeader: React.FC<MonthHeaderProps> = ({
+export const MonthHeader: React.FC<MonthHeaderProps> = ({
     isMobile, currentDate, navigateMonth
 }) => {
     return (
@@ -33,5 +33,3 @@ const MonthHeader: React.FC<MonthHeaderProps> = ({
         </Box>
     )
 }
-
-export default MonthHeader;

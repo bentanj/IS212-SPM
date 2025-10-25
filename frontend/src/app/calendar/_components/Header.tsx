@@ -7,7 +7,7 @@ interface HeaderProps {
     setCreateModalOpen: (open: boolean) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({
+export const Header: React.FC<HeaderProps> = ({
     isMobile, toggleSidebar, setCreateModalOpen
 }) => {
     return (
@@ -18,7 +18,7 @@ const Header: React.FC<HeaderProps> = ({
                         <Menu />
                     </IconButton>
                 )}
-                <TextField
+                {/* <TextField
                     placeholder="Search my tasks..."
                     variant="outlined"
                     size="small"
@@ -35,13 +35,14 @@ const Header: React.FC<HeaderProps> = ({
                             ),
                         },
                     }}
-                />
+                /> */}
                 <Typography
                     variant="h6"
                     sx={{
                         mx: { xs: 1, sm: 2 },
                         display: { xs: 'none', sm: 'block' }
                     }}
+                    flexGrow={1}
                 >
                     My Calendar
                 </Typography>
@@ -51,11 +52,9 @@ const Header: React.FC<HeaderProps> = ({
                     onClick={() => setCreateModalOpen(true)}
                     size={isMobile ? 'small' : 'medium'}
                 >
-                    {isMobile ? '+' : 'Add task'}
+                    {isMobile ? '' : 'Add task'}
                 </Button>
             </Toolbar>
         </AppBar>
     )
 }
-
-export default Header

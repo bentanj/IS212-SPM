@@ -1,21 +1,33 @@
 import { Drawer, Paper } from "@mui/material";
+import { Task, User } from "@/types";
 import SideBarContent from "./SideBarContent"
 
 interface SideBarProps {
     isMobile: boolean
     sidebarOpen: boolean
     toggleSidebar: () => void
-    currentUser: any
-    assignedTasks: any[]
+    currentUser: User
+    tasks: Task[]
 }
 
-const SideBar: React.FC<SideBarProps> = ({
+export const SideBar: React.FC<SideBarProps> = ({
     isMobile,
     sidebarOpen,
     toggleSidebar,
     currentUser,
-    assignedTasks
+    tasks
 }) => {
+
+    const assignedTasks = tasks.filter(task =>
+        task.assignedUsers.some(assignedUser => assignedUser.userId === currentUser.userId)
+    );
+
+    const departmentTasks = tasks.filter(task =>
+        task.departments.includes(currentUser.department) &&
+        !task.assignedUsers.some(assignedUser => assignedUser.userId === currentUser.userId) &&
+        !assignedTasks.includes(task)
+    );
+
     if (isMobile) {
         // Mobile Drawer
         return (
@@ -24,7 +36,7 @@ const SideBar: React.FC<SideBarProps> = ({
                     display: { xs: 'block', md: 'none' },
                     '& .MuiDrawer-paper': { width: 280 }
                 }}>
-                <SideBarContent isMobile={isMobile} currentUser={currentUser} assignedTasks={assignedTasks} />
+                <SideBarContent isMobile={isMobile} currentUser={currentUser} assignedTasks={assignedTasks} departmentTasks={departmentTasks} />
             </Drawer>
         )
 
@@ -32,9 +44,7 @@ const SideBar: React.FC<SideBarProps> = ({
     // Desktop Sidebar
     return (
         <Paper sx={{ width: 280, mr: 2, height: '100vh', overflow: 'auto', flexShrink: 0 }}>
-            <SideBarContent isMobile={isMobile} currentUser={currentUser} assignedTasks={assignedTasks} />
+            <SideBarContent isMobile={isMobile} currentUser={currentUser} assignedTasks={assignedTasks} departmentTasks={departmentTasks} />
         </Paper>
     )
 }
-
-export default SideBar;

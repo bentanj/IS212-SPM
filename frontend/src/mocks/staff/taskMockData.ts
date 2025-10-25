@@ -1,54 +1,22 @@
-import Priority from '@/types/TPriority';
-import Status from '@/types/TStatus';
-import { Departments } from '@/types/TOrganisation';
+//@ts-nocheck
+import { Task, User, APITaskParams } from '@/types';
 
-export interface User {
-  userId: number;
-  name: string;
-}
-
-export interface Comment {
-  commentId: number;
-  author: string;
-  content: string;
-  timestamp: string;
-}
-
-export interface Task {
-  taskId: number;
-  title: string;
-  description: string;
-  projectName: string;
-  department: Departments;
-  priority: Priority;
-  status: Status;
-  startDate: string;
-  dueDate: string;
-  completedDate: string | null;
-  assignedUsers: User[];
-  tags: string[];
-  comments: Comment[];
-  parentTaskId?: number;
-}
-
-export interface CurrentUser {
-  userId: number;
-  name: string;
-  systemRole: string;
-  department: Departments;
+interface MigrateTask extends APITaskParams {
+  assigned_users: number[]; // Array of user IDs
 }
 
 export interface MockData {
-  currentUser: CurrentUser;
-  tasks: Task[];
+  currentUser: User;
+  tasks: MigrateTask[];
 }
 
 export const taskMockData: MockData = {
   currentUser: {
     userId: 1,
     name: "John Smith",
-    systemRole: "Staff",
-    department: "Sales Manager",
+    email: "john.smith@company.com",
+    role: "Staff",
+    department: "Consultant",
   },
   tasks: [
     // Original parent tasks (existing ones unchanged)
@@ -60,10 +28,9 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-01",
       priority: 7,
-      assignedUsers: [
-        { userId: 1, name: "John Smith" },
-        { userId: 3, name: "Alice Johnson" }
-      ],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null,
+      assigned_users: [1, 3],
       tags: ["authentication", "security", "backend"],
       status: "In Progress",
       comments: [
@@ -80,10 +47,9 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-17T14:15:00Z"
         }
       ],
-      projectName: "E-Commerce Platform",
-      department: "IT Team",
+      project_name: "E-Commerce Platform",
+      departments: ["IT Team"],
     },
-    // SUBTASKS FOR TASK 1: User Authentication System
     {
       taskId: 101,
       title: "OAuth2 Provider Integration",
@@ -92,9 +58,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-25",
       priority: 7,
-      assignedUsers: [
-        { userId: 1, name: "John Smith" }
-      ],
+      assigned_users: [1],
       tags: ["oauth2", "integration", "google", "facebook"],
       status: "In Progress",
       comments: [
@@ -105,9 +69,11 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-18T14:20:00Z"
         }
       ],
-      projectName: "E-Commerce Platform",
+      project_name: "E-Commerce Platform",
       parentTaskId: 1,
-      department: "Sales Manager",
+      departments: ["Sales Manager"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null,
     },
     {
       taskId: 102,
@@ -117,16 +83,15 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-28",
       priority: 4,
-      assignedUsers: [
-        { userId: 3, name: "Alice Johnson" }
-      ],
+      assigned_users: [3],
       tags: ["password-reset", "email", "security", "tokens"],
       status: "To Do",
       comments: [],
-      projectName: "E-Commerce Platform",
+      project_name: "E-Commerce Platform",
       parentTaskId: 1,
-      // Added missing org attributes (likely IT based on project)
-      department: "IT Team",
+      departments: ["IT Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null,
     },
     {
       taskId: 103,
@@ -136,15 +101,15 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-30",
       priority: 7,
-      assignedUsers: [
-        { userId: 3, name: "Alice Johnson" }
-      ],
+      assigned_users: [3],
       tags: ["unit-tests", "testing", "authentication", "coverage"],
       status: "To Do",
       comments: [],
-      projectName: "E-Commerce Platform",
+      project_name: "E-Commerce Platform",
       parentTaskId: 1,
-      department: "IT Team",
+      departments: ["IT Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null,
     },
     {
       taskId: 104,
@@ -154,15 +119,16 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-01",
       priority: 4,
-      assignedUsers: [
-        { userId: 1, name: "John Smith" }
-      ],
+      assigned_users: [1],
       tags: ["documentation", "api", "authentication", "examples"],
       status: "To Do",
       comments: [],
-      projectName: "E-Commerce Platform",
+      project_name: "E-Commerce Platform",
       parentTaskId: 1,
-      department: "IT Team",
+      departments: ["IT Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null,
+
     },
     {
       taskId: 3,
@@ -172,9 +138,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-25",
       priority: 4,
-      assignedUsers: [
-        { userId: 2, name: "Sarah Davis" }
-      ],
+      assigned_users: [2],
       tags: ["api", "security", "performance"],
       status: "Blocked",
       comments: [
@@ -191,11 +155,11 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-21T11:30:00Z"
         }
       ],
-      projectName: "API Gateway Project",
-      // Added organization fields with assumption (engineering/support)
-      department: "Support Team",
+      project_name: "API Gateway Project",
+      departments: ["Support Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
-    // SUBTASKS FOR TASK 3: API Rate Limiting
     {
       taskId: 301,
       title: "Redis Configuration Setup",
@@ -204,9 +168,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-23",
       priority: 7,
-      assignedUsers: [
-        { userId: 1, name: "John Smith" }
-      ],
+      assigned_users: [1],
       tags: ["redis", "configuration", "clustering", "persistence"],
       status: "In Progress",
       comments: [
@@ -217,9 +179,11 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-22T11:15:00Z"
         }
       ],
-      projectName: "API Gateway Project",
+      project_name: "API Gateway Project",
       parentTaskId: 3,
-      department: "Support Team",
+      departments: ["Support Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 302,
@@ -229,15 +193,15 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-24",
       priority: 7,
-      assignedUsers: [
-        { userId: 2, name: "Sarah Davis" }
-      ],
+      assigned_users: [2],
       tags: ["algorithms", "token-bucket", "sliding-window", "rate-limiting"],
       status: "To Do",
       comments: [],
-      projectName: "API Gateway Project",
+      project_name: "API Gateway Project",
       parentTaskId: 3,
-      department: "Support Team",
+      departments: ["Support Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 303,
@@ -247,15 +211,15 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-26",
       priority: 4,
-      assignedUsers: [
-        { userId: 3, name: "Alice Johnson" }
-      ],
+      assigned_users: [3],
       tags: ["dashboard", "admin", "configuration", "monitoring"],
       status: "To Do",
       comments: [],
-      projectName: "API Gateway Project",
+      project_name: "API Gateway Project",
       parentTaskId: 3,
-      department: "Support Team",
+      departments: ["Support Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 21,
@@ -265,9 +229,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-28",
       priority: 4,
-      assignedUsers: [
-        { userId: 3, name: "Alice Johnson" }
-      ],
+      assigned_users: [3],
       tags: ["frontend", "components", "login", "ui"],
       status: "In Progress",
       comments: [
@@ -278,10 +240,11 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-17T09:45:00Z"
         }
       ],
-      projectName: "E-Commerce Platform",
-      department: "IT Team",
+      project_name: "E-Commerce Platform",
+      departments: ["IT Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
-    // SUBTASKS FOR TASK 21: Frontend Login Component
     {
       taskId: 201,
       title: "Login Form UI Design",
@@ -290,9 +253,7 @@ export const taskMockData: MockData = {
       completedDate: "2025-09-18",
       dueDate: "2025-09-17",
       priority: 4,
-      assignedUsers: [
-        { userId: 3, name: "Alice Johnson" }
-      ],
+      assigned_users: [3],
       tags: ["ui-design", "responsive", "accessibility", "mobile"],
       status: "Completed",
       comments: [
@@ -303,9 +264,11 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-18T16:30:00Z"
         }
       ],
-      projectName: "E-Commerce Platform",
+      project_name: "E-Commerce Platform",
       parentTaskId: 21,
-      department: "IT Team",
+      departments: ["IT Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 202,
@@ -315,9 +278,7 @@ export const taskMockData: MockData = {
       completedDate: "2025-09-19",
       dueDate: "2025-09-20",
       priority: 7,
-      assignedUsers: [
-        { userId: 3, name: "Alice Johnson" }
-      ],
+      assigned_users: [3],
       tags: ["validation", "client-side", "real-time", "error-handling"],
       status: "Completed",
       comments: [
@@ -328,9 +289,11 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-19T14:45:00Z"
         }
       ],
-      projectName: "E-Commerce Platform",
+      project_name: "E-Commerce Platform",
       parentTaskId: 21,
-      department: "IT Team",
+      departments: ["IT Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 203,
@@ -340,9 +303,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-26",
       priority: 7,
-      assignedUsers: [
-        { userId: 3, name: "Alice Johnson" }
-      ],
+      assigned_users: [3],
       tags: ["api-integration", "authentication", "endpoints", "error-handling"],
       status: "In Progress",
       comments: [
@@ -353,9 +314,11 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-22T10:20:00Z"
         }
       ],
-      projectName: "E-Commerce Platform",
+      project_name: "E-Commerce Platform",
       parentTaskId: 21,
-      department: "IT Team",
+      departments: ["IT Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 204,
@@ -365,15 +328,15 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-28",
       priority: 4,
-      assignedUsers: [
-        { userId: 3, name: "Alice Johnson" }
-      ],
+      assigned_users: [3],
       tags: ["testing", "unit-tests", "integration", "components"],
       status: "To Do",
       comments: [],
-      projectName: "E-Commerce Platform",
+      project_name: "E-Commerce Platform",
       parentTaskId: 21,
-      department: "IT Team",
+      departments: ["IT Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 24,
@@ -383,17 +346,15 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-30",
       priority: 4,
-      assignedUsers: [
-        { userId: 4, name: "Mike Wilson" },
-        { userId: 6, name: "David Chen" }
-      ],
+      assigned_users: [4, 6],
       tags: ["load-testing", "infrastructure", "performance", "validation"],
       status: "To Do",
       comments: [],
-      projectName: "Quality Assurance",
-      department: "Consultant",
+      project_name: "Quality Assurance",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
-    // SUBTASKS FOR TASK 24: Load Testing Infrastructure
     {
       taskId: 401,
       title: "Load Testing Tool Selection",
@@ -402,9 +363,7 @@ export const taskMockData: MockData = {
       completedDate: "2025-09-21",
       dueDate: "2025-09-21",
       priority: 7,
-      assignedUsers: [
-        { userId: 4, name: "Mike Wilson" }
-      ],
+      assigned_users: [4],
       tags: ["research", "tools", "k6", "jmeter", "selection"],
       status: "Completed",
       comments: [
@@ -415,9 +374,11 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-21T15:30:00Z"
         }
       ],
-      projectName: "Quality Assurance",
+      project_name: "Quality Assurance",
       parentTaskId: 24,
-      department: "Consultant",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 402,
@@ -427,9 +388,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-24",
       priority: 7,
-      assignedUsers: [
-        { userId: 6, name: "David Chen" }
-      ],
+      assigned_users: [6],
       tags: ["environment", "configuration", "infrastructure", "isolation"],
       status: "In Progress",
       comments: [
@@ -440,9 +399,11 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-23T13:15:00Z"
         }
       ],
-      projectName: "Quality Assurance",
+      project_name: "Quality Assurance",
       parentTaskId: 24,
-      department: "Consultant",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 403,
@@ -452,15 +413,15 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-28",
       priority: 7,
-      assignedUsers: [
-        { userId: 4, name: "Mike Wilson" }
-      ],
+      assigned_users: [4],
       tags: ["scripts", "scenarios", "endpoints", "user-simulation"],
       status: "To Do",
       comments: [],
-      projectName: "Quality Assurance",
+      project_name: "Quality Assurance",
       parentTaskId: 24,
-      department: "Consultant",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 404,
@@ -470,15 +431,15 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-30",
       priority: 4,
-      assignedUsers: [
-        { userId: 6, name: "David Chen" }
-      ],
+      assigned_users: [6],
       tags: ["dashboard", "metrics", "real-time", "monitoring"],
       status: "To Do",
       comments: [],
-      projectName: "Quality Assurance",
+      project_name: "Quality Assurance",
       parentTaskId: 24,
-      department: "Consultant",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 39,
@@ -488,10 +449,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-01",
       priority: 7,
-      assignedUsers: [
-        { userId: 6, name: "David Chen" },
-        { userId: 1, name: "John Smith" }
-      ],
+      assigned_users: [1, 6],
       tags: ["integration", "testing", "oauth", "automation"],
       status: "In Progress",
       comments: [
@@ -502,8 +460,10 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-23T15:30:00Z"
         }
       ],
-      projectName: "Quality Assurance",
-      department: "Consultant",
+      project_name: "Quality Assurance",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     // SUBTASKS FOR TASK 39: Integration Testing Automation
     {
@@ -514,9 +474,7 @@ export const taskMockData: MockData = {
       completedDate: "2025-09-24",
       dueDate: "2025-09-24",
       priority: 7,
-      assignedUsers: [
-        { userId: 6, name: "David Chen" }
-      ],
+      assigned_users: [6],
       tags: ["oauth", "test-setup", "mock-services", "providers"],
       status: "Completed",
       comments: [
@@ -527,9 +485,11 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-24T17:00:00Z"
         }
       ],
-      projectName: "Quality Assurance",
+      project_name: "Quality Assurance",
       parentTaskId: 39,
-      department: "Consultant",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 502,
@@ -539,9 +499,7 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-30",
       priority: 7,
-      assignedUsers: [
-        { userId: 1, name: "John Smith" }
-      ],
+      assigned_users: [1],
       tags: ["payment", "gateway", "integration", "error-handling"],
       status: "In Progress",
       comments: [
@@ -552,9 +510,11 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-25T11:30:00Z"
         }
       ],
-      projectName: "Quality Assurance",
+      project_name: "Quality Assurance",
       parentTaskId: 39,
-      department: "Consultant",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 503,
@@ -564,15 +524,15 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-10-01",
       priority: 4,
-      assignedUsers: [
-        { userId: 6, name: "David Chen" }
-      ],
+      assigned_users: [6],
       tags: ["test-data", "lifecycle", "cleanup", "isolation"],
       status: "To Do",
       comments: [],
-      projectName: "Quality Assurance",
+      project_name: "Quality Assurance",
       parentTaskId: 39,
-      department: "Consultant",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     // Other original tasks without subtasks with default org fields added
     {
@@ -583,9 +543,7 @@ export const taskMockData: MockData = {
       completedDate: "2025-09-18",
       dueDate: "2025-09-20",
       priority: 4,
-      assignedUsers: [
-        { userId: 1, name: "John Smith" }
-      ],
+      assigned_users: [1],
       tags: ["database", "migration", "sql"],
       status: "Completed",
       comments: [
@@ -596,8 +554,10 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-18T16:45:00Z"
         }
       ],
-      projectName: "E-Commerce Platform",
-      department: "IT Team",
+      project_name: "E-Commerce Platform",
+      departments: ["IT Team"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 4,
@@ -607,15 +567,14 @@ export const taskMockData: MockData = {
       completedDate: null,
       dueDate: "2025-09-28",
       priority: 1,
-      assignedUsers: [
-        { userId: 1, name: "John Smith" },
-        { userId: 4, name: "Mike Wilson" }
-      ],
+      assigned_users: [1, 4],
       tags: ["documentation", "process", "guidelines"],
       status: "To Do",
       comments: [],
-      projectName: "Development Process Improvement",
-      department: "Consultant",
+      project_name: "Development Process Improvement",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
       taskId: 5,
@@ -625,9 +584,7 @@ export const taskMockData: MockData = {
       completedDate: "2025-09-14",
       dueDate: "2025-09-15",
       priority: 7,
-      assignedUsers: [
-        { userId: 1, name: "John Smith" }
-      ],
+      assigned_users: [1],
       tags: ["performance", "optimization", "research"],
       status: "Completed",
       comments: [
@@ -638,77 +595,248 @@ export const taskMockData: MockData = {
           timestamp: "2025-09-14T17:00:00Z"
         }
       ],
-      projectName: "Performance Enhancement",
-      department: "Consultant",
+      project_name: "Performance Enhancement",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
+    // New tasks with expanded team across more departmentss
     {
-      taskId: 22,
-      title: "Security Testing Framework Setup",
-      description: "Set up automated security testing tools and penetration testing scripts for the authentication system.",
-      startDate: "2025-09-15",
+      taskId: 40,
+      title: "Mobile App UX Research",
+      description: "Conduct comprehensive UX research for mobile application redesign including user interviews and usability testing.",
+      startDate: "2025-09-25",
       completedDate: null,
-      dueDate: "2025-10-05",
+      dueDate: "2025-10-08",
       priority: 7,
-      assignedUsers: [
-        { userId: 2, name: "Sarah Davis" }
-      ],
-      tags: ["security", "testing", "penetration", "automation"],
-      status: "To Do",
-      comments: [],
-      projectName: "Security Enhancement",
-      department: "Sales Manager",
-    },
-    {
-      taskId: 23,
-      title: "Redis Cache Implementation",
-      description: "Implement Redis caching layer for API responses to improve performance and support rate limiting functionality.",
-      startDate: "2025-09-20",
-      completedDate: null,
-      dueDate: "2025-09-27",
-      priority: 7,
-      assignedUsers: [
-        { userId: 1, name: "John Smith" }
-      ],
-      tags: ["cache", "redis", "performance", "infrastructure"],
+      assigned_users: [7, 8],
+      tags: ["mobile", "ux", "research", "usability"],
       status: "In Progress",
       comments: [
         {
-          commentId: 18,
-          author: "John Smith",
-          content: "Redis cluster configured. Working on cache invalidation strategies.",
-          timestamp: "2025-09-22T14:30:00Z"
+          commentId: 26,
+          author: "Rachel Green",
+          content: "Completed 12 user interviews. Identifying key pain points in navigation.",
+          timestamp: "2025-09-27T14:20:00Z"
         }
       ],
-      projectName: "API Gateway Project",
-      department: "Support Team",
+      project_name: "Mobile App Redesign",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
     {
-      taskId: 25,
-      title: "API Documentation Generation",
-      description: "Create automated API documentation generation pipeline for rate limiting endpoints and configuration options.",
-      startDate: "2025-09-20",
+      taskId: 41,
+      title: "Cloud Migration Strategy",
+      description: "Develop comprehensive cloud migration strategy for legacy systems including cost analysis and risk assessment.",
+      startDate: "2025-09-28",
       completedDate: null,
-      dueDate: "2025-10-01",
-      priority: 1,
-      assignedUsers: [
-        { userId: 3, name: "Alice Johnson" }
-      ],
-      tags: ["documentation", "api", "automation", "pipeline"],
+      dueDate: "2025-10-15",
+      priority: 10,
+      assigned_users: [9, 10, 8],
+      tags: ["cloud", "migration", "strategy", "infrastructure"],
       status: "To Do",
       comments: [],
-      projectName: "Documentation Initiative",
-      department: "Consultant",
+      project_name: "Digital Transformation",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
     },
+    {
+      taskId: 42,
+      title: "Marketing Campaign Analytics Dashboard",
+      description: "Build real-time analytics dashboard for marketing campaigns with conversion tracking and ROI metrics.",
+      startDate: "2025-09-30",
+      completedDate: null,
+      dueDate: "2025-10-20",
+      priority: 7,
+      assigned_users: [2, 3],
+      tags: ["analytics", "dashboard", "marketing", "metrics"],
+      status: "To Do",
+      comments: [],
+      project_name: "Marketing Intelligence",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
+    },
+    {
+      taskId: 43,
+      title: "Customer Support Chatbot Enhancement",
+      description: "Enhance AI chatbot with natural language processing improvements and knowledge base integration.",
+      startDate: "2025-09-26",
+      completedDate: null,
+      dueDate: "2025-10-10",
+      priority: 7,
+      assigned_users: [4, 5],
+      tags: ["ai", "chatbot", "nlp", "customer-support"],
+      status: "In Progress",
+      comments: [
+        {
+          commentId: 27,
+          author: "Jessica Chen",
+          content: "NLP model training completed. Working on knowledge base integration.",
+          timestamp: "2025-09-28T16:45:00Z"
+        }
+      ],
+      project_name: "Customer Experience Enhancement",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
+    },
+    {
+      taskId: 44,
+      title: "Financial Reporting Automation",
+      description: "Automate monthly financial reporting process with data validation and executive summary generation.",
+      startDate: "2025-09-29",
+      completedDate: null,
+      dueDate: "2025-10-25",
+      priority: 10,
+      assigned_users: [6, 7],
+      tags: ["finance", "automation", "reporting", "validation"],
+      status: "To Do",
+      comments: [],
+      project_name: "Financial Process Optimization",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
+    },
+    {
+      taskId: 45,
+      title: "Employee Onboarding Portal",
+      description: "Develop comprehensive employee onboarding portal with document management and training modules.",
+      startDate: "2025-09-24",
+      completedDate: null,
+      dueDate: "2025-10-18",
+      priority: 7,
+      assigned_users: [8, 9, 3],
+      tags: ["hr", "onboarding", "portal", "training"],
+      status: "In Progress",
+      comments: [
+        {
+          commentId: 28,
+          author: "Nicole Brown",
+          content: "Document management system 70% complete. Starting training module integration.",
+          timestamp: "2025-09-27T10:30:00Z"
+        }
+      ],
+      project_name: "HR Digitization",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
+    },
+    {
+      taskId: 46,
+      title: "Legal Compliance Audit System",
+      description: "Build automated system for tracking and auditing legal compliance requirements across all departmentss.",
+      startDate: "2025-09-27",
+      completedDate: null,
+      dueDate: "2025-11-05",
+      priority: 8,
+      assigned_users: [2],
+      tags: ["legal", "compliance", "audit", "automation"],
+      status: "To Do",
+      comments: [],
+      project_name: "Compliance Management",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
+    },
+    {
+      taskId: 47,
+      title: "Sales Performance Dashboard",
+      description: "Create interactive sales performance dashboard with territory analysis and forecasting capabilities.",
+      startDate: "2025-09-25",
+      completedDate: null,
+      dueDate: "2025-10-12",
+      priority: 9,
+      assigned_users: [1, 3],
+      tags: ["sales", "dashboard", "analytics", "forecasting"],
+      status: "In Progress",
+      comments: [
+        {
+          commentId: 29,
+          author: "Patricia Garcia",
+          content: "Territory analysis module completed. Working on forecasting algorithms.",
+          timestamp: "2025-09-28T11:15:00Z"
+        }
+      ],
+      project_name: "Sales Intelligence Platform",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
+    },
+    {
+      taskId: 48,
+      title: "Product Roadmap Visualization Tool",
+      description: "Develop interactive product roadmap visualization tool for stakeholder communication and planning.",
+      startDate: "2025-09-26",
+      completedDate: null,
+      dueDate: "2025-10-15",
+      priority: 5,
+      assigned_users: [2, 7],
+      tags: ["product", "roadmap", "visualization", "planning"],
+      status: "To Do",
+      comments: [],
+      project_name: "Product Strategy Tools",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
+    },
+    // Add some security-focused tasks that Sarah might own as Security Admin
+    {
+      taskId: 49,
+      title: "Security Vulnerability Assessment",
+      description: "Conduct comprehensive security vulnerability assessment across all systems and applications with remediation plan.",
+      startDate: "2025-09-29",
+      completedDate: null,
+      dueDate: "2025-10-20",
+      priority: 10,
+      assigned_users: [2, 1],
+      tags: ["security", "vulnerability", "assessment", "remediation"],
+      status: "In Progress",
+      comments: [
+        {
+          commentId: 30,
+          author: "Sarah Davis",
+          content: "Initial scan completed. Found 23 medium-priority vulnerabilities to address.",
+          timestamp: "2025-09-29T09:30:00Z"
+        }
+      ],
+      project_name: "Security Enhancement",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null
+    },
+    {
+      taskId: 50,
+      title: "Identity Access Management Upgrade",
+      description: "Upgrade identity and access management system with multi-factor authentication and single sign-on capabilities.",
+      startDate: "2025-09-30",
+      completedDate: null,
+      dueDate: "2025-11-15",
+      priority: 5,
+      assigned_users: [1, 3],
+      tags: ["identity", "access", "authentication", "sso"],
+      status: "To Do",
+      comments: [],
+      project_name: "Identity Management",
+      departments: ["Consultant"],
+      recurrenceFrequency: "One-Off",
+      recurrenceInterval: null,
+    }
   ]
 };
 
-
-// Additional users for the new tasks
+// Expanded user base with multiple departmentss
 export const allUsers: User[] = [
-  { userId: 1, name: "John Smith" },
-  { userId: 2, name: "Sarah Davis" },
-  { userId: 3, name: "Alice Johnson" },
-  { userId: 4, name: "Mike Wilson" },
-  { userId: 5, name: "Emma Thompson" },
-  { userId: 6, name: "David Chen" }
+  { userId: 1, name: "John Smith", email: "john.smith@company.com", role: "Staff", department: "Engineering Operation Division" },
+  { userId: 2, name: "Sarah Davis", email: "sarah.davis@company.com", role: "HR/Admin", department: "Senior Engineers" },
+  { userId: 3, name: "Alice Johnson", email: "alice.johnson@company.com", role: "Manager", department: "Engineering Operation Division" },
+  { userId: 4, name: "Mike Wilson", email: "mike.wilson@company.com", role: "Manager", department: "Operation Planning Team" },
+  { userId: 5, name: "Emma Thompson", email: "emma.thompson@company.com", role: "Staff", department: "Engineering Operation Division" },
+  { userId: 6, name: "David Chen", email: "david.chen@company.com", role: "Staff", department: "Operation Planning Team" },
+  { userId: 7, name: "Rachel Green", email: "rachel.green@company.com", role: "Manager", department: "IT Division" },
+  { userId: 8, name: "James Rodriguez", email: "james.rodriguez@company.com", role: "Staff", department: "IT Division" },
+  { userId: 9, name: "Kevin Park", email: "kevin.park@company.com", role: "Manager", department: "L&D Team" },
+  { userId: 10, name: "Lisa Wang", email: "lisa.wang@company.com", role: "Staff", department: "L&D Team" },
 ];

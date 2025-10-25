@@ -281,16 +281,34 @@ def db_health():
         except ImportError:
             from Models.User import User
         user_count = g.db_session.query(User).count()
-        
+
         return jsonify({
             'status': 'healthy',
             'user_count': user_count,
             'message': 'Database connection successful'
         })
-        
+
     except Exception as e:
         return jsonify({
             'status': 'unhealthy',
             'error': str(e),
             'message': 'Database connection failed'
         }), 500
+
+# Create users blueprint for user-related endpoints
+users_bp = Blueprint('users', __name__, url_prefix='/api/users')
+
+@users_bp.route('/<int:user_id>', methods=['GET'])
+def get_user_by_id(user_id: int):
+    """Get user by ID"""
+    try:
+        user_repo = UserRepository(g.db_session)
+        user = user_repo.get_user_by_id(user_id)
+
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        return jsonify(user.to_dict())
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
