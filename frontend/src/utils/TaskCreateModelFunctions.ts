@@ -120,6 +120,10 @@ export const handleSubmit = async (params: {
     let response: any;
 
     if (TaskData.status === 'Completed') {
+        if (existingTaskDetails?.status == "To Do") {
+            setSnackbarContent('Task can only be "Completed" from "In Progress" status.', 'error');
+            return;
+        }
         const canComplete = await validateCanCompleteTask(TaskData, setSnackbarContent);
         if (!canComplete) return;
     }
