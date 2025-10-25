@@ -50,6 +50,8 @@ export interface TeamMemberStats {
   total_tasks: number;
   completed: number;
   in_progress: number;
+  todo: number;          
+  blocked: number; 
   completion_rate: number;
 }
 

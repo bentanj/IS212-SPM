@@ -1,4 +1,4 @@
-// src/app/reportgeneration/services/pdf/UserProductivityPDF.ts
+// src/app/reportgeneration/_lib/UserProductivityPDF.ts
 
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -12,7 +12,7 @@ export class UserProductivityPDF {
     dateRange: string = ''
   ): Promise<void> {
     console.log('Generating User Productivity PDF with report:', report);
-    
+
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     let yPos = 20;
@@ -123,28 +123,34 @@ export class UserProductivityPDF {
     doc.text('Detailed Team Member Statistics', 14, yPos);
     yPos += 10;
 
+    // ✅ UPDATED: Add To-Do and Blocked columns
     const tableData = teamMembers.map((u) => [
       u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || `User ${u.user_id}`,
-      u.total_tasks?.toString() || '0',
       u.completed?.toString() || '0',
+      u.total_tasks?.toString() || '0',
+      u.todo?.toString() || '0',
       u.in_progress?.toString() || '0',
+      u.blocked?.toString() || '0',        
       `${(u.completion_rate || 0).toFixed(1)}%`,
     ]);
 
-
     autoTable(doc, {
       startY: yPos,
-      head: [['Name', 'Total Tasks', 'Completed', 'In Progress', 'Completion Rate']],
+      // ✅ UPDATED: Add To-Do and Blocked header columns
+      head: [['Name', 'Total Tasks', 'Completed', 'To-Do', 'In Progress',  'Blocked', 'Completion Rate']],
       body: tableData,
       theme: 'striped',
       headStyles: { fillColor: [33, 150, 243], fontSize: 9 },
       styles: { fontSize: 8, halign: 'center', cellPadding: 2 },
+      // ✅ UPDATED: Adjust column widths for new columns
       columnStyles: {
-        0: { halign: 'left', cellWidth: 60 },
-        1: { cellWidth: 25 },
-        2: { cellWidth: 25, fillColor: [232, 245, 233] },
-        3: { cellWidth: 25, fillColor: [227, 242, 253] },
-        4: { cellWidth: 30, fontStyle: 'bold' },
+        0: { halign: 'left', cellWidth: 50 },      // Name (narrower)
+        1: { cellWidth: 20 },                       // Total Tasks
+        2: { cellWidth: 20, fillColor: [232, 245, 233] },  // Completed (green tint)
+        3: { cellWidth: 20, fillColor: [227, 242, 253] },  // In Progress (blue tint)
+        4: { cellWidth: 20, fillColor: [255, 243, 224] },  // To-Do (orange tint)
+        5: { cellWidth: 20, fillColor: [255, 235, 238] },  // Blocked (red tint)
+        6: { cellWidth: 25, fontStyle: 'bold' },   // Completion Rate
       },
       margin: { left: 14, right: 14 },
     });
