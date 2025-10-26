@@ -12,7 +12,6 @@ export class UserProductivityPDF {
     dateRange: string = ''
   ): Promise<void> {
     console.log('Generating User Productivity PDF with report:', report);
-
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     let yPos = 20;
@@ -39,7 +38,7 @@ export class UserProductivityPDF {
 
     yPos += 20;
 
-    // IMPORTANT FIX: Check if report has data property, handle both structures
+    // ✅ FIXED: Extract data from backend response
     const teamMembers = report.data?.team_members || [];
     const summary = report.summary || {
       total_team_members: 0,
@@ -87,14 +86,14 @@ export class UserProductivityPDF {
       yPos = 20;
     }
 
-    // Summary Statistics
+    // ✅ FIXED: Summary Statistics - now pulls from backend
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.text('Summary Statistics', 14, yPos);
     yPos += 10;
 
     const summaryStats = [
-      ['Total Users', summary.total_team_members?.toString() || '0'],
+      ['Total Users', summary.total_users?.toString() || '0'],
       ['Total Tasks Assigned', summary.total_tasks_assigned?.toString() || '0'],
       ['Total Completed', summary.total_completed?.toString() || '0'],
       ['Average Completion Rate', `${(summary.average_completion_rate || 0).toFixed(1)}%`],
@@ -117,40 +116,40 @@ export class UserProductivityPDF {
       yPos = 20;
     }
 
-    // Detailed User Statistics
+    // ✅ FIXED: Detailed User Statistics - CORRECTED COLUMN ORDER
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.text('Detailed Team Member Statistics', 14, yPos);
     yPos += 10;
 
-    // ✅ UPDATED: Add To-Do and Blocked columns
+    // ✅ FIXED: Correct data order to match headers
     const tableData = teamMembers.map((u) => [
       u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || `User ${u.user_id}`,
-      u.completed?.toString() || '0',
-      u.total_tasks?.toString() || '0',
-      u.todo?.toString() || '0',
-      u.in_progress?.toString() || '0',
-      u.blocked?.toString() || '0',        
-      `${(u.completion_rate || 0).toFixed(1)}%`,
+      u.total_tasks?.toString() || '0',      // ✅ FIXED: Total Tasks FIRST
+      u.completed?.toString() || '0',        // ✅ FIXED: Completed SECOND
+      u.todo?.toString() || '0',             // To-Do
+      u.in_progress?.toString() || '0',      // In Progress
+      u.blocked?.toString() || '0',          // Blocked
+      `${(u.completion_rate || 0).toFixed(1)}%`, // Completion Rate
     ]);
 
     autoTable(doc, {
       startY: yPos,
-      // ✅ UPDATED: Add To-Do and Blocked header columns
-      head: [['Name', 'Total Tasks', 'Completed', 'To-Do', 'In Progress',  'Blocked', 'Completion Rate']],
+      // ✅ Headers match data order now
+      head: [['Name', 'Total Tasks', 'Completed', 'To-Do', 'In Progress', 'Blocked', 'Completion Rate']],
       body: tableData,
       theme: 'striped',
       headStyles: { fillColor: [33, 150, 243], fontSize: 9 },
       styles: { fontSize: 8, halign: 'center', cellPadding: 2 },
-      // ✅ UPDATED: Adjust column widths for new columns
+      // ✅ FIXED: Column styles match new order
       columnStyles: {
-        0: { halign: 'left', cellWidth: 50 },      // Name (narrower)
-        1: { cellWidth: 20 },                       // Total Tasks
-        2: { cellWidth: 20, fillColor: [232, 245, 233] },  // Completed (green tint)
-        3: { cellWidth: 20, fillColor: [227, 242, 253] },  // In Progress (blue tint)
-        4: { cellWidth: 20, fillColor: [255, 243, 224] },  // To-Do (orange tint)
-        5: { cellWidth: 20, fillColor: [255, 235, 238] },  // Blocked (red tint)
-        6: { cellWidth: 25, fontStyle: 'bold' },   // Completion Rate
+        0: { halign: 'left', cellWidth: 45 },  // Name
+        1: { cellWidth: 20, fontStyle: 'bold' }, // Total Tasks (bold)
+        2: { cellWidth: 20, fillColor: [232, 245, 233] }, // Completed (green tint)
+        3: { cellWidth: 20, fillColor: [255, 243, 224] }, // To-Do (orange tint)
+        4: { cellWidth: 20, fillColor: [227, 242, 253] }, // In Progress (blue tint)
+        5: { cellWidth: 20, fillColor: [255, 235, 238] }, // Blocked (red tint)
+        6: { cellWidth: 25, fontStyle: 'bold' }, // Completion Rate
       },
       margin: { left: 14, right: 14 },
     });

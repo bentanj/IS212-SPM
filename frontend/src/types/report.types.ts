@@ -60,7 +60,7 @@ export interface UserProductivityData {
 }
 
 export interface UserProductivitySummary {
-  total_team_members: number;
+  total_users: number;
   total_tasks_assigned: number;
   total_completed: number;
   average_completion_rate: number;

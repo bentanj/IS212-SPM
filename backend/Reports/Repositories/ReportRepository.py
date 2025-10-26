@@ -104,15 +104,14 @@ class ReportRepository:
     def get_user_productivity_from_tasks(self, tasks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
         Get productivity statistics by user from given tasks list
-        ✅ NOW INCLUDES: To-Do and Blocked status
+        
         """
         try:
             users = defaultdict(lambda: {
-                'total_tasks': 0,
                 'completed': 0,
                 'in_progress': 0,
-                'todo': 0,        # ✅ ADD THIS
-                'blocked': 0      # ✅ ADD THIS
+                'todo': 0,
+                'blocked': 0
             })
 
             for task in tasks:
@@ -128,9 +127,8 @@ class ReportRepository:
                         username = f'User {user_id}'
 
                     users[user_id]['name'] = username
-                    users[user_id]['total_tasks'] += 1
 
-                    # ✅ Count all statuses
+                    # ✅ FIX: Only count tasks with recognized statuses
                     if status == 'Completed':
                         users[user_id]['completed'] += 1
                     elif status == 'In Progress':
@@ -142,22 +140,26 @@ class ReportRepository:
 
             result = []
             for user_id, stats in users.items():
-                completion_rate = (stats['completed'] / stats['total_tasks'] * 100) if stats['total_tasks'] > 0 else 0
+                # ✅ FIX: Calculate total_tasks as sum of all status counts
+                total_tasks = stats['completed'] + stats['in_progress'] + stats['todo'] + stats['blocked']
+                completion_rate = (stats['completed'] / total_tasks * 100) if total_tasks > 0 else 0
 
                 result.append({
                     'user_id': user_id,
-                    'total_tasks': stats['total_tasks'],
+                    'total_tasks': total_tasks,  # ✅ Now correctly calculated
                     'completed': stats['completed'],
                     'in_progress': stats['in_progress'],
-                    'todo': stats['todo'],          # ✅ ADD THIS
-                    'blocked': stats['blocked'],    # ✅ ADD THIS
+                    'todo': stats['todo'],
+                    'blocked': stats['blocked'],
                     'completion_rate': round(completion_rate, 1)
                 })
 
-            logger.info(f"Generated productivity stats for {len(result)} users with todo/blocked columns")
+            # ✅ Sort by completion_rate descending (highest first)
+            result.sort(key=lambda x: x['completion_rate'], reverse=True)
+
+            logger.info(f"Generated productivity stats for {len(result)} users with correct totals")
             return result
 
         except Exception as e:
             logger.error(f"Error calculating user productivity: {str(e)}")
             raise
-

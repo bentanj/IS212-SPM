@@ -199,62 +199,64 @@ class ReportService:
             
             # Get all tasks and filter by date range
             all_tasks = self.repo.get_all_tasks()
-            filtered_tasks = self._filter_tasks_by_date(all_tasks, start_date, end_date)
+            filtered_tasks = self.filter_tasks_by_date(all_tasks, start_date, end_date)
             
-            # Generate user productivity from filtered tasks
+            # Get user productivity from filtered tasks
             users = self.repo.get_user_productivity_from_tasks(filtered_tasks)
-
-            # Fetch user names for each user
+            
+            # ✅ FIX: Calculate total unique users from filtered tasks (not from aggregated list)
+            unique_user_ids = set()
+            for task in filtered_tasks:
+                assigned_to = task.get('assignedTo') or task.get('assigned_to')
+                if assigned_to:
+                    unique_user_ids.add(assigned_to)
+            
+            total_users_count = len(unique_user_ids)  # ✅ Now correctly counts unique users with tasks
+            logger.info(f"Found {total_users_count} users with tasks in date range")
+            
+            # ✅ Fetch user names for each user
             for user in users:
                 user_id = user.get('user_id')
                 if user_id:
-                    user_info = self._get_user_info(user_id)
+                    user_info = self.get_user_info(user_id)
                     user['first_name'] = user_info['first_name']
                     user['last_name'] = user_info['last_name']
-                    # Create full_name by combining first and last name
                     full_name = f"{user_info['first_name']} {user_info['last_name']}".strip()
                     user['full_name'] = full_name if full_name else f"User {user_id}"
-
-            # ✅ ADD THIS LINE: Sort users by completion_rate in descending order
-            users = sorted(users, key=lambda x: x.get('completion_rate', 0), reverse=True)
-
+            
+            # ✅ Calculate summary metrics
+            total_tasks = sum(u.get('total_tasks', 0) for u in users)
+            total_completed = sum(u.get('completed', 0) for u in users)
+            avg_completion = sum(u.get('completion_rate', 0) for u in users) / total_users_count if total_users_count > 0 else 0.0
+            
             metadata = ReportMetadata(
                 report_id=report_id,
-                report_type="user_productivity",
+                report_type='user_productivity',
                 generated_at=datetime.utcnow(),
-                generated_by="system",
+                generated_by='system',
                 parameters={
-                    "start_date": start_date,
-                    "end_date": end_date,
-                    "report_subtype": "per_user",
-                    "tasks_in_range": len(filtered_tasks),
-                    "total_tasks": len(all_tasks)
-                }
-            )
-            
-            # Calculate summary
-            total_users = len(users)
-            total_tasks = sum(u["total_tasks"] for u in users)
-            total_completed = sum(u["completed"] for u in users)
-            avg_completion = (
-                sum(u["completion_rate"] for u in users) / total_users 
-                if total_users > 0 else 0.0
+                    'start_date': start_date,
+                    'end_date': end_date,
+                    'report_subtype': 'per_user'
+                },
+                tasks_in_range=len(filtered_tasks),
+                total_tasks=len(all_tasks)
             )
             
             summary = {
-                "total_users": total_users,
-                "total_tasks_assigned": total_tasks,
-                "total_completed": total_completed,
-                "average_completion_rate": round(avg_completion, 1)
+                'total_team_members': total_users_count,  # ✅ Now uses correct count
+                'total_tasks_assigned': total_tasks,
+                'total_completed': total_completed,
+                'average_completion_rate': round(avg_completion, 1)
             }
             
-            logger.info(f"User productivity report generated. Users: {total_users}, Tasks: {total_tasks}")
+            logger.info(f"User productivity report generated. Users: {total_users_count}, Tasks: {total_tasks}")
+            
             return ReportData(
                 metadata=metadata,
                 summary=summary,
-                data={"team_members": users}
+                data={'team_members': users}
             )
-            
         except Exception as e:
             logger.error(f"Error generating user productivity report: {str(e)}", exc_info=True)
             raise
