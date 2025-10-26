@@ -28,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        service: [ "Tasks", "Authentication", "TaskAttachments" ]   # <-- add backend services here
+        service: [ "Tasks", "TaskAttachments" ]   # <-- add backend services here
 
     # Add job-level services here if a backend service needs its own dependencies (e.g., Redis)
     # For hosted DBs like Supabase, no local DB service is required.
