@@ -6,7 +6,7 @@ interface DayHeadersProps {
 
 const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-const DayHeaders: React.FC<DayHeadersProps> = ({
+export const DayHeaders: React.FC<DayHeadersProps> = ({
     isMobile
 }) => {
     return (
@@ -27,5 +27,3 @@ const DayHeaders: React.FC<DayHeadersProps> = ({
         </Stack>
     )
 }
-
-export default DayHeaders;

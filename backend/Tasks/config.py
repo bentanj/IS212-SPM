@@ -13,4 +13,7 @@ class Config:
     SQLALCHEMY_ECHO = os.getenv("SQLALCHEMY_ECHO", "false").lower() == "true"
     ENV = os.getenv("ENV", "dev")
     FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:3000")
+
+    # Users Service Configuration
+    USERS_SERVICE_URL = os.getenv("USERS_SERVICE_URL", "http://users:8003")
     
