@@ -28,3 +28,4 @@ export const ORGANISATION: Organisation = {
 }
 
 export const ALL_DEPARTMENTS = Object.keys(ORGANISATION).sort()
+export const ALL_ROLES = ["Staff", "Manager", "HR/Admin"];

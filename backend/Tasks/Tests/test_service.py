@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import Iterable, Optional, Dict, Any, List
-from uuid import UUID, uuid4
 import pytest
 
 from Services.TaskService import TaskService
@@ -45,15 +44,15 @@ class InMemoryRepo:
     def find_by_project(self, project_name: str) -> Iterable[Task]:
         return [t for t in self._store.values() if t.project_name == project_name]
 
-    def find_by_assigned_user(self, user_id: UUID) -> Iterable[Task]:
+    def find_by_assigned_user(self, user_id: int) -> Iterable[Task]:
         return [t for t in self._store.values() if t.assigned_users and user_id in t.assigned_users]
 
-    def find_by_priority(self, priority: str) -> Iterable[Task]:
+    def find_by_priority(self, priority: int) -> Iterable[Task]:
         return [t for t in self._store.values() if t.priority == priority]
 
     def find_overdue_tasks(self) -> Iterable[Task]:
         now = datetime.now()
-        return [t for t in self._store.values() if t.due_date and t.due_date < now and t.status != 'completed']
+        return [t for t in self._store.values() if t.due_date and t.due_date < now and t.status != 'Completed']
 
     def find_by_criteria(self, filters: Dict[str, Any]) -> Iterable[Task]:
         results = list(self._store.values())
@@ -96,7 +95,7 @@ def test_create_task_defaults():
 
     assert task.id == 1
     assert task.title == 'Test Task'
-    assert task.status == 'pending'
+    assert task.status == 'To Do'
     assert task.description == ''
     assert task.start_date is not None
     assert task.due_date is not None
@@ -105,10 +104,10 @@ def test_create_task_defaults():
 @pytest.mark.unit
 def test_mark_completed_sets_completed_date():
     service = TaskService(InMemoryRepo())
-    t = service.create_task({'title': 'Finish', 'status': 'in_progress'})
+    t = service.create_task({'title': 'Finish', 'status': 'In Progress'})
 
     updated = service.mark_task_completed(t.id)
-    assert updated.status == 'completed'
+    assert updated.status == 'Completed'
     assert updated.completed_date is not None
 
 
@@ -116,7 +115,7 @@ def test_mark_completed_sets_completed_date():
 def test_assign_and_remove_users():
     service = TaskService(InMemoryRepo())
     t = service.create_task({'title': 'Assign Test'})
-    u1, u2 = uuid4(), uuid4()
+    u1, u2 = 1, 2
 
     updated = service.assign_users_to_task(t.id, [u1, u2])
     assert set(updated.assigned_users) == {u1, u2}
@@ -253,13 +252,13 @@ def test_search_tasks_by_date_range():
 def test_search_tasks_by_multiple_filters():
     service = TaskService(InMemoryRepo())
 
-    task1 = service.create_task({'title': 'Task 1', 'status': 'pending', 'priority': 'high', 'project_name': 'SPM'})
-    task2 = service.create_task({'title': 'Task 2', 'status': 'pending', 'priority': 'low', 'project_name': 'SPM'})
-    task3 = service.create_task({'title': 'Task 3', 'status': 'completed', 'priority': 'high', 'project_name': 'Other'})
+    task1 = service.create_task({'title': 'Task 1', 'status': 'To Do', 'priority': 8, 'project_name': 'SPM'})
+    task2 = service.create_task({'title': 'Task 2', 'status': 'To Do', 'priority': 2, 'project_name': 'SPM'})
+    task3 = service.create_task({'title': 'Task 3', 'status': 'Completed', 'priority': 8, 'project_name': 'Other'})
 
     results = list(service.search_tasks({
-        'status': 'pending',
-        'priority': 'high',
+        'status': 'To Do',
+        'priority': 8,
         'project_name': 'SPM'
     }))
 
@@ -322,7 +321,7 @@ def test_search_tasks_empty_filters():
 @pytest.mark.unit
 def test_search_tasks_no_results():
     service = TaskService(InMemoryRepo())
-    task = service.create_task({'title': 'Task', 'status': 'pending'})
+    task = service.create_task({'title': 'Task', 'status': 'To Do'})
 
     # Filter that matches nothing
     results = list(service.search_tasks({'status': 'nonexistent_status'}))
@@ -337,13 +336,13 @@ def test_search_tasks_combined_date_and_status():
     now = datetime.now()
     future = now + timedelta(days=5)
 
-    task1 = service.create_task({'title': 'Pending Future', 'status': 'pending', 'due_date': future})
-    task2 = service.create_task({'title': 'Completed Future', 'status': 'completed', 'due_date': future})
-    task3 = service.create_task({'title': 'Pending Past', 'status': 'pending', 'due_date': now - timedelta(days=1)})
+    task1 = service.create_task({'title': 'Pending Future', 'status': 'To Do', 'due_date': future})
+    task2 = service.create_task({'title': 'Completed Future', 'status': 'Completed', 'due_date': future})
+    task3 = service.create_task({'title': 'Pending Past', 'status': 'To Do', 'due_date': now - timedelta(days=1)})
 
     # Combined filters: pending AND due in future
     results = list(service.search_tasks({
-        'status': 'pending',
+        'status': 'To Do',
         'due_after': now
     }))
 
@@ -366,7 +365,7 @@ def test_parent_id_filter_with_zero():
 @pytest.mark.unit
 def test_search_tasks_case_sensitivity():
     service = TaskService(InMemoryRepo())
-    task = service.create_task({'title': 'Task', 'project_name': 'SPM', 'status': 'pending'})
+    task = service.create_task({'title': 'Task', 'project_name': 'SPM', 'status': 'To Do'})
 
     # Test case sensitivity for project_name
     results = list(service.search_tasks({'project_name': 'SPM'}))
@@ -376,7 +375,7 @@ def test_search_tasks_case_sensitivity():
     assert len(results) == 0  # Case-sensitive, should not match
 
     # Test case sensitivity for status
-    results = list(service.search_tasks({'status': 'PENDING'}))
+    results = list(service.search_tasks({'status': 'TO DO'}))
     assert len(results) == 0  # Case-sensitive, should not match
 
 
@@ -436,7 +435,7 @@ def test_date_range_inclusive():
 @pytest.mark.unit
 def test_create_task_with_4_assigned_users():
     service = TaskService(InMemoryRepo())
-    users = [uuid4() for _ in range(4)]
+    users = [1, 2, 3, 4]
 
     task = service.create_task({
         'title': 'Task with 4 users',
@@ -450,7 +449,7 @@ def test_create_task_with_4_assigned_users():
 @pytest.mark.unit
 def test_create_task_with_5_assigned_users():
     service = TaskService(InMemoryRepo())
-    users = [uuid4() for _ in range(5)]
+    users = [1, 2, 3, 4, 5]
 
     task = service.create_task({
         'title': 'Task with 5 users',
@@ -465,7 +464,7 @@ def test_create_task_with_5_assigned_users():
 def test_create_task_with_6_assigned_users_fails():
     from exceptions import TaskValidationError
     service = TaskService(InMemoryRepo())
-    users = [uuid4() for _ in range(6)]
+    users = [1, 2, 3, 4, 5, 6]
 
     with pytest.raises(TaskValidationError, match="Cannot assign more than 5 users to a task"):
         service.create_task({
@@ -479,7 +478,7 @@ def test_update_task_with_6_assigned_users_fails():
     from exceptions import TaskValidationError
     service = TaskService(InMemoryRepo())
     task = service.create_task({'title': 'Task'})
-    users = [uuid4() for _ in range(6)]
+    users = [1, 2, 3, 4, 5, 6]
 
     with pytest.raises(TaskValidationError, match="Cannot assign more than 5 users to a task"):
         service.update_task(task.id, {'assigned_users': users})
@@ -489,7 +488,7 @@ def test_update_task_with_6_assigned_users_fails():
 def test_assign_users_to_task_with_5_users():
     service = TaskService(InMemoryRepo())
     task = service.create_task({'title': 'Task'})
-    users = [uuid4() for _ in range(5)]
+    users = [1, 2, 3, 4, 5]
 
     updated = service.assign_users_to_task(task.id, users)
 
@@ -502,7 +501,7 @@ def test_assign_users_to_task_with_6_users_fails():
     from exceptions import TaskValidationError
     service = TaskService(InMemoryRepo())
     task = service.create_task({'title': 'Task'})
-    users = [uuid4() for _ in range(6)]
+    users = [1, 2, 3, 4, 5, 6]
 
     with pytest.raises(TaskValidationError, match="Cannot assign more than 5 users to a task"):
         service.assign_users_to_task(task.id, users)
@@ -512,7 +511,7 @@ def test_assign_users_to_task_with_6_users_fails():
 def test_add_user_to_task_up_to_5_users():
     service = TaskService(InMemoryRepo())
     task = service.create_task({'title': 'Task'})
-    users = [uuid4() for _ in range(5)]
+    users = [1, 2, 3, 4, 5]
 
     # Add 5 users one by one
     for user in users:
@@ -527,7 +526,7 @@ def test_add_user_to_task_exceeding_5_users_fails():
     from exceptions import TaskValidationError
     service = TaskService(InMemoryRepo())
     task = service.create_task({'title': 'Task'})
-    users = [uuid4() for _ in range(6)]
+    users = [1, 2, 3, 4, 5, 6]
 
     # Add 5 users successfully
     for user in users[:5]:
