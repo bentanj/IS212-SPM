@@ -153,7 +153,19 @@ export const handleSubmit = async (params: {
 
             onTaskCreated?.(newTask);
             setSubmitStatus('success');
-            setSubmitMessage('Task created successfully!');
+            
+            // TODO: When integrated with real backend API:
+            // 1. POST to /api/tasks with task data + file as multipart/form-data
+            // 2. Backend creates task first
+            // 3. Backend makes internal call to task-attachments service
+            // 4. Return success response to frontend
+            
+            // For now with mock data, just show success message
+            if (formData.attachedFile) {
+                setSubmitMessage('Task created! Note: File upload requires backend integration.');
+            } else {
+                setSubmitMessage('Task created successfully!');
+            }
         }
 
         setTimeout(() => {

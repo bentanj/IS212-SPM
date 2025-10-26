@@ -39,12 +39,31 @@ def get_task(task_id: int):
 @bp.post("")
 def create_task():
     try:
-        data = request.get_json()
+        # Handle both JSON and multipart/form-data
+        if request.content_type and 'multipart/form-data' in request.content_type:
+            # Extract JSON data from form
+            task_json = request.form.get('task_data')
+            if not task_json:
+                return jsonify({"error": "No task data provided"}), 400
+            
+            import json
+            data = json.loads(task_json)
+            
+            # Check if file was uploaded
+            file = request.files.get('file')
+        else:
+            # Standard JSON request
+            data = request.get_json()
+            file = None
+        
         if not data:
             return jsonify({"error": "No data provided"}), 400
 
         task_data = _parse_task_data(data)
-        task = _task_service().create_task(task_data)
+        uploaded_by = data.get('uploaded_by', 1)
+        
+        # Pass file and uploaded_by to service
+        task = _task_service().create_task(task_data, file=file, uploaded_by=uploaded_by)
         g.db_session.commit()
 
         return jsonify(task.to_dict()), 201

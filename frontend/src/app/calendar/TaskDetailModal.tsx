@@ -26,6 +26,7 @@ import dayjs from 'dayjs';
 import TaskCreateModal from './_components/TaskCreateModal';
 import { canEditTask } from '@/utils/Permissions';
 import { getPriorityColor, getStatusColor } from './_functions/TaskRenderingFunctions';
+import TaskAttachmentsSection from './_components/TaskAttachmentsSection';
 
 interface TaskDetailModalProps {
   task: Task | null;
@@ -339,6 +340,13 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
               </List>
             </Box>
           )}
+
+          {/* Attachments Section */}
+          <TaskAttachmentsSection
+            taskId={task.taskId}
+            uploadedBy={currentUser.userId}
+            setSnackbarContent={setSnackbarContent}
+          />
         </DialogContent>
 
         <DialogActions>

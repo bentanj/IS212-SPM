@@ -21,7 +21,7 @@ class TaskService:
             raise TaskNotFoundError(f"Task with id {task_id} not found")
         return task
 
-    def create_task(self, task_data: Dict[str, Any]) -> Task:
+    def create_task(self, task_data: Dict[str, Any], file=None, uploaded_by=1) -> Task:
         self._validate_task_data(task_data)
 
         # Validate parent_id if provided
@@ -48,7 +48,30 @@ class TaskService:
         if 'priority' not in task_data or task_data['priority'] is None:
             task_data['priority'] = 'medium'
 
-        return self.repo.create(task_data)
+        # Create the task in the database
+        task = self.repo.create(task_data)
+
+        # If file was uploaded, create attachment via internal call to task-attachments service
+        if file:
+            try:
+                import requests
+                attachment_url = "http://taskattachments:8005/api/task-attachments/upload"
+                
+                files = {'file': (file.filename, file.read(), file.content_type)}
+                form_data = {
+                    'task_id': str(task.task_id),
+                    'uploaded_by': str(uploaded_by)
+                }
+                
+                # Make internal request to task-attachments service
+                resp = requests.post(attachment_url, files=files, data=form_data, timeout=30)
+                if resp.status_code not in [200, 201]:
+                    print(f"Warning: Failed to upload attachment: {resp.text}")
+            except Exception as e:
+                # Don't fail task creation if attachment upload fails
+                print(f"Warning: Failed to upload attachment: {str(e)}")
+
+        return task
 
     def update_task(self, task_id: int, task_data: Dict[str, Any]) -> Task:
         existing_task = self.repo.get(task_id)
