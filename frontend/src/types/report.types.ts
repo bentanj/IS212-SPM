@@ -43,15 +43,38 @@ export interface ProjectPerformanceReport {
   summary: ProjectPerformanceSummary;
 }
 
-// Team Productivity Report Types (Per User)
+// User Productivity Report Types (Per User)
 export interface TeamMemberStats {
   user_id: string;
+  first_name?: string;
+  last_name?: string;
+  full_name?: string;
   total_tasks: number;
   completed: number;
   in_progress: number;
+  todo: number;
+  blocked: number;
   completion_rate: number;
 }
 
+export interface UserProductivityData {
+  team_members: TeamMemberStats[];
+}
+
+export interface UserProductivitySummary {
+  total_users: number;
+  total_tasks_assigned: number;
+  total_completed: number;
+  average_completion_rate: number;
+}
+
+export interface UserProductivityReport {
+  metadata: ReportMetadata;
+  data: UserProductivityData;
+  summary: UserProductivitySummary;
+}
+
+// Team Productivity Report Types (Alternative naming - same as UserProductivityReport)
 export interface TeamProductivityData {
   team_members: TeamMemberStats[];
 }
@@ -69,8 +92,52 @@ export interface TeamProductivityReport {
   summary: TeamProductivitySummary;
 }
 
+// Department Task Activity Report Types
+export interface TaskStatusCount {
+  to_do: number;
+  in_progress: number;
+  blocked: number;
+  completed: number;
+  overdue: number;
+}
+
+export interface WeeklyData extends TaskStatusCount {
+  week_start: string;  // ISO date string
+  week_end: string;
+}
+
+export interface MonthlyData extends TaskStatusCount {
+  month: string;  // e.g., "2025-10"
+  month_name: string;  // e.g., "October 2025"
+}
+
+export interface DepartmentTaskActivityData {
+  department: string;
+  aggregation: 'weekly' | 'monthly';
+  weekly_data?: WeeklyData[];
+  monthly_data?: MonthlyData[];
+  total_tasks: number;
+}
+
+export interface DepartmentTaskActivitySummary {
+  department: string;
+  date_range: {
+    start_date: string;
+    end_date: string;
+  };
+  total_tasks: number;
+  status_totals: TaskStatusCount;
+  aggregation_type: 'weekly' | 'monthly';
+}
+
+export interface DepartmentTaskActivityReport {
+  metadata: ReportMetadata;
+  data: DepartmentTaskActivityData;
+  summary: DepartmentTaskActivitySummary;
+}
+
 // Combined Task Completion Report Type
-export type TaskCompletionReport = ProjectPerformanceReport | TeamProductivityReport;
+export type TaskCompletionReport = ProjectPerformanceReport | UserProductivityReport | TeamProductivityReport | DepartmentTaskActivityReport;
 
 // Reports Summary
 export interface ReportsSummary {
@@ -100,8 +167,7 @@ export interface ApiError {
 // Report Sub-Type identifier
 export type ReportSubType = 'per-user' | 'per-project';
 
-
-// LoggedTimeEntry Project
+// Logged Time Report Types
 export interface LoggedTimeEntry {
   userName: string;           // Name of the user who logged the time
   loginTime: Dayjs;           // Dayjs object for easy date manipulation

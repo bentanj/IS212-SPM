@@ -40,6 +40,11 @@ import { mockLoggedTimeData } from '../../mocks/report/loggedTimeMockData'
 // NEW: Import organization departments
 import { ALL_DEPARTMENTS } from '../../constants/Organisation';
 
+// Import excel generator adpater functions
+import { exportLoggedTimeToExcel } from './services/excel/LoggedTimeReportExcel'
+import { exportProjectPerformanceToExcel } from './services/excel/ProjectPerformanceExcel';
+import { exportTeamProductivityToExcel } from './services/excel/UserProductivityExcel';
+
 // NEW: Import function to get projects from tasks
 // change this to call the function when merging the branch
 // import { getProjectsByTasks } from '@/path/to/getProjectsByTasks';
@@ -191,7 +196,7 @@ export default function ReportGeneration() {
     if (!subType || !pendingExportType) return;
 
     setSelectedReport('task-completion');
-    setExportType(pendingExportType);
+    setExportType(pendingExportType); // This remembers if they clicked PDF or Excel
 
     try {
       console.log('2. Fetching report data...');
@@ -200,6 +205,7 @@ export default function ReportGeneration() {
       
       await new Promise((resolve) => setTimeout(resolve, 500));
 
+      // Generate PDF
       if (pendingExportType === 'pdf') {
         const dateRangeStr = getDateRangeString();
         console.log('4. Generating PDF...', { subType, dateRangeStr });
@@ -211,14 +217,25 @@ export default function ReportGeneration() {
             dateRangeStr
           );
         } else if (subType === 'per-user') {
-          console.log('5. Calling TeamProductivityPDF.generate...');
           await TeamProductivityPDF.generate(
             reportData as TeamProductivityReport,
             currentDate,
             dateRangeStr
           );
         }
-        console.log('6. PDF generated successfully!');
+        console.log('5. PDF generated successfully!');
+      }
+      
+      // Generate Excel (ADD THIS SECTION)
+      if (pendingExportType === 'excel') {
+        console.log('4. Generating Excel...', { subType });
+        
+        if (subType === 'per-project') {
+          exportProjectPerformanceToExcel(reportData as ProjectPerformanceReport);
+        } else if (subType === 'per-user') {
+          exportTeamProductivityToExcel(reportData as TeamProductivityReport);
+        }
+        console.log('5. Excel generated successfully!');
       }
     } catch (err) {
       console.error('Export failed:', err);
@@ -226,7 +243,7 @@ export default function ReportGeneration() {
     } finally {
       setSelectedReport(null);
       setExportType(null);
-      setPendingExportType(null);
+      setPendingExportType(null); // Clear the pending type
       setShowDateValidation(false);
     }
   };
@@ -321,8 +338,24 @@ export default function ReportGeneration() {
     filterType: 'department' | 'project',
     filterValue: string
   ) => {
-    console.log('Exporting Logged Time Report Excel:', { filterType, filterValue });
-    alert('Excel export coming soon!');
+    if (!isDateRangeValid) {
+      setError('Please select both start and end dates');
+      setShowError(true);
+      return;
+    }
+
+    setSelectedReport('logged-time');
+    setExportType('excel');
+    
+    try {
+      exportLoggedTimeToExcel(mockLoggedTimeData, startDate!, endDate!, filterType, filterValue);
+    } catch (err) {
+      setError('Failed to export Excel');
+      setShowError(true);
+    } finally {
+      setSelectedReport(null);
+      setExportType(null);
+    }
   };
 
   // Helper function for category colors
