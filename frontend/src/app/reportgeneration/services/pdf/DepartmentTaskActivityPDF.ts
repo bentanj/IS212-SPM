@@ -84,6 +84,52 @@ export class DepartmentTaskActivityPDF {
       yPos = 20;
     }
 
+      if (data.users && data.users.length > 0) {
+    if (yPos > 200) {
+      doc.addPage();
+      yPos = 20;
+    }
+    
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Department Team Members', 14, yPos);
+    yPos += 7;
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Total Users: ${data.users.length}`, 14, yPos);
+    yPos += 10;
+    
+    const usersTableData = data.users.map((user, index) => [
+      (index + 1).toString(),
+      user.full_name,
+      user.email || 'N/A'
+    ]);
+    
+    autoTable(doc, {
+      startY: yPos,
+      head: [['#', 'Name', 'Email']],
+      body: usersTableData,
+      theme: 'striped',
+      headStyles: { fillColor: [76, 175, 80], fontSize: 10 },
+      styles: { fontSize: 9, cellPadding: 3 },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 15 },
+        1: { halign: 'left', cellWidth: 70 },
+        2: { halign: 'left', cellWidth: 90 },
+      },
+      margin: { left: 14, right: 14 },
+    });
+    
+    yPos = (doc as any).lastAutoTable.finalY + 15;
+  }
+
+  // Continue with chart generation...
+  if (yPos > 220) {
+    doc.addPage();
+    yPos = 20;
+  }
+
     // Create Chart
     if (data.aggregation === 'weekly' && data.weekly_data && data.weekly_data.length > 0) {
       try {
@@ -137,6 +183,8 @@ export class DepartmentTaskActivityPDF {
       doc.addPage();
       yPos = 20;
     }
+
+    
 
     // Detailed Table
     doc.setFontSize(14);

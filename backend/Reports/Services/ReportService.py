@@ -443,31 +443,79 @@ class ReportService:
             # Return empty list on error rather than crashing
             return []
 
-    # ✅ ADD THIS NEW METHOD - Main department report generator
-    def generate_department_activity_report(
-            self,
-            department: str,
-            aggregation: str,
-            start_date: str,
-            end_date: str
-        ) -> ReportData:
-        """Generate department task activity report with weekly or monthly aggregation"""
+    def _get_department_users(self, department: str, tasks: List[Dict]) -> List[Dict[str, Any]]:
+        """
+        Get list of unique users working in a specific department
+        
+        Args:
+            department: Department name
+            tasks: List of tasks (already filtered by department)
+            
+        Returns:
+            List of user dictionaries with user_id, full_name, email
+        """
         try:
-            logger.info(f"Generating department activity report for {department} ({aggregation}) from {start_date} to {end_date}")
+            # Collect unique user IDs from department tasks
+            user_ids = set()
+            for task in tasks:
+                assigned_users = task.get('assignedusers') or task.get('assignedUsers') or []
+                for user_data in assigned_users:
+                    if isinstance(user_data, dict):
+                        user_id = user_data.get('userId') or user_data.get('user_id')
+                        if user_id:
+                            user_ids.add(str(user_id))
+            
+            logger.info(f"Found {len(user_ids)} unique users in department '{department}'")
+            
+            # Fetch user details for each user ID
+            users_list = []
+            for user_id in user_ids:
+                user_info = self._get_user_info(user_id)
+                users_list.append({
+                    'user_id': user_id,
+                    'full_name': f"{user_info['first_name']} {user_info['last_name']}".strip(),
+                    'first_name': user_info['first_name'],
+                    'last_name': user_info['last_name'],
+                    'email': user_info.get('email', '')
+                })
+            
+            # Sort by full name
+            users_list.sort(key=lambda x: x['full_name'])
+            
+            logger.info(f"Retrieved details for {len(users_list)} users in department '{department}'")
+            return users_list
+        
+        except Exception as e:
+            logger.error(f"Error getting department users: {str(e)}", exc_info=True)
+            return []
+
+
+    # Update the generate_department_activity_report method
+    def generate_department_activity_report(
+        self,
+        department: str,
+        aggregation: str,
+        start_date: str,
+        end_date: str
+    ) -> ReportData:
+        """
+        Generate department task activity report with weekly or monthly aggregation
+        """
+        try:
+            logger.info(f"Generating department activity report for '{department}' ({aggregation}) from {start_date} to {end_date}")
             report_id = str(uuid4())
             
             # Get all tasks and filter by date range
             all_tasks = self.repo.get_all_tasks()
             filtered_tasks = self._filter_tasks_by_date(all_tasks, start_date, end_date)
             
-            # ✅ FIX: Filter tasks by department (handle array field)
+            # Filter tasks by department (handle array field)
             department_tasks = []
             for task in filtered_tasks:
                 task_departments = task.get('departments', [])
                 
-                # Handle if it's a list (array)
+                # Handle if it's a list/array
                 if isinstance(task_departments, list):
-                    # Check if department exists in the array
                     if any(dept.strip().lower() == department.lower() for dept in task_departments if dept):
                         department_tasks.append(task)
                 # Handle if it's a string (fallback)
@@ -478,12 +526,12 @@ class ReportService:
             logger.info(f"Found {len(department_tasks)} tasks for department '{department}' out of {len(filtered_tasks)} filtered tasks")
             
             # Get aggregated data
-            if aggregation == 'weekly':
+            if aggregation == "weekly":
                 aggregated_data = self._aggregate_by_week(department_tasks, start_date, end_date)
-                data_key = 'weekly_data'
+                data_key = "weekly_data"
             else:  # monthly
                 aggregated_data = self._aggregate_by_month(department_tasks, start_date, end_date)
-                data_key = 'monthly_data'
+                data_key = "monthly_data"
             
             # Calculate status totals across all periods
             status_totals = {
@@ -496,6 +544,10 @@ class ReportService:
             
             total_tasks = len(department_tasks)
             
+            # NEW: Get list of users in the department
+            department_users = self._get_department_users(department, department_tasks)
+            logger.info(f"Retrieved {len(department_users)} users for department '{department}'")
+
             metadata = ReportMetadata(
                 report_id=report_id,
                 report_type="department_activity",
@@ -505,24 +557,24 @@ class ReportService:
                     "department": department,
                     "aggregation": aggregation,
                     "start_date": start_date,
-                    "end_date": end_date,
-                    "tasks_in_range": total_tasks
-                }
+                    "end_date": end_date
+                },
             )
             
             summary = {
                 "total_tasks": total_tasks,
-                "status_totals": status_totals
+                "status_totals": status_totals,
+                "total_users": len(department_users)  # NEW: Add total users count
             }
             
             data = {
                 "department": department,
                 "aggregation": aggregation,
-                data_key: aggregated_data
+                data_key: aggregated_data,
+                "users": department_users  # NEW: Add users list
             }
             
-            logger.info(f"Department activity report generated. Total tasks: {total_tasks}")
-            
+            logger.info(f"Department activity report generated. Total tasks: {total_tasks}, Users: {len(department_users)}")
             return ReportData(
                 metadata=metadata,
                 summary=summary,
@@ -532,5 +584,3 @@ class ReportService:
         except Exception as e:
             logger.error(f"Error generating department activity report: {str(e)}", exc_info=True)
             raise
-
-                

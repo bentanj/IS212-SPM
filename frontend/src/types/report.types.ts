@@ -79,6 +79,7 @@ export interface TaskStatusCount {
   blocked: number;
   completed: number;
   overdue: number;
+  
 }
 
 // FIXED: Extend TaskStatusCount instead of using spread
@@ -99,6 +100,7 @@ export interface DepartmentTaskActivityData {
   weekly_data?: WeeklyData[];
   monthly_data?: MonthlyData[];
   total_tasks: number;
+  users?: DepartmentUser[];  // NEW: Add optional users array
 }
 
 export interface DepartmentTaskActivitySummary {
@@ -110,6 +112,7 @@ export interface DepartmentTaskActivitySummary {
   total_tasks: number;
   status_totals: TaskStatusCount;
   aggregation_type: 'weekly' | 'monthly';
+  total_users?: number;  // NEW: Add optional total users count
 }
 
 export interface DepartmentTaskActivityReport {
@@ -148,3 +151,11 @@ export interface ApiError {
 
 // Report Sub-Type identifier
 export type ReportSubType = 'per-user' | 'per-project';
+
+export interface DepartmentUser {
+  user_id: string;
+  full_name: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+}
