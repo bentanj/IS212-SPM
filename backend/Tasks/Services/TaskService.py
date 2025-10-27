@@ -20,7 +20,7 @@ class TaskService:
             raise TaskNotFoundError(f"Task with id {task_id} not found")
         return task
 
-    def create_task(self, task_data: Dict[str, Any], file=None, uploaded_by=1) -> Task:
+    def create_task(self, task_data: Dict[str, Any]) -> Task:
         self._validate_task_data(task_data)
 
         # Validate parent_id if provided
@@ -49,28 +49,72 @@ class TaskService:
 
         # Create the task in the database
         task = self.repo.create(task_data)
-
-        # If file was uploaded, create attachment via internal call to task-attachments service
-        if file:
-            try:
-                import requests
-                attachment_url = "http://taskattachments:8005/api/task-attachments/upload"
-                
-                files = {'file': (file.filename, file.read(), file.content_type)}
-                form_data = {
-                    'task_id': str(task.task_id),
-                    'uploaded_by': str(uploaded_by)
-                }
-                
-                # Make internal request to task-attachments service
-                resp = requests.post(attachment_url, files=files, data=form_data, timeout=30)
-                if resp.status_code not in [200, 201]:
-                    print(f"Warning: Failed to upload attachment: {resp.text}")
-            except Exception as e:
-                # Don't fail task creation if attachment upload fails
-                print(f"Warning: Failed to upload attachment: {str(e)}")
-
         return task
+
+    def upload_task_attachments(self, task_id: int, files, uploaded_by: int) -> Dict[str, int]:
+        """Upload files for a task that already exists in the database"""
+        if files and len(files) > 0:
+            import requests
+            import logging
+            logging.basicConfig(level=logging.INFO)
+            logger = logging.getLogger(__name__)
+
+            attachment_url = "http://taskattachments:8005/api/task-attachments/upload"
+
+            logger.info(f"=== Starting file upload for task_id={task_id} ===")
+            logger.info(f"Number of files to upload: {len(files)}")
+            logger.info(f"Uploaded by user_id: {uploaded_by}")
+            logger.info(f"Target URL: {attachment_url}")
+
+            successful_uploads = 0
+            failed_uploads = 0
+
+            # Upload each file
+            for idx, file in enumerate(files, 1):
+                try:
+                    logger.info(f"[File {idx}/{len(files)}] Processing: {file.filename}")
+                    logger.info(f"[File {idx}/{len(files)}] Content type: {file.content_type}")
+                    logger.info(f"[File {idx}/{len(files)}] File size: {len(file.read())} bytes")
+
+                    # Reset file pointer to the beginning after reading size
+                    file.seek(0)
+                    file_content = file.read()
+                    logger.info(f"[File {idx}/{len(files)}] File content read successfully, length: {len(file_content)} bytes")
+
+                    files_dict = {'file': (file.filename, file_content, file.content_type)}
+                    form_data = {
+                        'task_id': str(task_id),
+                        'uploaded_by': str(uploaded_by)
+                    }
+
+                    logger.info(f"[File {idx}/{len(files)}] Sending POST request to {attachment_url}")
+
+                    # Make internal request to task-attachments service
+                    resp = requests.post(attachment_url, files=files_dict, data=form_data, timeout=30)
+
+                    logger.info(f"[File {idx}/{len(files)}] Response status: {resp.status_code}")
+                    logger.info(f"[File {idx}/{len(files)}] Response body: {resp.text[:500]}")
+
+                    if resp.status_code not in [200, 201]:
+                        failed_uploads += 1
+                        logger.error(f"[File {idx}/{len(files)}] FAILED: Status={resp.status_code}, Response={resp.text}")
+                    else:
+                        successful_uploads += 1
+                        logger.info(f"[File {idx}/{len(files)}] SUCCESS: {resp.json()}")
+
+                except Exception as file_error:
+                    failed_uploads += 1
+                    logger.error(f"[File {idx}/{len(files)}] EXCEPTION during upload: {str(file_error)}")
+                    import traceback
+                    logger.error(f"[File {idx}/{len(files)}] Traceback: {traceback.format_exc()}")
+
+            logger.info(f"=== File upload completed for task_id={task_id} ===")
+            logger.info(f"Successful uploads: {successful_uploads}/{len(files)}")
+            logger.info(f"Failed uploads: {failed_uploads}/{len(files)}")
+
+            return {"successful": successful_uploads, "failed": failed_uploads}
+
+        return {"successful": 0, "failed": 0}
 
     def update_task(self, task_id: int, task_data: Dict[str, Any]) -> Task:
         existing_task = self.repo.get(task_id)

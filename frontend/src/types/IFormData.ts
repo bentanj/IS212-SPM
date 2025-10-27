@@ -7,5 +7,5 @@ export interface FormData extends
     dueDate: Dayjs | null;
     completedDate: Dayjs | null;
     comments?: string | null;
-    attachedFile?: File | null;
+    attachedFiles?: File[];
 }

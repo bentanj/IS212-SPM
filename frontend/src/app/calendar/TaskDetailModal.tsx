@@ -21,11 +21,12 @@ import {
   useMediaQuery
 } from '@mui/material';
 import { Edit, Add } from '@mui/icons-material';
-import { CurrentUser, Task, taskMockData } from '@/mocks/staff/taskMockData';
+import { User, Task } from '@/types';
+import { taskMockData } from '@/mocks/staff/taskMockData';
 import dayjs from 'dayjs';
-import TaskCreateModal from './_components/TaskCreateModal';
+import { TaskCreateModal } from '@/components/TaskCreateModal';
 import { canEditTask } from '@/utils/Permissions';
-import { getPriorityColor, getStatusColor } from './_functions/TaskRenderingFunctions';
+import { getPriorityColor, getStatusColor } from '@/utils/TaskRenderingFunctions';
 import TaskAttachmentsSection from './_components/TaskAttachmentsSection';
 
 interface TaskDetailModalProps {
@@ -34,7 +35,7 @@ interface TaskDetailModalProps {
   onClose: () => void;
   setSnackbarContent: (message: string, severity: AlertColor) => void;
   onTaskUpdated?: (task: Task) => void;
-  currentUser: CurrentUser;
+  currentUser: User;
   onCreateSubtask?: (parentTask: Task) => void;
   onSubtaskClick?: (subtask: Task) => void;
   allTasks?: Task[]; // New
@@ -68,8 +69,8 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     if (task.parentTaskId) return [];
 
     // ✅ Use allTasks prop if provided, fallback to mockData
-    const tasksToFilter = allTasks || taskMockData.tasks;
-    return tasksToFilter.filter(t => t.parentTaskId === task.taskId);
+    const tasksToFilter = allTasks || (taskMockData.tasks as any);
+    return tasksToFilter.filter((t: Task) => t.parentTaskId === task.taskId) as Task[];
   }, [task, allTasks]); // ✅ Add allTasks to dependency array
 
   if (!task) return null;
@@ -149,7 +150,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
               Project
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {task.projectName}
+              {task.project_name}
             </Typography>
           </Box>
 
@@ -385,7 +386,10 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
       <TaskCreateModal
         open={editModalOpen}
         onClose={handleEditClose}
-        onTaskUpdated={handleTaskUpdated}
+        refetchTasks={() => {
+          handleTaskUpdated(task); // This is a placeholder - ideally should call actual refetch
+          onTaskUpdated?.(task);
+        }}
         setSnackbarContent={setSnackbarContent}
         currentUser={currentUser}
         existingTaskDetails={task}
