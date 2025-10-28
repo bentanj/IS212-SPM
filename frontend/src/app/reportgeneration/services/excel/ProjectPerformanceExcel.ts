@@ -30,17 +30,32 @@ export function exportProjectPerformanceToExcel(
   // Blank row
   excelData.push({ section_header: '', metric: '', value: '' });
 
-  // Project Statistics section
+  // Project Statistics section header
   excelData.push({ section_header: 'Detailed Project Statistics', metric: '', value: '' });
+  
+  // Column headers - using metric and value columns
+  excelData.push({ 
+    section_header: '', 
+    metric: 'Project Name', 
+    value: 'Total Tasks',
+    value_1: 'Completed',
+    value_2: 'To Do', 
+    value_3: 'In Progress',
+    value_4: 'Blocked',
+    value_5: 'Completion Rate'
+  });
+  
+  // Add project data rows
   sortedProjects.forEach(project => {
     excelData.push({
-      project_name: project.project_name || 'Unnamed Project',
-      total_tasks: project.total_tasks,
-      completed: project.completed,
-      to_do: project.to_do,
-      in_progress: project.in_progress,
-      blocked: project.blocked,
-      completion_rate: `${project.completion_rate}%`,
+      section_header: '',
+      metric: project.project_name || 'Unnamed Project',
+      value: project.total_tasks,
+      value_1: project.completed,
+      value_2: project.to_do,
+      value_3: project.in_progress,
+      value_4: project.blocked,
+      value_5: `${project.completion_rate}%`,
     });
   });
 

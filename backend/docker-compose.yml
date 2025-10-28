@@ -12,6 +12,7 @@ services:
       - tasks
       - authentication
       - reports
+      - users
     restart: unless-stopped
 
   # Tasks Service
@@ -76,14 +77,28 @@ services:
       - SQLALCHEMY_ECHO=${SQLALCHEMY_ECHO}
       - ENV=${ENV}
     expose:
-      - "8003"
+      - "8010"
     # depends_on:
     #   tasks:
     #     condition: service_healthy
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8003/api/reports/health')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+  
+  # Users
+  users:
+    build:
+      context: ./Users
+      dockerfile: Dockerfile
+    container_name: users_app
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - SQLALCHEMY_ECHO=${SQLALCHEMY_ECHO}
+      - ENV=${ENV}
+      - FRONTEND_ORIGIN=${FRONTEND_ORIGIN}
+      - SECRET_KEY=${SECRET_KEY}
+    expose:
+      - "8003"
+    restart: unless-stopped

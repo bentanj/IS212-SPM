@@ -100,15 +100,15 @@ export class ProjectPerformancePDF {
       p.project_name || 'Unnamed Project',
       p.total_tasks.toString(),
       p.completed.toString(),
-      p.in_progress.toString(),
       p.to_do.toString(),
+      p.in_progress.toString(),
       p.blocked.toString(),
       `${p.completion_rate}%`,
     ]);
 
     autoTable(doc, {
       startY: yPos,
-      head: [['Project Name', 'Total', 'Completed', 'In Progress', 'To Do', 'Blocked', 'Rate']],
+      head: [['Project Name', 'Total', 'Completed', 'To Do', 'In Progress', 'Blocked', 'Rate']],
       body: tableData,
       theme: 'grid',
       headStyles: { fillColor: [76, 175, 80], fontSize: 9, fontStyle: 'bold' },
@@ -117,8 +117,8 @@ export class ProjectPerformancePDF {
         0: { halign: 'left', cellWidth: 60 },
         1: { cellWidth: 15 },
         2: { cellWidth: 20, fillColor: [232, 245, 233] },
-        3: { cellWidth: 22, fillColor: [227, 242, 253] },
-        4: { cellWidth: 15, fillColor: [255, 248, 225] },
+        3: { cellWidth: 22, fillColor: [255, 248, 225] }, 
+        4: { cellWidth: 15, fillColor: [227, 242, 253] },
         5: { cellWidth: 17, fillColor: [255, 235, 238] },
         6: { cellWidth: 18, fontStyle: 'bold' },
       },

@@ -1,5 +1,5 @@
-// src/app/reportgeneration/components/ReportCard.tsx
-import React from 'react';
+// src/app/reportgeneration/_components/ReportCard.tsx
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -12,8 +12,19 @@ import {
   useTheme,
   useMediaQuery,
   Tooltip,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  SelectChangeEvent,
 } from '@mui/material';
-import { PictureAsPdf, TableChart, Timer, LockOutlined } from '@mui/icons-material';
+import {
+  PictureAsPdf,
+  TableChart,
+  Timer,
+  LockOutlined,
+} from '@mui/icons-material';
+import { ReportService } from '@/services/reportService';
 
 interface ReportCardProps {
   report: {
@@ -28,11 +39,12 @@ interface ReportCardProps {
   };
   isExportingPDF: boolean;
   isExportingExcel: boolean;
-  onExportPDF: () => void;
-  onExportExcel: () => void;
+  onExportPDF: (params?: { department: string; aggregation: string }) => void;
+  onExportExcel: (params?: { department: string; aggregation: string }) => void;
   getCategoryColor: (category: string) => string;
   hasDateFilter?: boolean;
   isDisabled?: boolean;
+  reportType?: string;
 }
 
 export const ReportCard: React.FC<ReportCardProps> = ({
@@ -44,143 +56,224 @@ export const ReportCard: React.FC<ReportCardProps> = ({
   getCategoryColor,
   hasDateFilter = false,
   isDisabled = false,
+  reportType,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  // State for Department Task Activity Report
+  const [selectedDepartment, setSelectedDepartment] = useState('');
+  const [selectedAggregation, setSelectedAggregation] = useState('weekly');
+  const [departments, setDepartments] = useState<string[]>([]);
+  const [loadingDepartments, setLoadingDepartments] = useState(false);
+
+  // Check if this is a department report
+  const isDepartmentReport = reportType === 'department-activity' || report.id === 'department-activity';
+
+  // Fetch departments when component mounts and is department report
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      if (!isDepartmentReport) return;
+
+      setLoadingDepartments(true);
+      try {
+        const reportService = new ReportService();
+        const fetchedDepartments = await reportService.getDepartments();
+        setDepartments(fetchedDepartments);
+      } catch (error) {
+        console.error('Failed to load departments:', error);
+        setDepartments([]);
+      } finally {
+        setLoadingDepartments(false);
+      }
+    };
+
+    fetchDepartments();
+  }, [isDepartmentReport]);
+
+  // Handle department dropdown change
+  const handleDepartmentChange = (event: SelectChangeEvent) => {
+    setSelectedDepartment(event.target.value);
+  };
+
+  // Handle aggregation dropdown change
+  const handleAggregationChange = (event: SelectChangeEvent) => {
+    setSelectedAggregation(event.target.value);
+  };
+
+  // Enhanced button rendering with department validation
   const renderButton = (
-    button: React.ReactNode,
+    button: React.ReactElement,
     tooltipText: string,
     disabled: boolean
   ) => {
-    if (disabled && isDisabled) {
+    const needsDepartment = isDepartmentReport && !selectedDepartment;
+    const finalDisabled = disabled || needsDepartment;
+    const finalTooltip = needsDepartment ? 'Please select a department' : tooltipText;
+
+    if (finalDisabled && (isDisabled || needsDepartment)) {
       return (
-        <Tooltip title={tooltipText} arrow>
-          <span style={{ width: isMobile ? '100%' : 'auto' }}>{button}</span>
+        <Tooltip title={finalTooltip} arrow>
+          <span>{button}</span>
         </Tooltip>
       );
     }
+
     return button;
+  };
+
+  // Handle export with department params
+  const handleExportPDF = () => {
+    if (isDepartmentReport) {
+      if (!selectedDepartment) {
+        return;
+      }
+      onExportPDF({
+        department: selectedDepartment,
+        aggregation: selectedAggregation,
+      });
+    } else {
+      onExportPDF();
+    }
+  };
+
+  const handleExportExcel = () => {
+    if (isDepartmentReport) {
+      if (!selectedDepartment) {
+        return;
+      }
+      onExportExcel({
+        department: selectedDepartment,
+        aggregation: selectedAggregation,
+      });
+    } else {
+      onExportExcel();
+    }
   };
 
   return (
     <Card
-      elevation={2}
+      elevation={3}
       sx={{
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        transition: 'all 0.3s ease-in-out',
-        opacity: isDisabled ? 0.7 : 1,
+        position: 'relative',
+        transition: 'all 0.3s ease',
+        opacity: isDisabled ? 0.6 : 1,
         '&:hover': {
+          boxShadow: isDisabled ? 3 : 6,
           transform: isDisabled ? 'none' : 'translateY(-4px)',
-          boxShadow: isDisabled ? theme.shadows[2] : theme.shadows[8],
         },
       }}
     >
-      <CardContent sx={{ flexGrow: 1, pb: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
-          <Box
-            sx={{
-              mr: 2,
-              p: 1.5,
-              borderRadius: 2,
-              bgcolor: isDisabled ? 'action.disabledBackground' : 'primary.lighter',
-              display: 'flex',
-              color: isDisabled ? 'action.disabled' : 'primary.main',
-            }}
-          >
-            {isDisabled ? <LockOutlined sx={{ fontSize: 28 }} /> : report.icon}
-          </Box>
-          <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-            <Typography
-              variant="h6"
-              component="h3"
-              gutterBottom
+      <CardContent sx={{ flexGrow: 1, pb: 2 }}>
+        <Stack spacing={2}>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Box
               sx={{
-                fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                fontWeight: 600,
-                lineHeight: 1.3,
+                p: 1.5,
+                borderRadius: 2,
+                bgcolor: `${getCategoryColor(report.category)}15`,
+                color: getCategoryColor(report.category),
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
-              {report.title}
-            </Typography>
-            <Chip
-              label={report.category}
-              color={getCategoryColor(report.category) as any}
-              size="small"
-              sx={{ fontSize: '0.75rem' }}
-            />
+              {isDisabled ? <LockOutlined fontSize="large" /> : report.icon}
+            </Box>
+            <Box flex={1}>
+              <Typography variant="h6" component="h3" gutterBottom sx={{ mb: 0.5 }}>
+                {report.title}
+              </Typography>
+              <Chip
+                label={report.category}
+                size="small"
+                sx={{
+                  bgcolor: `${getCategoryColor(report.category)}15`,
+                  color: getCategoryColor(report.category),
+                  fontWeight: 600,
+                  fontSize: '0.75rem',
+                }}
+              />
+            </Box>
           </Box>
-        </Box>
 
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{
-            mb: 2,
-            display: { xs: 'none', sm: 'block' },
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {report.description}
-        </Typography>
-
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{
-            mb: 2,
-            display: { xs: 'block', sm: 'none' },
-          }}
-        >
-          {report.description.substring(0, 120)}...
-        </Typography>
-
-        <Stack direction="row" spacing={2} sx={{ mt: 'auto', flexWrap: 'wrap', gap: 1 }}>
-          <Chip
-            icon={<Timer />}
-            label={report.estimatedTime}
-            size="small"
-            variant="outlined"
-          />
-          <Typography variant="caption" color="text.secondary" sx={{ pt: 0.75 }}>
-            {report.dataPoints} data points
+          <Typography variant="body2" color="text.secondary" sx={{ minHeight: 40 }}>
+            {report.description.length > 120 ? (
+              <Tooltip title={report.description} arrow>
+                <span>{report.description.substring(0, 120)}...</span>
+              </Tooltip>
+            ) : (
+              report.description
+            )}
           </Typography>
-        </Stack>
 
-        <Stack direction="row" spacing={1} sx={{ mt: 2, flexWrap: 'wrap', gap: 1 }}>
-          {hasDateFilter && (
-            <Chip
-              label="Date Filtered"
-              color="success"
-              size="small"
-              variant="outlined"
-            />
-          )}
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            <Chip icon={<Timer />} label={report.estimatedTime} size="small" variant="outlined" />
+            {hasDateFilter && (
+              <Chip label="Date Range Available" size="small" color="primary" variant="outlined" />
+            )}
+            {report.hasSubTypes && (
+              <Chip label="Multiple Types" size="small" color="secondary" variant="outlined" />
+            )}
+          </Stack>
 
-          {report.hasSubTypes && (
-            <Chip
-              label="Multiple Options"
-              color="secondary"
-              size="small"
-              variant="outlined"
-            />
-          )}
+          {/* Department Report Dropdowns */}
+          {isDepartmentReport && !isDisabled && (
+            <Stack spacing={2} sx={{ mt: 2 }}>
+              {/* Department Dropdown */}
+              <FormControl fullWidth size="small" required>
+                <InputLabel>Department *</InputLabel>
+                <Select
+                  value={selectedDepartment}
+                  onChange={handleDepartmentChange}
+                  label="Department *"
+                  disabled={loadingDepartments}
+                >
+                  {loadingDepartments ? (
+                    <MenuItem disabled>Loading departments...</MenuItem>
+                  ) : departments.length === 0 ? (
+                    <MenuItem disabled>No departments found</MenuItem>
+                  ) : (
+                    [
+                      <MenuItem key="empty" value="">Select Department</MenuItem>,
+                      ...departments.map((dept) => (
+                        <MenuItem key={dept} value={dept}>
+                          {dept}
+                        </MenuItem>
+                      ))
+                    ]
+                  )}
+                </Select>
+              </FormControl>
 
-          {isDisabled && (
-            <Chip
-              label="Date Range Required"
-              color="warning"
-              size="small"
-              variant="filled"
-            />
+              {/* Aggregation Dropdown */}
+              <FormControl fullWidth size="small">
+                <InputLabel>Aggregation</InputLabel>
+                <Select
+                  value={selectedAggregation}
+                  onChange={handleAggregationChange}
+                  label="Aggregation"
+                >
+                  <MenuItem value="weekly">Weekly</MenuItem>
+                  <MenuItem value="monthly">Monthly</MenuItem>
+                </Select>
+              </FormControl>
+
+              {/* Department Selection Indicator */}
+              {!selectedDepartment && (
+                <Typography variant="caption" color="warning.main" sx={{ fontStyle: 'italic' }}>
+                  Please select a department to enable export
+                </Typography>
+              )}
+            </Stack>
           )}
         </Stack>
       </CardContent>
 
-      <CardActions sx={{ px: 2, pb: 2, pt: 1 }}>
+      <CardActions sx={{ p: 2, pt: 0 }}>
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
           spacing={1}
@@ -190,8 +283,10 @@ export const ReportCard: React.FC<ReportCardProps> = ({
             <Button
               variant="contained"
               startIcon={<PictureAsPdf />}
-              onClick={onExportPDF}
-              disabled={isExportingPDF || isDisabled}
+              onClick={handleExportPDF}
+              disabled={
+                isExportingPDF || isDisabled || (isDepartmentReport && !selectedDepartment)
+              }
               fullWidth={isMobile}
               sx={{
                 py: { xs: 1, sm: 1.25 },
@@ -202,15 +297,16 @@ export const ReportCard: React.FC<ReportCardProps> = ({
               {isExportingPDF ? 'Exporting...' : 'Export to PDF'}
             </Button>,
             'Please select a date range first',
-            isDisabled
+            isDisabled || (isDepartmentReport && !selectedDepartment)
           )}
-
           {renderButton(
             <Button
               variant="outlined"
               startIcon={<TableChart />}
-              onClick={onExportExcel}
-              disabled={isExportingExcel || isDisabled}
+              onClick={handleExportExcel}
+              disabled={
+                isExportingExcel || isDisabled || (isDepartmentReport && !selectedDepartment)
+              }
               fullWidth={isMobile}
               sx={{
                 py: { xs: 1, sm: 1.25 },
@@ -221,7 +317,7 @@ export const ReportCard: React.FC<ReportCardProps> = ({
               {isExportingExcel ? 'Exporting...' : 'Export to Excel'}
             </Button>,
             'Please select a date range first',
-            isDisabled
+            isDisabled || (isDepartmentReport && !selectedDepartment)
           )}
         </Stack>
       </CardActions>

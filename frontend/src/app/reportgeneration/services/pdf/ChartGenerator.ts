@@ -134,12 +134,16 @@ export class ChartGenerator {
     };
   }
 
-  static createTeamProductivityChart(teamMembers: any[]): ChartConfiguration {
+  static createUserProductivityChart(teamMembers: any[]): ChartConfiguration {
     const topUsers = [...teamMembers].sort((a, b) => b.completion_rate - a.completion_rate).slice(0, 10);
     return {
       type: 'bar',
       data: {
-        labels: topUsers.map(u => u.user_id.length > 12 ? u.user_id.substring(0, 12) + '...' : u.user_id),
+        labels: topUsers.map(u => {
+          const name = u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || `User ${u.user_id}`;
+          return name.length > 20 ? name.substring(0, 20) + '...' : name;
+        }),
+
         datasets: [{
           label: 'Completion Rate (%)',
           data: topUsers.map(u => u.completion_rate),
@@ -159,10 +163,77 @@ export class ChartGenerator {
         },
         plugins: {
           legend: { display: false },
-          title: { display: true, text: 'Top 10 Team Members by Completion Rate', font: { size: 16, weight: 'bold' }, padding: { bottom: 15 } },
+          title: { display: true, text: 'Top 10 Users by Completion Rate', font: { size: 16, weight: 'bold' }, padding: { bottom: 15 } },
           datalabels: { display: true, anchor: 'end', align: 'end', color: '#424242', font: { weight: 'bold', size: 10 }, formatter: (v: number) => `${v.toFixed(1)}%` },
         },
       },
     };
   }
+
+
+  static createDepartmentTaskActivityChart(data: any[], title: string): ChartConfiguration {
+  // ✅ Filter out weeks/months where ALL values are 0
+  const filteredData = data.filter(d => {
+    const total = (d.to_do || 0) + (d.in_progress || 0) + (d.blocked || 0) + (d.completed || 0) + (d.overdue || 0);
+    return total > 0; // Only include if there's at least 1 task
+  });
+
+  return {
+    type: 'bar',
+    data: {
+      labels: filteredData.map(d => d.label), // Use filtered data
+      datasets: [
+        {
+          label: 'To Do',
+          data: filteredData.map(d => d.to_do || 0),
+          backgroundColor: '#9E9E9E',
+        },
+        {
+          label: 'In Progress',
+          data: filteredData.map(d => d.in_progress || 0),
+          backgroundColor: '#2196F3',
+        },
+        {
+          label: 'Blocked',
+          data: filteredData.map(d => d.blocked || 0),
+          backgroundColor: '#FF9800',
+        },
+        {
+          label: 'Completed',
+          data: filteredData.map(d => d.completed || 0),
+          backgroundColor: '#4CAF50',
+        },
+        {
+          label: 'Overdue',
+          data: filteredData.map(d => d.overdue || 0),
+          backgroundColor: '#F44336',
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      animation: { duration: 0 },
+      scales: {
+        x: { stacked: true, ticks: { font: { size: 9 } } },
+        y: { stacked: true, beginAtZero: true, ticks: { font: { size: 10 } } },
+      },
+      plugins: {
+        legend: { display: true, position: 'bottom' },
+        title: { display: true, text: title, font: { size: 14, weight: 'bold' } },
+        // ✅ FIX: Hide data labels or only show non-zero values
+        datalabels: {
+          display: true,
+          color: '#ffffff',
+          font: { weight: 'bold', size: 10 },
+          formatter: (value: number) => {
+            // Only show label if value > 0
+            return value > 0 ? value : '';
+          },
+        },
+      },
+    },
+  };
+  }
+
 }

@@ -74,24 +74,6 @@ export interface UserProductivityReport {
   summary: UserProductivitySummary;
 }
 
-// Team Productivity Report Types (Alternative naming - same as UserProductivityReport)
-export interface TeamProductivityData {
-  team_members: TeamMemberStats[];
-}
-
-export interface TeamProductivitySummary {
-  total_team_members: number;
-  total_tasks_assigned: number;
-  total_completed: number;
-  average_completion_rate: number;
-}
-
-export interface TeamProductivityReport {
-  metadata: ReportMetadata;
-  data: TeamProductivityData;
-  summary: TeamProductivitySummary;
-}
-
 // Department Task Activity Report Types
 export interface TaskStatusCount {
   to_do: number;
@@ -111,12 +93,21 @@ export interface MonthlyData extends TaskStatusCount {
   month_name: string;  // e.g., "October 2025"
 }
 
+export interface DepartmentUser {
+  user_id: string;
+  full_name: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+}
+
 export interface DepartmentTaskActivityData {
   department: string;
   aggregation: 'weekly' | 'monthly';
   weekly_data?: WeeklyData[];
   monthly_data?: MonthlyData[];
   total_tasks: number;
+  users?: DepartmentUser[];
 }
 
 export interface DepartmentTaskActivitySummary {
@@ -128,6 +119,7 @@ export interface DepartmentTaskActivitySummary {
   total_tasks: number;
   status_totals: TaskStatusCount;
   aggregation_type: 'weekly' | 'monthly';
+  total_users?: number;
 }
 
 export interface DepartmentTaskActivityReport {
@@ -137,7 +129,10 @@ export interface DepartmentTaskActivityReport {
 }
 
 // Combined Task Completion Report Type
-export type TaskCompletionReport = ProjectPerformanceReport | UserProductivityReport | TeamProductivityReport | DepartmentTaskActivityReport;
+export type TaskCompletionReport = 
+  | ProjectPerformanceReport 
+  | UserProductivityReport 
+  | DepartmentTaskActivityReport;
 
 // Reports Summary
 export interface ReportsSummary {
