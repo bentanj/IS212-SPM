@@ -12,9 +12,9 @@ dayjs.extend(weekOfYear);
 
 import { taskMockData } from '@/mocks/staff/taskMockData';
 import { Task } from '@/types';
-import { SideBar, Header, TaskCreateModal, TaskDetailModal, DayTasksModal } from './_components';
+import { SideBar, Header, DayTasksModal, TaskCreateModal, TaskDetailModal } from './_components';
 import { MonthHeader, CalendarBody, DayHeaders } from './_components/_TaskCalendar';
-import { getTaskTypeColor, isTaskOverdue } from '../../utils/TaskRenderingFunctions';
+import { getTaskTypeColor, isTaskOverdue } from '@/utils/TaskRenderingFunctions';
 
 // Functions
 import { getUserTask } from '@/utils/Tasks/getTask';

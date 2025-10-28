@@ -13,7 +13,7 @@ import { canEditTask } from '@/utils/Permissions';
 import { ModalTitle, Subtitle1, SubTaskSection, CommentSection } from './_TaskDetailModal';
 import updateTask from '@/utils/Tasks/updateTask';
 import { validateCanCompleteTask, taskCompletedTrigger } from '@/utils/TaskCreateModelFunctions';
-import TaskAttachmentsSection from '@/app/calendar/_components/TaskAttachmentsSection';
+import { TaskAttachmentsSection } from './_TaskCreateModal/TaskAttachmentsSection';
 
 interface TaskDetailModalProps {
   task: Task | null;
