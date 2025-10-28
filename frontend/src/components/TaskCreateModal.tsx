@@ -21,6 +21,7 @@ import { getProjectsByTasks } from '../app/projects/_functions/getProjectsByTask
 
 // Components
 import { ModalTitle, ParentTaskField, DateRow, RecurringParams, MultiSelectInput, DropDownMenu, Tags, AssignedUsersAutocomplete, Comments, FileUpload } from './_TaskCreateModal/';
+import TaskAttachmentsSection from '@/app/calendar/_components/TaskAttachmentsSection';
 
 interface TaskCreateModalProps {
   open: boolean;
@@ -87,7 +88,7 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
         completedDate: existingTaskDetails.completedDate ? dayjs(existingTaskDetails.completedDate) : null,
         dueDate: dayjs(existingTaskDetails.dueDate),
         comments: "",
-        attachedFile: null,
+        attachedFiles: [], // Start with empty array - existing files shown in TaskAttachmentsSection
       });
 
       if (existingTaskDetails.parentTaskId) {
@@ -122,7 +123,10 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
     })
       .then((response) => {
         if (response) {
-          refetchTasks();
+          // Add a small delay to ensure modal is closed before refetching
+          setTimeout(() => {
+            refetchTasks();
+          }, 1600); // Slightly longer than the modal close delay
         }
       })
   }
@@ -256,11 +260,22 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
           setFormData={setFormData}
           errors={errors} newComment={newComment} setNewComment={setNewComment} />
 
-        {/* File Upload */}
-        <FileUpload
-          isMobile={isMobile}
-          formData={formData}
-          setFormData={setFormData} />
+        {/* File Upload - Only show in create mode */}
+        {!isEditMode && (
+          <FileUpload
+            isMobile={isMobile}
+            formData={formData}
+            setFormData={setFormData} />
+        )}
+
+        {/* Attachments Section - Only show in edit mode */}
+        {isEditMode && existingTaskDetails && (
+          <TaskAttachmentsSection
+            taskId={existingTaskDetails.taskId}
+            uploadedBy={currentUser.userId}
+            setSnackbarContent={setSnackbarContent}
+          />
+        )}
 
       </DialogContent>
 
