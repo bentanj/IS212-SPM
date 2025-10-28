@@ -14,7 +14,7 @@ export const Header: React.FC<HeaderProps> = ({
         <AppBar position="static" color="transparent" elevation={0} sx={{ bgcolor: 'white', flexShrink: 0 }}>
             <Toolbar sx={{ minHeight: { xs: 56, sm: 64 } }}>
                 {isMobile && (
-                    <IconButton edge="start" onClick={toggleSidebar} sx={{ mr: 2 }}>
+                    <IconButton edge="start" onClick={toggleSidebar} sx={{ mr: 2, }} >
                         <Menu />
                     </IconButton>
                 )}
@@ -48,10 +48,11 @@ export const Header: React.FC<HeaderProps> = ({
                 </Typography>
                 <Button
                     variant="contained"
-                    startIcon={<Add />}
                     onClick={() => setCreateModalOpen(true)}
                     size={isMobile ? 'small' : 'medium'}
+                    sx={{ ml: 'auto' }}
                 >
+                    <Add />
                     {isMobile ? '' : 'Add task'}
                 </Button>
             </Toolbar>
