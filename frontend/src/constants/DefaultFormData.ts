@@ -21,7 +21,7 @@ const DefaultFormData: Omit<FormData, "taskId"> = {
     assignedUsers: [],
     tags: [],
     comments: '',
-    attachedFile: null,
+    attachedFiles: [],
     parentTaskId: null,
     IsReplicateFromCompletedSubtask: false,
 }

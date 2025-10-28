@@ -13,6 +13,7 @@ import { canEditTask } from '@/utils/Permissions';
 import { ModalTitle, Subtitle1, SubTaskSection, CommentSection } from './_TaskDetailModal';
 import updateTask from '@/utils/Tasks/updateTask';
 import { validateCanCompleteTask, taskCompletedTrigger } from '@/utils/TaskCreateModelFunctions';
+import TaskAttachmentsSection from '@/app/calendar/_components/TaskAttachmentsSection';
 
 interface TaskDetailModalProps {
   task: Task | null;
@@ -195,6 +196,13 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
           {task.comments.length > 0 && (
             <CommentSection comments={task.comments} />
           )}
+
+          {/* Attachments Section */}
+          <TaskAttachmentsSection
+            taskId={task.taskId}
+            uploadedBy={currentUser.userId}
+            setSnackbarContent={setSnackbarContent}
+          />
         </DialogContent>
 
         <DialogActions>
