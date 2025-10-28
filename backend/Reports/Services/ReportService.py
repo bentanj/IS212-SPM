@@ -199,7 +199,7 @@ class ReportService:
             
             # Get all tasks and filter by date range
             all_tasks = self.repo.get_all_tasks()
-            filtered_tasks = self.filter_tasks_by_date(all_tasks, start_date, end_date)
+            filtered_tasks = self._filter_tasks_by_date(all_tasks, start_date, end_date)
             
             # Get user productivity from filtered tasks
             users = self.repo.get_user_productivity_from_tasks(filtered_tasks)
@@ -218,7 +218,7 @@ class ReportService:
             for user in users:
                 user_id = user.get('user_id')
                 if user_id:
-                    user_info = self.get_user_info(user_id)
+                    user_info = self._get_user_info(user_id)
                     user['first_name'] = user_info['first_name']
                     user['last_name'] = user_info['last_name']
                     full_name = f"{user_info['first_name']} {user_info['last_name']}".strip()
@@ -231,16 +231,16 @@ class ReportService:
             
             metadata = ReportMetadata(
                 report_id=report_id,
-                report_type='user_productivity',
+                report_type="user_productivity",
                 generated_at=datetime.utcnow(),
-                generated_by='system',
+                generated_by="system",
                 parameters={
-                    'start_date': start_date,
-                    'end_date': end_date,
-                    'report_subtype': 'per_user'
-                },
-                tasks_in_range=len(filtered_tasks),
-                total_tasks=len(all_tasks)
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "report_subtype": "per_user",
+                    "tasks_in_range": len(filtered_tasks),
+                    "total_tasks": len(all_tasks)
+                }
             )
             
             summary = {
