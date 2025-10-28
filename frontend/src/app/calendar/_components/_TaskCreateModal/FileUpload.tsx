@@ -1,6 +1,6 @@
-import { Box, Button, Typography, Paper, IconButton, Alert, Stack, Chip } from '@mui/material'
+import { Box, Button, Typography, Paper, IconButton, Alert, Stack, Chip } from '@mui/material';
 import { CloudUpload, Delete, AttachFile } from '@mui/icons-material';
-import { handleFileUpload, handleRemoveFile } from '@/utils/TaskCreateModelFunctions';
+import { handleFileUpload, handleRemoveFile } from '../../_functions/TaskCreateModelFunctions';
 import { useState } from 'react';
 
 interface FileUploadProps {
@@ -9,7 +9,7 @@ interface FileUploadProps {
     setFormData: React.Dispatch<React.SetStateAction<any>>;
 }
 
-export const FileUpload: React.FC<FileUploadProps> = ({
+const FileUpload: React.FC<FileUploadProps> = ({
     isMobile,
     formData,
     setFormData,
@@ -121,3 +121,5 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         </Box>
     )
 }
+
+export default FileUpload

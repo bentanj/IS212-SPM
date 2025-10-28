@@ -133,14 +133,23 @@ export const handleSubmit = async (params: {
             response = await updateTask(TaskData);
             setSnackbarContent('Task updated successfully', 'success');
         } else {
-            response = await createTask(TaskData);
-            setSnackbarContent('Task created successfully', 'success');
+            // Pass files to createTask if they exist
+            const files = formData.attachedFiles && formData.attachedFiles.length > 0 ? formData.attachedFiles : undefined;
+            response = await createTask(TaskData, files);
+
+            if (files && files.length > 0) {
+                setSnackbarContent(`Task created successfully with ${files.length} file(s)`, 'success');
+            } else {
+                setSnackbarContent('Task created successfully', 'success');
+            }
         }
 
         if (TaskData.status === 'Completed') {
             await taskCompletedTrigger(TaskData, setSnackbarContent);
         }
 
+        // Return response immediately so refetchTasks() is called
+        // The modal close is handled separately with setTimeout
         setTimeout(() => {
             handleReset();
             onClose();
@@ -150,6 +159,7 @@ export const handleSubmit = async (params: {
     } catch (error) {
         setSnackbarContent(`Failed to create task. Please try again`, 'error');
         console.error('Error submitting form:', error);
+        return null; // Return null on error so refetchTasks is not called
     }
 };
 
@@ -194,22 +204,26 @@ export const taskCompletedTrigger = async (
     }
 };
 
-// Handle file upload
+// Handle file upload - accepts array of files
 export const handleFileUpload = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    files: File[],
     setFormData: React.Dispatch<React.SetStateAction<FormData | Omit<FormData, 'taskId'>>>
 ) => {
-    const file = event.target.files?.[0];
-    if (file) {
-        setFormData(prev => ({ ...prev, attachedFile: file }));
-    }
+    setFormData(prev => ({
+        ...prev,
+        attachedFiles: [...(prev.attachedFiles || []), ...files]
+    }));
 };
 
-// Handle file removal
+// Handle file removal - accepts index of file to remove
 export const handleRemoveFile = (
+    index: number,
     setFormData: React.Dispatch<React.SetStateAction<FormData | Omit<FormData, 'taskId'>>>
 ) => {
-    setFormData(prev => ({ ...prev, attachedFile: null }));
+    setFormData(prev => ({
+        ...prev,
+        attachedFiles: prev.attachedFiles?.filter((_, i) => i !== index) || []
+    }));
 };
 
 // Add tag
