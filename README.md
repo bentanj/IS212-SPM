@@ -2,9 +2,18 @@
 
 ## Testing
 
-This project includes comprehensive testing across all backend services. Tests are organized by service and include both unit and integration tests.
+This project includes comprehensive testing across both frontend and backend.
 
 ### Running Tests
+
+#### Frontend Tests
+To run all frontend tests:
+```bash
+cd frontend
+npm test                 # Run all tests
+npm run test:watch      # Run tests in watch mode
+npm run test:coverage   # Run tests with coverage report
+```
 
 #### All Backend Tests
 To run all backend tests across all services:
@@ -25,13 +34,22 @@ cd backend/Example
 
 ### Test Structure
 
-#### Unit Tests
+#### Frontend Tests
+- **Framework**: Jest with React Testing Library
+- **Location**: Co-located with components or in `/src/utils/_Tests/`
+- **Types**:
+  - Component tests: UI rendering, user interactions, state management
+  - Utility tests: Pure function logic, data transformations
+  - Integration tests: API calls, form submissions
+- **Configuration**: `jest.config.ts` with Next.js integration
+
+#### Backend Unit Tests
 - **Purpose**: Test individual components in isolation
 - **Markers**: `@pytest.mark.unit`
 - **Scope**: Functions, classes, and methods without external dependencies
 - **Speed**: Fast execution, no database or network calls
 
-#### Integration Tests
+#### Backend Integration Tests
 - **Purpose**: Test complete workflows and service interactions
 - **Markers**: `@pytest.mark.integration`
 - **Scope**: End-to-end functionality with real dependencies
