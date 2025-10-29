@@ -32,6 +32,7 @@ import { LoadingIndicator } from './_components/LoadingIndicator';
 import { ReportFooter } from './_components/ReportFooter';
 import { DateRangePicker } from './_components/DateRangePicker';
 import { ReportTypeSelector } from './_components/ReportTypeSelector';
+import { LoggedTimeReportCard } from './_components/LoggedTimeReportCard';
 
 // Import PDF services
 import {
@@ -39,6 +40,19 @@ import {
   UserProductivityPDF,
   DepartmentTaskActivityPDF,
 } from './services/pdf';
+import { LoggedTimeReportPDF } from './services/pdf/LoggedTimeReportPDF';
+
+// Import mock logged time data
+import { mockLoggedTimeData } from '../../mocks/report/loggedTimeMockData'
+
+// Import organization departments
+import { ALL_DEPARTMENTS } from '../../constants/Organisation';
+
+// Import excel generator adapter functions
+import { exportLoggedTimeToExcel } from './services/excel/LoggedTimeReportExcel'
+import { exportProjectPerformanceToExcel } from './services/excel/ProjectPerformanceExcel';
+import { exportUserProductivityToExcel } from './services/excel/UserProductivityExcel';
+import { exportDepartmentTaskActivityToExcel } from './services/excel/DepartmentSummaryExcel';
 
 // Register Chart.js components
 Chart.register(...registerables, ChartDataLabels);
@@ -74,7 +88,7 @@ export default function ReportGeneration() {
 
   // API Data States
   const [projectReport, setProjectReport] = useState<ProjectPerformanceReport | null>(null);
-  const [teamReport, setUserProductivityReport] = useState<UserProductivityReport | null>(null);
+  const [userReport, setUserProductivityReport] = useState<UserProductivityReport | null>(null);
   const [departmentReport, setDepartmentReport] = useState<DepartmentTaskActivityReport | null>(null);
 
   // Loading and Error States
@@ -239,6 +253,7 @@ export default function ReportGeneration() {
 
       await new Promise((resolve) => setTimeout(resolve, 500));
 
+      // Generate PDF
       if (pendingExportType === 'pdf') {
         const dateRangeStr = getDateRangeString();
         console.log('4. Generating PDF...', { subType, dateRangeStr });
@@ -259,6 +274,18 @@ export default function ReportGeneration() {
         }
         console.log('6. PDF generated successfully!');
       }
+      
+      // Generate Excel
+      if (pendingExportType === 'excel') {
+        console.log('4. Generating Excel...', { subType });
+        
+        if (subType === 'per-project') {
+          exportProjectPerformanceToExcel(reportData as ProjectPerformanceReport);
+        } else if (subType === 'per-user') {
+          exportUserProductivityToExcel(reportData as UserProductivityReport);
+        }
+        console.log('5. Excel generated successfully!');
+      }
     } catch (err) {
       console.error('Export failed:', err);
       alert(`Export failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
@@ -274,7 +301,6 @@ export default function ReportGeneration() {
   const handleExportClick = (type: 'pdf' | 'excel') => {
     console.log('Export clicked. Date range valid:', isDateRangeValid);
 
-    // Validate date range
     if (!isDateRangeValid) {
       setShowDateValidation(true);
       setError('Please select both start and end dates before generating a report.');
@@ -284,56 +310,122 @@ export default function ReportGeneration() {
     }
 
     setShowDateValidation(false);
-
-    // Proceed with export
     setPendingExportType(type);
     setShowReportTypeDialog(true);
   };
 
-  // NEW: Handle department report export (direct, no dialog)
+  // Handle department export
   const handleDepartmentExport = async (
     type: 'pdf' | 'excel',
-    params: { department?: string; aggregation?: string }
+    params: { department: string; aggregation: string }
   ) => {
-    console.log('Department export clicked:', { type, params, isDateRangeValid });
+    console.log('Department export:', { type, params });
 
-    // Validate date range first
     if (!isDateRangeValid) {
-      setShowDateValidation(true);
       setError('Please select both start and end dates before generating a report.');
       setShowError(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
-    // Validate department params
-    if (!params.department || !params.aggregation) {
-      setError('Please select a department and aggregation type.');
-      setShowError(true);
-      return;
-    }
-
-    setShowDateValidation(false);
     setSelectedReport('department-activity');
     setExportType(type);
 
     try {
-      console.log('Fetching department report...', params);
       const reportData = await fetchDepartmentReport(params.department, params.aggregation);
-
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       if (type === 'pdf') {
         const dateRangeStr = getDateRangeString();
-        console.log('Generating Department PDF...', { dateRangeStr });
         await DepartmentTaskActivityPDF.generate(reportData, currentDate, dateRangeStr);
-        console.log('Department PDF generated successfully!');
       } else if (type === 'excel') {
-        alert('Excel export for department reports coming soon!');
+        exportDepartmentTaskActivityToExcel(reportData);
       }
     } catch (err) {
       console.error('Department export failed:', err);
-      alert(`Export failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setSelectedReport(null);
+      setExportType(null);
+    }
+  };
+
+  // Get unique projects from mock logged time data
+  const getProjects = (): string[] => {
+    const projects = Array.from(new Set(mockLoggedTimeData.map(entry => entry.projectName))).sort();
+    return projects;
+  };
+
+  // Get unique departments
+  const getDepartments = (): string[] => {
+    return ALL_DEPARTMENTS;
+  };
+
+  // Handle Logged Time Report PDF export
+  const handleLoggedTimeExportPDF = async (
+    filterType: 'department' | 'project',
+    filterValue: string
+  ) => {
+    console.log('Exporting Logged Time Report PDF:', { filterType, filterValue });
+    
+    if (!isDateRangeValid) {
+      setError('Please select both start and end dates before generating a report.');
+      setShowError(true);
+      return;
+    }
+
+    setSelectedReport('logged-time');
+    setExportType('pdf');
+    
+    try {
+      await LoggedTimeReportPDF.generate(
+        mockLoggedTimeData,
+        startDate!,
+        endDate!,
+        filterType,
+        filterValue,
+        currentDate
+      );
+      
+      console.log('Logged Time PDF generated successfully!');
+    } catch (err) {
+      console.error('Logged Time PDF export failed:', err);
+      setError(`Failed to export PDF: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setShowError(true);
+    } finally {
+      setSelectedReport(null);
+      setExportType(null);
+    }
+  };
+
+  // Handle Logged Time Report Excel export
+  const handleLoggedTimeExportExcel = async (
+    filterType: 'department' | 'project',
+    filterValue: string
+  ) => {
+    console.log('Exporting Logged Time Report Excel:', { filterType, filterValue });
+    
+    if (!isDateRangeValid) {
+      setError('Please select both start and end dates before generating a report.');
+      setShowError(true);
+      return;
+    }
+
+    setSelectedReport('logged-time');
+    setExportType('excel');
+    
+    try {
+      exportLoggedTimeToExcel(
+        mockLoggedTimeData,
+        startDate!,
+        endDate!,
+        filterType,
+        filterValue
+      );
+      
+      console.log('Logged Time Excel generated successfully!');
+    } catch (err) {
+      console.error('Logged Time Excel export failed:', err);
+      setError(`Failed to export Excel: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setShowError(true);
     } finally {
       setSelectedReport(null);
       setExportType(null);
@@ -356,7 +448,6 @@ export default function ReportGeneration() {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50', py: 4 }}>
       <Container maxWidth="lg">
-        {/* Error Notification */}
         <ErrorNotification
           error={error}
           showError={showError}
@@ -366,10 +457,8 @@ export default function ReportGeneration() {
           }}
         />
 
-        {/* Header Section */}
         <ReportHeader />
 
-        {/* Date Range Picker */}
         <DateRangePicker
           startDate={startDate}
           endDate={endDate}
@@ -386,14 +475,12 @@ export default function ReportGeneration() {
           showValidation={showDateValidation}
         />
 
-        {/* Loading Indicator */}
         <LoadingIndicator
           selectedReport={selectedReport}
           exportType={exportType}
           isLoading={isLoading}
         />
 
-        {/* Reports Section */}
         <Typography
           variant="h5"
           component="h2"
@@ -414,14 +501,14 @@ export default function ReportGeneration() {
                 report={report}
                 isExportingPDF={selectedReport === report.id && exportType === 'pdf'}
                 isExportingExcel={selectedReport === report.id && exportType === 'excel'}
-                onExportPDF={(params) => {
+                onExportPDF={(params?: { department: string; aggregation: string }) => {
                   if (report.id === 'department-activity' && params) {
                     handleDepartmentExport('pdf', params);
                   } else {
                     handleExportClick('pdf');
                   }
                 }}
-                onExportExcel={(params) => {
+                onExportExcel={(params?: { department: string; aggregation: string }) => {
                   if (report.id === 'department-activity' && params) {
                     handleDepartmentExport('excel', params);
                   } else {
@@ -435,9 +522,21 @@ export default function ReportGeneration() {
               />
             </Grid>
           ))}
+
+          <Grid size={{ xs: 12 }}>
+            <LoggedTimeReportCard
+              startDate={startDate}
+              endDate={endDate}
+              onExportPDF={handleLoggedTimeExportPDF}
+              onExportExcel={handleLoggedTimeExportExcel}
+              getProjects={getProjects}
+              getDepartments={getDepartments}
+              isExportingPDF={selectedReport === 'logged-time' && exportType === 'pdf'}
+              isExportingExcel={selectedReport === 'logged-time' && exportType === 'excel'}
+            />
+          </Grid>
         </Grid>
 
-        {/* Footer Info */}
         <ReportFooter
           totalTasks={displayData.totalTasks}
           uniqueProjects={displayData.uniqueProjects}
@@ -445,7 +544,6 @@ export default function ReportGeneration() {
           currentDate={currentDate}
         />
 
-        {/* Report Type Selection Dialog (for task-completion only) */}
         <ReportTypeSelector
           open={showReportTypeDialog}
           onClose={() => {

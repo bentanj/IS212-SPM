@@ -41,8 +41,8 @@ interface ReportCardProps {
   };
   isExportingPDF: boolean;
   isExportingExcel: boolean;
-  onExportPDF: (params?: { department?: string; aggregation?: string }) => void;
-  onExportExcel: (params?: { department?: string; aggregation?: string }) => void;
+  onExportPDF: (params?: { department: string; aggregation: string }) => void;
+  onExportExcel: (params?: { department: string; aggregation: string }) => void;
   getCategoryColor: (category: string) => string;
   hasDateFilter?: boolean;
   isDisabled?: boolean;

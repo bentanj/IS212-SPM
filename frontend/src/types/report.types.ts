@@ -5,6 +5,8 @@
  * Matches backend API response structure
  */
 
+import { Dayjs } from 'dayjs';
+
 export interface ReportMetadata {
   report_id: string;
   report_type: string;
@@ -50,8 +52,8 @@ export interface TeamMemberStats {
   total_tasks: number;
   completed: number;
   in_progress: number;
-  todo: number;          
-  blocked: number; 
+  todo: number;
+  blocked: number;
   completion_rate: number;
 }
 
@@ -79,19 +81,24 @@ export interface TaskStatusCount {
   blocked: number;
   completed: number;
   overdue: number;
-  
 }
 
-// FIXED: Extend TaskStatusCount instead of using spread
 export interface WeeklyData extends TaskStatusCount {
   week_start: string;  // ISO date string
   week_end: string;
 }
 
-// FIXED: Extend TaskStatusCount instead of using spread
 export interface MonthlyData extends TaskStatusCount {
   month: string;  // e.g., "2025-10"
   month_name: string;  // e.g., "October 2025"
+}
+
+export interface DepartmentUser {
+  user_id: string;
+  full_name: string;
+  first_name: string;
+  last_name: string;
+  email: string;
 }
 
 export interface DepartmentTaskActivityData {
@@ -100,7 +107,7 @@ export interface DepartmentTaskActivityData {
   weekly_data?: WeeklyData[];
   monthly_data?: MonthlyData[];
   total_tasks: number;
-  users?: DepartmentUser[];  // NEW: Add optional users array
+  users?: DepartmentUser[];
 }
 
 export interface DepartmentTaskActivitySummary {
@@ -112,7 +119,7 @@ export interface DepartmentTaskActivitySummary {
   total_tasks: number;
   status_totals: TaskStatusCount;
   aggregation_type: 'weekly' | 'monthly';
-  total_users?: number;  // NEW: Add optional total users count
+  total_users?: number;
 }
 
 export interface DepartmentTaskActivityReport {
@@ -122,7 +129,10 @@ export interface DepartmentTaskActivityReport {
 }
 
 // Combined Task Completion Report Type
-export type TaskCompletionReport = ProjectPerformanceReport | UserProductivityReport | DepartmentTaskActivityReport;
+export type TaskCompletionReport = 
+  | ProjectPerformanceReport 
+  | UserProductivityReport 
+  | DepartmentTaskActivityReport;
 
 // Reports Summary
 export interface ReportsSummary {
@@ -152,10 +162,18 @@ export interface ApiError {
 // Report Sub-Type identifier
 export type ReportSubType = 'per-user' | 'per-project';
 
-export interface DepartmentUser {
-  user_id: string;
-  full_name: string;
-  first_name: string;
-  last_name: string;
-  email: string;
+// Logged Time Report Types
+export interface LoggedTimeEntry {
+  userName: string;           // Name of the user who logged the time
+  loginTime: Dayjs;           // Dayjs object for easy date manipulation
+  logoutTime: Dayjs;          // Dayjs object for easy date manipulation
+  projectName: string;        // Name of the project worked on
+  department: string;         // User's department (e.g., "Engineering", "Design")
+}
+
+// Aggregated time statistics for a single user
+export interface UserTimeStats {
+  userName: string;           // Name of the user
+  totalHours: number;         // Total hours worked (calculated from all entries)
+  totalSessions: number;      // Number of logged time sessions
 }
