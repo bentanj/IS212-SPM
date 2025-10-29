@@ -16,13 +16,8 @@ export function exportLoggedTimeToExcel(
   // 1. Filter entries
   const filteredEntries = filterEntries(allEntries, startDate, endDate, filterType, filterValue);
   
-  if (filteredEntries.length === 0) {
-    alert(`No data found for ${filterType}: ${filterValue}`);
-    return;
-  }
-
-  // 2. Calculate statistics
-  const userStats = calculateUserStats(filteredEntries);
+  // 2. Calculate statistics (handle empty data case)
+  const userStats = filteredEntries.length > 0 ? calculateUserStats(filteredEntries) : [];
   const totalHours = userStats.reduce((sum, user) => sum + user.totalHours, 0);
   const totalSessions = userStats.reduce((sum, user) => sum + user.totalSessions, 0);
 
@@ -36,8 +31,16 @@ export function exportLoggedTimeToExcel(
   excelData.push({ section_header: '', metric: 'Total Users', value: userStats.length.toString() });
   excelData.push({ section_header: '', metric: 'Total Hours Logged', value: `${totalHours.toFixed(1)} hours` });
   excelData.push({ section_header: '', metric: 'Total Sessions', value: totalSessions.toString() });
-  excelData.push({ section_header: '', metric: 'Average Hours per User', value: `${(totalHours / userStats.length).toFixed(1)} hours` });
-  excelData.push({ section_header: '', metric: 'Average Hours per Session', value: `${(totalHours / totalSessions).toFixed(1)} hours` });
+  excelData.push({ 
+    section_header: '', 
+    metric: 'Average Hours per User', 
+    value: userStats.length > 0 ? `${(totalHours / userStats.length).toFixed(1)} hours` : 'NaN hours'
+  });
+  excelData.push({ 
+    section_header: '', 
+    metric: 'Average Hours per Session', 
+    value: totalSessions > 0 ? `${(totalHours / totalSessions).toFixed(1)} hours` : 'NaN hours'
+  });
   
   // Blank row
   excelData.push({ section_header: '', metric: '', value: '' });
@@ -50,7 +53,7 @@ export function exportLoggedTimeToExcel(
   const userNameRow: any = { section_header: '', metric: 'User Name' };
   const sessionsRow: any = { section_header: '', metric: 'Sessions' };
   const hoursRow: any = { section_header: '', metric: 'Total Hours' };
-  const percentageRow: any = { section_header: '', metric: 'Percentage Of Total' };
+  const percentageRow: any = { section_header: '', metric: '% of Total' };
   
   // Add each user's data starting from 'value' column (column C)
   if (userStats.length > 0) {
@@ -58,15 +61,21 @@ export function exportLoggedTimeToExcel(
     sessionsRow.value = userStats[0].totalSessions;
     hoursRow.value = userStats[0].totalHours.toFixed(1);
     percentageRow.value = `${((userStats[0].totalHours / totalHours) * 100).toFixed(1)}%`;
-  }
-  
-  // Add remaining users in subsequent columns
-  for (let i = 1; i < userStats.length; i++) {
-    const colName = `col_${i}`;
-    userNameRow[colName] = userStats[i].userName;
-    sessionsRow[colName] = userStats[i].totalSessions;
-    hoursRow[colName] = userStats[i].totalHours.toFixed(1);
-    percentageRow[colName] = `${((userStats[i].totalHours / totalHours) * 100).toFixed(1)}%`;
+    
+    // Add remaining users in subsequent columns
+    for (let i = 1; i < userStats.length; i++) {
+      const colName = `col_${i}`;
+      userNameRow[colName] = userStats[i].userName;
+      sessionsRow[colName] = userStats[i].totalSessions;
+      hoursRow[colName] = userStats[i].totalHours.toFixed(1);
+      percentageRow[colName] = `${((userStats[i].totalHours / totalHours) * 100).toFixed(1)}%`;
+    }
+  } else {
+    // Leave value column empty when there are no users
+    userNameRow.value = '';
+    sessionsRow.value = '';
+    hoursRow.value = '';
+    percentageRow.value = '';
   }
   
   excelData.push(userNameRow);
