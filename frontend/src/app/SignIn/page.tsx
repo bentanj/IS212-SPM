@@ -5,7 +5,7 @@ import { Typography } from "@mui/material";
 
 export default function SignIn() {
     useEffect(() => {
-        signIn("google");
+        signIn("google", { callbackUrl: "/" });
     }, []);
 
     return (
