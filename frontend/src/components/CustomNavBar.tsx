@@ -17,7 +17,7 @@ const CustomNavBar: React.FC = () => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
     const HomeButton = <NavBarButton href="/" icon={<CalendarMonth />} title="Home" />
-    const ProjectButton = <NavBarButton href="/project" icon={<AccountTree />} title="Projects" />
+    const ProjectButton = <NavBarButton href="/projects" icon={<AccountTree />} title="Projects" />
     const ReportButton = session?.user.role === "HR/Admin" ? <NavBarButton href="/reportgeneration" icon={<Assessment />} title="Reports" /> : null;
 
     return (
