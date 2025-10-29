@@ -10,12 +10,19 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 import dayjs, { Dayjs } from 'dayjs';
 
 // Import API service and types
-import { reportService, ReportServiceError } from '@/services/reportService';
 import type {
   ProjectPerformanceReport,
   UserProductivityReport,
   DepartmentTaskActivityReport,
 } from '@/types/report.types';
+
+import { 
+  generateProjectPerformanceReport,
+  generateUserProductivityReport,
+  generateDepartmentActivityReport,
+  getUniqueDepartments
+} from '@/utils/ReportGenerationFunction';
+
 
 // Import components
 import { ReportCard } from './_components/ReportCard';
@@ -96,73 +103,71 @@ export default function ReportGeneration() {
     setMounted(true);
   }, []);
 
-  // Fetch data from backend with date range (for task-completion reports)
+  // Report generation
   const fetchReportData = async (
     subType: ReportSubType
   ): Promise<ProjectPerformanceReport | UserProductivityReport> => {
     setIsLoading(true);
     setError(null);
-
     try {
       const startDateStr = startDate!.format('YYYY-MM-DD');
       const endDateStr = endDate!.format('YYYY-MM-DD');
 
       let data;
-
       if (subType === 'per-project') {
-        data = await reportService.getProjectPerformanceReport(startDateStr, endDateStr);
+        // ✅ Call frontend function instead of API
+        data = await generateProjectPerformanceReport(startDateStr, endDateStr);
         setProjectReport(data);
         return data;
       } else if (subType === 'per-user') {
-        data = await reportService.getUserProductivityReport(startDateStr, endDateStr);
+        // ✅ Call frontend function instead of API
+        data = await generateUserProductivityReport(startDateStr, endDateStr);
         setUserProductivityReport(data);
         return data;
       }
-
       throw new Error('Invalid report sub-type');
     } catch (err) {
       const errorMessage =
-        err instanceof ReportServiceError
+        err instanceof Error
           ? err.message
-          : 'Failed to connect to reports service. Please ensure the backend is running.';
+          : 'Failed to generate report. Please try again.';
       setError(errorMessage);
       setShowError(true);
-      console.error('Error fetching report data:', err);
+      console.error('Error generating report:', err);
       throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // NEW: Fetch department report
+  // Fetch department report
   const fetchDepartmentReport = async (
     department: string,
     aggregation: string
   ): Promise<DepartmentTaskActivityReport> => {
     setIsLoading(true);
     setError(null);
-
     try {
       const startDateStr = startDate!.format('YYYY-MM-DD');
       const endDateStr = endDate!.format('YYYY-MM-DD');
 
-      const data = await reportService.getDepartmentTaskActivityReport(
+      // ✅ Call frontend function instead of API
+      const data = await generateDepartmentActivityReport(
         department,
         aggregation as 'weekly' | 'monthly',
         startDateStr,
         endDateStr
       );
-
       setDepartmentReport(data);
       return data;
     } catch (err) {
       const errorMessage =
-        err instanceof ReportServiceError
+        err instanceof Error
           ? err.message
-          : 'Failed to fetch department report. Please ensure the backend is running.';
+          : 'Failed to generate department report. Please try again.';
       setError(errorMessage);
       setShowError(true);
-      console.error('Error fetching department report:', err);
+      console.error('Error generating department report:', err);
       throw err;
     } finally {
       setIsLoading(false);

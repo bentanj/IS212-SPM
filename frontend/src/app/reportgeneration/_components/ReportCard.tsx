@@ -24,7 +24,9 @@ import {
   Timer,
   LockOutlined,
 } from '@mui/icons-material';
-import { ReportService } from '@/services/reportService';
+
+import { getUniqueDepartments } from '@/utils/ReportGenerationFunction';
+
 
 interface ReportCardProps {
   report: {
@@ -77,8 +79,8 @@ export const ReportCard: React.FC<ReportCardProps> = ({
 
       setLoadingDepartments(true);
       try {
-        const reportService = new ReportService();
-        const fetchedDepartments = await reportService.getDepartments();
+        // ✅ Call frontend function instead of backend service
+        const fetchedDepartments = await getUniqueDepartments();
         setDepartments(fetchedDepartments);
       } catch (error) {
         console.error('Failed to load departments:', error);
@@ -90,6 +92,7 @@ export const ReportCard: React.FC<ReportCardProps> = ({
 
     fetchDepartments();
   }, [isDepartmentReport]);
+
 
   // Handle department dropdown change
   const handleDepartmentChange = (event: SelectChangeEvent) => {

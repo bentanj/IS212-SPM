@@ -1,5 +1,4 @@
 services:
-
   # Reverse Proxy
   nginx:
     image: nginx:alpine
@@ -11,12 +10,11 @@ services:
     depends_on:
       - tasks
       - authentication
-      - reports
       - users
       - taskattachments
     restart: unless-stopped
 
-  # Tasks Service
+  # Tasks
   tasks:
     build:
       context: ./Tasks
@@ -33,14 +31,8 @@ services:
     expose:
       - "8001"
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-f", "import requests; requests.get('http://127.0.0.1:8001/api/tasks/health')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
-  # Authentication Service
+  # Authentication
   authentication:
     build:
       context: ./Authentication
@@ -63,27 +55,6 @@ services:
       - "8002"
     restart: unless-stopped
 
-  # Reports Service
-  reports:
-    build:
-      context: ./Reports
-      dockerfile: Dockerfile
-    container_name: reports_app
-    environment:
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
-      - SQLALCHEMY_ECHO=${SQLALCHEMY_ECHO}
-      - ENV=${ENV}
-    expose:
-      - "8010"
-    # depends_on:
-    #   tasks:
-    #     condition: service_healthy
-    restart: unless-stopped
-  
   # Users
   users:
     build:
