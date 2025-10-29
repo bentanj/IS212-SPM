@@ -260,18 +260,26 @@ export const generateUserProductivityReport = async (
     const teamMembers: TeamMemberStats[] = Array.from(userMap.entries()).map(([userId, tasks]) => {
       const userInfo = userInfoMap.get(userId);
       const totalTasks = tasks.length;
-      const completed = tasks.filter(t => 
-        (t.status || '').toLowerCase() === 'completed'
-      ).length;
-      const inProgress = tasks.filter(t => 
-        (t.status || '').toLowerCase() === 'in progress'
-      ).length;
-      const toDo = tasks.filter(t => 
-        (t.status || '').toLowerCase() === 'to do'
-      ).length;
-      const blocked = tasks.filter(t => 
-        (t.status || '').toLowerCase() === 'blocked'
-      ).length;
+        const completed = tasks.filter(t => {
+        const status = (t.status || '').toLowerCase().trim();
+        return status === 'completed';
+      }).length;
+      
+      const inProgress = tasks.filter(t => {
+        const status = (t.status || '').toLowerCase().trim();
+        return status === 'in progress';
+      }).length;
+      
+      const toDo = tasks.filter(t => {
+        const status = (t.status || '').toLowerCase().trim();
+        return status === 'to do';
+      }).length;
+      
+      const blocked = tasks.filter(t => {
+        const status = (t.status || '').toLowerCase().trim();
+        return status === 'blocked';
+      }).length;
+
       
       // Extract name from user info
       const userName = userInfo?.name || userInfo?.full_name || `User ${userId}`;
