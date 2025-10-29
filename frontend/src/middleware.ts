@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 
 export default auth((req) => {
     const { pathname } = req.nextUrl;
-    console.log("Middleware invoked for path:", req.auth);
 
     // Allow access to the sign in page without redirect
     if (pathname === "/SignIn" || pathname === "/NoPermission"
