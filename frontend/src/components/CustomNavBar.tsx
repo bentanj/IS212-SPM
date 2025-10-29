@@ -18,7 +18,7 @@ const CustomNavBar: React.FC = () => {
 
     const HomeButton = <NavBarButton href="/" icon={<CalendarMonth />} title="Home" />
     const ProjectButton = <NavBarButton href="/project" icon={<AccountTree />} title="Projects" />
-    const ReportButton = session?.user ? <NavBarButton href="/Report" icon={<Assessment />} title="Reports" /> : null;
+    const ReportButton = session?.user.role === "HR/Admin" ? <NavBarButton href="/reportgeneration" icon={<Assessment />} title="Reports" /> : null;
 
     return (
         <AppBar position="static">
