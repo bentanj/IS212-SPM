@@ -94,56 +94,77 @@ const getUniqueUserIds = (tasks: any[]): number[] => {
  * Generate Project Performance Report
  * Migrated from: ReportService.generate_project_performance_report()
  */
+
 export const generateProjectPerformanceReport = async (
   startDate: string,
   endDate: string
 ): Promise<ProjectPerformanceReport> => {
   try {
     console.log(`Generating project performance report: ${startDate} to ${endDate}`);
-    
+
     // 1. Fetch and filter tasks
     const allTasks = await fetchAllTasks();
-    const filteredTasks = filterTasksByDateRange(allTasks, startDate, endDate);
+    console.log('All tasks fetched:', allTasks.length);
     
-    // 2. Group tasks by project
-    const projectMap = new Map<number, {
-      project_id: number;
-      project_name: string;
-      tasks: any[];
-    }>();
+    const filteredTasks = filterTasksByDateRange(allTasks, startDate, endDate);
+    console.log('Filtered tasks:', filteredTasks.length);
+
+    // 2. Group tasks by PROJECT NAME (not ID)
+    const projectMap = new Map<string, any>();
     
     filteredTasks.forEach(task => {
-      const projectId = task.projectId || task.project_id;
-      const projectName = task.project_name || task.projectName || `Project ${projectId}`;
+      // ✅ Use project_name as the key
+      const projectName = task.project_name || task.projectName;
       
-      if (projectId && !projectMap.has(projectId)) {
-        projectMap.set(projectId, {
-          project_id: projectId,
+      // Skip tasks without a project name
+      if (!projectName) {
+        console.warn('Task has no project name:', task.id || task.taskId || task.task_id);
+        return;
+      }
+      
+      // Create project entry if it doesn't exist
+      if (!projectMap.has(projectName)) {
+        projectMap.set(projectName, {
           project_name: projectName,
           tasks: []
         });
       }
-      if (projectId) {
-        projectMap.get(projectId)!.tasks.push(task);
-      }
+      
+      // Add task to the project
+      projectMap.get(projectName)!.tasks.push(task);
     });
-    
+
+    console.log('Projects found:', projectMap.size);
+    console.log('Project names:', Array.from(projectMap.keys()));
+
     // 3. Calculate project statistics
     const projects: ProjectStatistics[] = Array.from(projectMap.values()).map(project => {
       const totalTasks = project.tasks.length;
-      const completed = project.tasks.filter(t => 
-        (t.status || '').toLowerCase() === 'completed'
-      ).length;
-      const inProgress = project.tasks.filter(t => 
-        (t.status || '').toLowerCase() === 'in progress'
-      ).length;
-      const toDo = project.tasks.filter(t => 
-        (t.status || '').toLowerCase() === 'to do'
-      ).length;
-      const blocked = project.tasks.filter(t => 
-        (t.status || '').toLowerCase() === 'blocked'
-      ).length;
       
+      // Count tasks by status (case-insensitive)
+      const completed = project.tasks.filter(t => {
+        const status = (t.status || '').toLowerCase().trim();
+        return status === 'completed';
+      }).length;
+      
+      const inProgress = project.tasks.filter(t => {
+        const status = (t.status || '').toLowerCase().trim();
+        return status === 'in progress';
+      }).length;
+      
+      const toDo = project.tasks.filter(t => {
+        const status = (t.status || '').toLowerCase().trim();
+        return status === 'to do';
+      }).length;
+      
+      const blocked = project.tasks.filter(t => {
+        const status = (t.status || '').toLowerCase().trim();
+        return status === 'blocked';
+      }).length;
+
+      const completionRate = totalTasks > 0 ?
+        Math.round((completed / totalTasks) * 100 * 10) / 10 : 0;
+
       return {
         project_name: project.project_name,
         total_tasks: totalTasks,
@@ -151,18 +172,27 @@ export const generateProjectPerformanceReport = async (
         in_progress: inProgress,
         to_do: toDo,
         blocked,
-        completion_rate: totalTasks > 0 ? 
-          Math.round((completed / totalTasks) * 100 * 10) / 10 : 0
+        completion_rate: completionRate
       };
     });
-    
-    // 4. Calculate summary
+
+    // Sort projects by total tasks (descending)
+    projects.sort((a, b) => b.total_tasks - a.total_tasks);
+
+    // 4. Calculate summary statistics
     const totalProjects = projects.length;
     const totalTasks = projects.reduce((sum, p) => sum + p.total_tasks, 0);
     const totalCompleted = projects.reduce((sum, p) => sum + p.completed, 0);
     const avgCompletion = totalProjects > 0 ?
-      projects.reduce((sum, p) => sum + p.completion_rate, 0) / totalProjects : 0;
-    
+      Math.round((projects.reduce((sum, p) => sum + p.completion_rate, 0) / totalProjects) * 10) / 10 : 0;
+
+    console.log('Report summary:', {
+      totalProjects,
+      totalTasks,
+      totalCompleted,
+      avgCompletion
+    });
+
     return {
       metadata: {
         report_id: `project-${Date.now()}`,
@@ -180,11 +210,10 @@ export const generateProjectPerformanceReport = async (
         total_projects: totalProjects,
         total_tasks: totalTasks,
         total_completed: totalCompleted,
-        average_completion_rate: Math.round(avgCompletion * 10) / 10
+        average_completion_rate: avgCompletion
       },
       data: { projects }
     };
-    
   } catch (error) {
     console.error('Error generating project performance report:', error);
     throw error;

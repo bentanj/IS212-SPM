@@ -108,7 +108,7 @@ export class ProjectPerformancePDF {
 
     autoTable(doc, {
       startY: yPos,
-      head: [['Project Name', 'Total', 'Completed', 'To Do', 'In Progress', 'Blocked', 'Rate']],
+      head: [['Project Name', 'Total', 'Completed', 'To Do', 'In Progress', 'Blocked', 'Completion Rate']],
       body: tableData,
       theme: 'grid',
       headStyles: { fillColor: [76, 175, 80], fontSize: 9, fontStyle: 'bold' },
@@ -120,7 +120,7 @@ export class ProjectPerformancePDF {
         3: { cellWidth: 22, fillColor: [255, 248, 225] }, 
         4: { cellWidth: 15, fillColor: [227, 242, 253] },
         5: { cellWidth: 17, fillColor: [255, 235, 238] },
-        6: { cellWidth: 18, fontStyle: 'bold' },
+        6: { cellWidth: 25, fontStyle: 'bold' },
       },
       margin: { left: 14, right: 14 },
     });
