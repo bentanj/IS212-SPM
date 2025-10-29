@@ -4,12 +4,84 @@ from sqlalchemy.exc import SQLAlchemyError
 from Repositories.TaskRepository import TaskRepository
 from Services.TaskService import TaskService
 from exceptions import TaskNotFoundError, TaskValidationError, InvalidTaskStatusError
+import requests
+import os
 
 bp = Blueprint("tasks", __name__, url_prefix="/api/tasks")
 
 def _task_service() -> TaskService:
     repo = TaskRepository(g.db_session)
     return TaskService(repo)
+
+def _batch_fetch_users_for_tasks(tasks):
+    """
+    Efficiently fetch user details for multiple tasks in a single batch request.
+    This prevents N+1 HTTP calls to the Users service.
+
+    Returns a dict mapping user_id -> user_data
+    """
+    if not tasks:
+        return {}
+
+    # Collect all unique user IDs from all tasks
+    user_ids = set()
+    for task in tasks:
+        if task.assigned_users:
+            user_ids.update(task.assigned_users)
+
+    if not user_ids:
+        return {}
+
+    # Make a single batch request to Users service
+    try:
+        users_service_url = os.getenv('USERS_SERVICE_URL', 'http://users:8003')
+        response = requests.post(
+            f"{users_service_url}/api/users/filter",
+            json={"userIds": list(user_ids)},
+            headers={"Content-Type": "application/json"},
+            timeout=5
+        )
+
+        if response.status_code == 200:
+            users_list = response.json()
+            # Create a lookup map: user_id -> user_data
+            return {user.get('userId') or user.get('user_id'): user for user in users_list}
+        else:
+            print(f"Warning: Failed to batch fetch users (status {response.status_code})")
+            return {}
+    except requests.exceptions.RequestException as e:
+        print(f"Warning: Failed to batch fetch users: {e}")
+        return {}
+
+def _serialize_tasks_with_users(tasks):
+    """
+    Serialize multiple tasks with a single batch user fetch.
+    Returns list of task dictionaries with user data populated.
+    """
+    # Batch fetch all users needed for these tasks
+    users_map = _batch_fetch_users_for_tasks(tasks)
+
+    # Serialize each task with user data from the map
+    result = []
+    for task in tasks:
+        task_dict = task.to_dict(g.db_session, fetch_users=False)  # Don't fetch users individually
+
+        # Populate assigned users from our batch-fetched map
+        if task.assigned_users:
+            assigned_users_data = []
+            for user_id in task.assigned_users:
+                if user_id in users_map:
+                    assigned_users_data.append(users_map[user_id])
+                else:
+                    # Fallback to just the user ID if not found
+                    assigned_users_data.append(user_id)
+            task_dict['assignedUsers'] = assigned_users_data
+        else:
+            task_dict['assignedUsers'] = []
+
+        result.append(task_dict)
+
+    return result
 
 @bp.get("")
 def list_tasks():
@@ -21,7 +93,8 @@ def list_tasks():
         else:
             tasks = _task_service().list_tasks()
 
-        return jsonify([task.to_dict(g.db_session) for task in tasks])
+        # Use batch serialization to avoid N+1 HTTP calls
+        return jsonify(_serialize_tasks_with_users(tasks))
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -124,7 +197,7 @@ def delete_task(task_id: int):
 def get_tasks_by_status(status: str):
     try:
         tasks = _task_service().get_tasks_by_status(status)
-        return jsonify([task.to_dict(g.db_session) for task in tasks])
+        return jsonify(_serialize_tasks_with_users(tasks))
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -132,7 +205,7 @@ def get_tasks_by_status(status: str):
 def get_tasks_by_project(project_name: str):
     try:
         tasks = _task_service().get_tasks_by_project(project_name)
-        return jsonify([task.to_dict(g.db_session) for task in tasks])
+        return jsonify(_serialize_tasks_with_users(tasks))
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -140,7 +213,7 @@ def get_tasks_by_project(project_name: str):
 def get_tasks_by_user(user_id: int):
     try:
         tasks = _task_service().get_tasks_by_user(user_id)
-        return jsonify([task.to_dict(g.db_session) for task in tasks])
+        return jsonify(_serialize_tasks_with_users(tasks))
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -148,7 +221,7 @@ def get_tasks_by_user(user_id: int):
 def get_tasks_by_priority(priority: int):
     try:
         tasks = _task_service().get_tasks_by_priority(priority)
-        return jsonify([task.to_dict(g.db_session) for task in tasks])
+        return jsonify(_serialize_tasks_with_users(tasks))
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -156,7 +229,7 @@ def get_tasks_by_priority(priority: int):
 def get_overdue_tasks():
     try:
         tasks = _task_service().get_overdue_tasks()
-        return jsonify([task.to_dict(g.db_session) for task in tasks])
+        return jsonify(_serialize_tasks_with_users(tasks))
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -251,7 +324,7 @@ def remove_user_from_task(task_id: int):
 def get_subtasks(parent_id: int):
     try:
         tasks = _task_service().get_subtasks(parent_id)
-        return jsonify([task.to_dict(g.db_session) for task in tasks])
+        return jsonify(_serialize_tasks_with_users(tasks))
     except TaskNotFoundError as e:
         return jsonify({"error": str(e)}), 404
     except Exception as e:
@@ -261,7 +334,7 @@ def get_subtasks(parent_id: int):
 def get_root_tasks():
     try:
         tasks = _task_service().get_root_tasks()
-        return jsonify([task.to_dict(g.db_session) for task in tasks])
+        return jsonify(_serialize_tasks_with_users(tasks))
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -274,7 +347,7 @@ def filter_tasks():
 
         filters = _parse_filter_data(data)
         tasks = _task_service().search_tasks(filters)
-        return jsonify([task.to_dict(g.db_session) for task in tasks])
+        return jsonify(_serialize_tasks_with_users(tasks))
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
     except Exception as e:
