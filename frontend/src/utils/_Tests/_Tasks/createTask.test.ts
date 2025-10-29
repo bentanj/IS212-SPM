@@ -17,7 +17,11 @@ describe('createTask', () => {
     assigned_users: [1],
     tags: ['test'],
     departments: ['IT'],
-    uploaded_by: 1,
+    recurrenceFrequency: 'None',
+    recurrenceInterval: null,
+    completedDate: null,
+    comments: [],
+    IsReplicateFromCompletedSubtask: false,
   };
 
   beforeEach(() => {

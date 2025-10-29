@@ -3,8 +3,36 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Session
 from typing import Optional, List, Dict, Any
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 import os
 from db import Base
+
+# Create a module-level HTTP session with connection pooling
+# This reuses connections instead of creating new ones for each request
+_http_session = None
+
+def get_http_session():
+    """Get or create a persistent HTTP session with connection pooling"""
+    global _http_session
+    if _http_session is None:
+        _http_session = requests.Session()
+
+        # Configure connection pooling and retry strategy
+        retry_strategy = Retry(
+            total=3,  # Number of retries
+            backoff_factor=0.3,  # Wait 0.3, 0.6, 1.2 seconds between retries
+            status_forcelist=[429, 500, 502, 503, 504],  # Retry on these status codes
+        )
+        adapter = HTTPAdapter(
+            pool_connections=10,  # Number of connection pools to cache
+            pool_maxsize=20,      # Max connections per pool
+            max_retries=retry_strategy
+        )
+        _http_session.mount("http://", adapter)
+        _http_session.mount("https://", adapter)
+
+    return _http_session
 
 
 class Task(Base):
@@ -37,12 +65,13 @@ class Task(Base):
                 users_service_url = os.getenv(
                     'USERS_SERVICE_URL', 'http://users:8003')
 
-                # Use filter endpoint for efficient batch fetching
-                response = requests.post(
+                # Use persistent HTTP session with connection pooling
+                session = get_http_session()
+                response = session.post(
                     f"{users_service_url}/api/users/filter",
                     json={"userIds": self.assigned_users},
                     headers={"Content-Type": "application/json"},
-                    timeout=2
+                    timeout=5  # Increased timeout for better reliability
                 )
 
                 if response.status_code == 200:
