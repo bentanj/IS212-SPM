@@ -128,7 +128,6 @@ class ReportRepository:
 
                     users[user_id]['name'] = username
 
-                    # ✅ FIX: Only count tasks with recognized statuses
                     if status == 'Completed':
                         users[user_id]['completed'] += 1
                     elif status == 'In Progress':
@@ -140,13 +139,13 @@ class ReportRepository:
 
             result = []
             for user_id, stats in users.items():
-                # ✅ FIX: Calculate total_tasks as sum of all status counts
+                # Calculate total_tasks as sum of all status counts
                 total_tasks = stats['completed'] + stats['in_progress'] + stats['todo'] + stats['blocked']
                 completion_rate = (stats['completed'] / total_tasks * 100) if total_tasks > 0 else 0
 
                 result.append({
                     'user_id': user_id,
-                    'total_tasks': total_tasks,  # ✅ Now correctly calculated
+                    'total_tasks': total_tasks,  
                     'completed': stats['completed'],
                     'in_progress': stats['in_progress'],
                     'todo': stats['todo'],
@@ -154,7 +153,7 @@ class ReportRepository:
                     'completion_rate': round(completion_rate, 1)
                 })
 
-            # ✅ Sort by completion_rate descending (highest first)
+            # Sort by completion_rate descending (highest first)
             result.sort(key=lambda x: x['completion_rate'], reverse=True)
 
             logger.info(f"Generated productivity stats for {len(result)} users with correct totals")

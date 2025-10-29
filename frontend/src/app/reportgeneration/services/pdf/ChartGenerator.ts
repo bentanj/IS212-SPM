@@ -172,7 +172,7 @@ export class ChartGenerator {
 
 
   static createDepartmentTaskActivityChart(data: any[], title: string): ChartConfiguration {
-  // ✅ Filter out weeks/months where ALL values are 0
+  // Filter out weeks/months where ALL values are 0
   const filteredData = data.filter(d => {
     const total = (d.to_do || 0) + (d.in_progress || 0) + (d.blocked || 0) + (d.completed || 0) + (d.overdue || 0);
     return total > 0; // Only include if there's at least 1 task
@@ -221,7 +221,7 @@ export class ChartGenerator {
       plugins: {
         legend: { display: true, position: 'bottom' },
         title: { display: true, text: title, font: { size: 14, weight: 'bold' } },
-        // ✅ FIX: Hide data labels or only show non-zero values
+        // Hide Data labels to only show non zero values
         datalabels: {
           display: true,
           color: '#ffffff',

@@ -38,7 +38,7 @@ export class UserProductivityPDF {
 
     yPos += 20;
 
-    // ✅ FIXED: Extract data from backend response
+    // Extract Data from backend
     const teamMembers = report.data?.team_members || [];
     const summary = report.summary || {
       total_team_members: 0,
@@ -86,7 +86,7 @@ export class UserProductivityPDF {
       yPos = 20;
     }
 
-    // ✅ FIXED: Summary Statistics - now pulls from backend
+    // Summar Statistics
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.text('Summary Statistics', 14, yPos);
@@ -116,17 +116,17 @@ export class UserProductivityPDF {
       yPos = 20;
     }
 
-    // ✅ FIXED: Detailed User Statistics - CORRECTED COLUMN ORDER
+    // Detailed User Statistics - CORRECTED COLUMN ORDER
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.text('Detailed Team Member Statistics', 14, yPos);
     yPos += 10;
 
-    // ✅ FIXED: Correct data order to match headers
+    // data order to match headers
     const tableData = teamMembers.map((u) => [
       u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || `User ${u.user_id}`,
-      u.total_tasks?.toString() || '0',      // ✅ FIXED: Total Tasks FIRST
-      u.completed?.toString() || '0',        // ✅ FIXED: Completed SECOND
+      u.total_tasks?.toString() || '0',      // Total tasks
+      u.completed?.toString() || '0',        // Completed
       u.todo?.toString() || '0',             // To-Do
       u.in_progress?.toString() || '0',      // In Progress
       u.blocked?.toString() || '0',          // Blocked
@@ -135,13 +135,11 @@ export class UserProductivityPDF {
 
     autoTable(doc, {
       startY: yPos,
-      // ✅ Headers match data order now
       head: [['Name', 'Total Tasks', 'Completed', 'To-Do', 'In Progress', 'Blocked', 'Completion Rate']],
       body: tableData,
       theme: 'striped',
       headStyles: { fillColor: [33, 150, 243], fontSize: 9 },
       styles: { fontSize: 8, halign: 'center', cellPadding: 2 },
-      // ✅ FIXED: Column styles match new order
       columnStyles: {
         0: { halign: 'left', cellWidth: 45 },  // Name
         1: { cellWidth: 20, fontStyle: 'bold' }, // Total Tasks (bold)

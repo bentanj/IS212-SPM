@@ -1,4 +1,5 @@
 # Services/ReportService.py
+
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 from uuid import uuid4
@@ -6,23 +7,78 @@ from Repositories.ReportRepository import ReportRepository
 from Models.Report import ReportMetadata, ReportData
 import logging
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 import os
+import threading
 
 logger = logging.getLogger(__name__)
 
+
 class ReportService:
     """Service for generating various types of reports with date range filtering"""
-
+    
+    # Class-level shared session for User Service API calls (singleton pattern)
+    _user_service_session = None
+    _session_lock = threading.Lock()
+    
     def __init__(self):
+        """
+        Initialize ReportService
+        
+        """
         self.repo = ReportRepository()
-        logger.info("ReportService initialized successfully")
-        # ADD THIS LINE - Set the User service URL
         self.user_service_url = os.getenv('USER_SERVICE_URL', 'http://users:8003')
+        
+        # Initialize shared session only once (thread-safe)
+        if ReportService._user_service_session is None:
+            with ReportService._session_lock:
+                # Double-check locking pattern
+                if ReportService._user_service_session is None:
+                    ReportService._user_service_session = self._create_user_service_session()
+                    logger.info("ReportService: User service session pool initialized")
+        
         logger.info("ReportService initialized successfully")
+    
+    def _create_user_service_session(self) -> requests.Session:
+        """Create a session with connection pooling for User Service API calls"""
+        session = requests.Session()
+        
+        # Configure retry strategy
+        retry_strategy = Retry(
+            total=3,
+            status_forcelist=[429, 500, 502, 503, 504],
+            allowed_methods=["HEAD", "GET", "POST", "OPTIONS"],
+            backoff_factor=0.5,
+            raise_on_status=False
+        )
+        
+        # Create adapter with connection pooling
+        adapter = HTTPAdapter(
+            pool_connections=5,               # Cache up to 5 connection pools
+            pool_maxsize=10,                  # Max 10 connections per pool
+            max_retries=retry_strategy,
+            pool_block=False
+        )
+        
+        # Mount adapter for HTTP and HTTPS
+        session.mount("http://", adapter)
+        session.mount("https://", adapter)
+        
+        # Set persistent headers
+        session.headers.update({
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate'
+        })
+        
+        logger.info("ReportService: User service connection pool created (pool_size=10)")
+        return session
 
     def _get_user_info(self, user_id: str) -> Dict[str, str]:
         """
-        Fetch user information from user service
+        Fetch user information from user service (single user)
         
         """
         try:
@@ -31,11 +87,10 @@ class ReportService:
             
             logger.info(f"Fetching user info for user_id: {user_id_int} from {self.user_service_url}")
             
-            # Use the batch filter endpoint like Task.py does
-            response = requests.post(
+            # Use shared session instead of requests.post()
+            response = ReportService._user_service_session.post(
                 f"{self.user_service_url}/api/users/filter",
                 json={"userIds": [user_id_int]},
-                headers={"Content-Type": "application/json"},
                 timeout=5
             )
             
@@ -49,7 +104,7 @@ class ReportService:
                 if users_data and len(users_data) > 0:
                     user_data = users_data[0]
                     
-                    # ✅ FIX: Your User Service returns 'name' field, not 'staff_fname'/'staff_lname'
+                    # Your User Service returns 'name' field
                     full_name = user_data.get('name', '')
                     
                     # Split the full name into first and last name
@@ -81,6 +136,73 @@ class ReportService:
         logger.warning(f"Using fallback name for user {user_id}")
         return {'first_name': 'User', 'last_name': str(user_id), 'email': ''}
 
+    def _get_users_batch(self, user_ids: List) -> Dict[int, Dict[str, str]]:
+        """
+        Fetch multiple users in a single batch request (OPTIMIZED)
+        
+        Args:
+            user_ids: List of user IDs to fetch (can be strings or ints)
+        
+        Returns:
+            Dictionary mapping user_id (int) to user info dict
+        
+   
+        """
+        if not user_ids:
+            return {}
+        
+        try:
+            # Convert all IDs to integers
+            user_ids_int = []
+            for uid in user_ids:
+                try:
+                    user_ids_int.append(int(uid) if isinstance(uid, str) else uid)
+                except (ValueError, TypeError):
+                    logger.warning(f"Skipping invalid user_id: {uid}")
+                    continue
+            
+            if not user_ids_int:
+                return {}
+            
+            logger.info(f"🚀 Batch fetching {len(user_ids_int)} users from {self.user_service_url}")
+            
+            # Single API Call
+            response = ReportService._user_service_session.post(
+                f"{self.user_service_url}/api/users/filter",
+                json={"userIds": user_ids_int},
+                timeout=10  # Higher timeout for batch
+            )
+            
+            logger.info(f"Batch user fetch response status: {response.status_code}")
+            
+            if response.status_code == 200:
+                users_data = response.json()
+                logger.info(f"✅ Received {len(users_data)} users in batch (requested {len(user_ids_int)})")
+                
+                # Map user_id to user info
+                users_map = {}
+                for user_data in users_data:
+                    user_id = user_data.get('id') or user_data.get('userId')
+                    full_name = user_data.get('name', '')
+                    
+                    name_parts = full_name.split(' ', 1) if full_name else ['User', str(user_id)]
+                    first_name = name_parts[0] if len(name_parts) > 0 else 'User'
+                    last_name = name_parts[1] if len(name_parts) > 1 else str(user_id)
+                    
+                    users_map[int(user_id)] = {
+                        'first_name': first_name,
+                        'last_name': last_name,
+                        'email': user_data.get('email', '')
+                    }
+                
+                return users_map
+            else:
+                logger.warning(f"Batch user fetch failed with status {response.status_code}")
+                return {}
+                
+        except Exception as e:
+            logger.error(f"Error in batch user fetch: {str(e)}", exc_info=True)
+            return {}
 
     def _filter_tasks_by_date(
         self, 
@@ -103,26 +225,23 @@ class ReportService:
                     continue
                 
                 try:
-                    # Handle ISO format with timezone (e.g., 2025-10-01T00:00:00+00:00)
+                    # Handle ISO format with timezone
                     if 'T' in str(due_date_str):
-                        # Parse ISO format and extract date only
                         due_date = datetime.fromisoformat(str(due_date_str).replace('Z', '+00:00')).date()
                     else:
-                        # Simple date format
                         due_date = datetime.strptime(str(due_date_str), '%Y-%m-%d').date()
                     
-                    # Check if task falls within date range
                     if start_dt <= due_date <= end_dt:
                         filtered_tasks.append(task)
                         logger.debug(f"Task {task_id}: Due {due_date} - INCLUDED")
                     else:
-                        logger.debug(f"Task {task_id}: Due {due_date} - Outside range ({start_date} to {end_date})")
+                        logger.debug(f"Task {task_id}: Due {due_date} - Outside range")
                         
                 except (ValueError, TypeError, AttributeError) as e:
                     logger.warning(f"Task {task_id}: Could not parse due_date '{due_date_str}': {str(e)}")
                     continue
             
-            logger.info(f"Filtered {len(filtered_tasks)} tasks from {len(tasks)} total tasks (range: {start_date} to {end_date})")
+            logger.info(f"Filtered {len(filtered_tasks)} tasks from {len(tasks)} total tasks")
             return filtered_tasks
             
         except Exception as e:
@@ -139,11 +258,8 @@ class ReportService:
             logger.info(f"Generating project performance report from {start_date} to {end_date}")
             report_id = str(uuid4())
             
-            # Get all tasks and filter by date range
             all_tasks = self.repo.get_all_tasks()
             filtered_tasks = self._filter_tasks_by_date(all_tasks, start_date, end_date)
-            
-            # Generate project statistics from filtered tasks
             projects = self.repo.get_project_statistics_from_tasks(filtered_tasks)
             
             metadata = ReportMetadata(
@@ -160,7 +276,6 @@ class ReportService:
                 }
             )
             
-            # Calculate summary
             total_projects = len(projects)
             total_tasks = sum(p["total_tasks"] for p in projects)
             total_completed = sum(p["completed"] for p in projects)
@@ -192,39 +307,55 @@ class ReportService:
         start_date: str, 
         end_date: str
     ) -> ReportData:
-        """Generate user productivity report (Per User) with date filtering"""
+        """
+        Generate user productivity report (Per User) with date filtering
+        
+        """
         try:
             logger.info(f"Generating user productivity report from {start_date} to {end_date}")
             report_id = str(uuid4())
             
-            # Get all tasks and filter by date range
             all_tasks = self.repo.get_all_tasks()
             filtered_tasks = self._filter_tasks_by_date(all_tasks, start_date, end_date)
-            
-            # Get user productivity from filtered tasks
             users = self.repo.get_user_productivity_from_tasks(filtered_tasks)
             
-            # ✅ FIX: Calculate total unique users from filtered tasks (not from aggregated list)
+            # Calculate total unique users
             unique_user_ids = set()
             for task in filtered_tasks:
                 assigned_to = task.get('assignedTo') or task.get('assigned_to')
                 if assigned_to:
                     unique_user_ids.add(assigned_to)
             
-            total_users_count = len(unique_user_ids)  # ✅ Now correctly counts unique users with tasks
+            total_users_count = len(unique_user_ids)
             logger.info(f"Found {total_users_count} users with tasks in date range")
             
-            # ✅ Fetch user names for each user
+            # Batch Fetch
+            user_ids_to_fetch = [user.get('user_id') for user in users if user.get('user_id')]
+            logger.info(f"🚀 Batch fetching {len(user_ids_to_fetch)} user details...")
+            users_info_map = self._get_users_batch(user_ids_to_fetch)
+            
+            # Map User info from Batch fetching
             for user in users:
                 user_id = user.get('user_id')
                 if user_id:
-                    user_info = self._get_user_info(user_id)
-                    user['first_name'] = user_info['first_name']
-                    user['last_name'] = user_info['last_name']
-                    full_name = f"{user_info['first_name']} {user_info['last_name']}".strip()
-                    user['full_name'] = full_name if full_name else f"User {user_id}"
+                    user_id_int = int(user_id) if isinstance(user_id, str) else user_id
+                    
+                    if user_id_int in users_info_map:
+                        user_info = users_info_map[user_id_int]
+                        user['first_name'] = user_info['first_name']
+                        user['last_name'] = user_info['last_name']
+                        full_name = f"{user_info['first_name']} {user_info['last_name']}".strip()
+                        user['full_name'] = full_name if full_name else f"User {user_id}"
+                        user['email'] = user_info.get('email', '')
+                    else:
+                        # Fallback for missing users
+                        logger.warning(f"User {user_id} not found in batch result")
+                        user['first_name'] = 'User'
+                        user['last_name'] = str(user_id)
+                        user['full_name'] = f"User {user_id}"
+                        user['email'] = ''
             
-            # ✅ Calculate summary metrics
+            # Calculate summary metrics
             total_tasks = sum(u.get('total_tasks', 0) for u in users)
             total_completed = sum(u.get('completed', 0) for u in users)
             avg_completion = sum(u.get('completion_rate', 0) for u in users) / total_users_count if total_users_count > 0 else 0.0
@@ -244,13 +375,13 @@ class ReportService:
             )
             
             summary = {
-                'total_team_members': total_users_count,  # ✅ Now uses correct count
+                'total_team_members': total_users_count,
                 'total_tasks_assigned': total_tasks,
                 'total_completed': total_completed,
                 'average_completion_rate': round(avg_completion, 1)
             }
             
-            logger.info(f"User productivity report generated. Users: {total_users_count}, Tasks: {total_tasks}")
+            logger.info(f"✅ User productivity report generated. Users: {total_users_count}, Tasks: {total_tasks}")
             
             return ReportData(
                 metadata=metadata,
@@ -298,14 +429,12 @@ class ReportService:
         while current <= end_dt:
             week_end = min(current + timedelta(days=6), end_dt)
             
-            # Filter tasks for this week
             week_tasks = [
                 task for task in tasks
                 if self._get_task_date(task) and
                 current <= self._get_task_date(task) <= week_end
             ]
             
-            # Count by status
             status_counts = self._count_by_status(week_tasks)
             
             weekly_data.append({
@@ -330,21 +459,17 @@ class ReportService:
         current_month = start_dt.month
         
         while (current_year < end_dt.year) or (current_year == end_dt.year and current_month <= end_dt.month):
-            # Get month boundaries
             month_start = max(start_dt, datetime(current_year, current_month, 1).date())
             last_day = monthrange(current_year, current_month)[1]
             month_end = min(end_dt, datetime(current_year, current_month, last_day).date())
             
-            # Filter tasks for this month
             month_tasks = [
                 task for task in tasks
                 if self._get_task_date(task) and
                 month_start <= self._get_task_date(task) <= month_end
             ]
             
-            # Count by status
             status_counts = self._count_by_status(month_tasks)
-            
             month_name = datetime(current_year, current_month, 1).strftime('%B %Y')
             
             monthly_data.append({
@@ -353,7 +478,6 @@ class ReportService:
                 **status_counts
             })
             
-            # Move to next month
             if current_month == 12:
                 current_month = 1
                 current_year += 1
@@ -392,7 +516,6 @@ class ReportService:
             status = task.get('status', '').lower()
             due_date = self._get_task_date(task)
             
-            # Check if overdue
             if status not in ['completed', 'done'] and due_date and due_date < now:
                 counts['overdue'] += 1
             elif status in ['to do', 'todo', 'to_do']:
@@ -412,27 +535,21 @@ class ReportService:
         try:
             logger.info("Fetching unique departments from tasks")
             
-            # Get all tasks
             all_tasks = self.repo.get_all_tasks()
             logger.info(f"Retrieved {len(all_tasks)} total tasks")
             
-            # Extract unique departments
             departments = set()
             for task in all_tasks:
-                # ✅ FIX: Access 'departments' (plural) array instead of 'department'
                 task_departments = task.get('departments', [])
                 
-                # Handle if it's a list (array)
                 if isinstance(task_departments, list):
                     for dept in task_departments:
-                        if dept and dept.strip():  # Only add non-empty departments
+                        if dept and dept.strip():
                             departments.add(dept.strip())
-                # Handle if it's a string (fallback for backwards compatibility)
                 elif isinstance(task_departments, str):
                     if task_departments.strip():
                         departments.add(task_departments.strip())
             
-            # Sort alphabetically
             sorted_departments = sorted(list(departments))
             
             logger.info(f"Found {len(sorted_departments)} unique departments: {sorted_departments}")
@@ -440,19 +557,12 @@ class ReportService:
             
         except Exception as e:
             logger.error(f"Error getting unique departments: {str(e)}", exc_info=True)
-            # Return empty list on error rather than crashing
             return []
 
     def _get_department_users(self, department: str, tasks: List[Dict]) -> List[Dict[str, Any]]:
         """
         Get list of unique users working in a specific department
         
-        Args:
-            department: Department name
-            tasks: List of tasks (already filtered by department)
-            
-        Returns:
-            List of user dictionaries with user_id, full_name, email
         """
         try:
             # Collect unique user IDs from department tasks
@@ -467,30 +577,45 @@ class ReportService:
             
             logger.info(f"Found {len(user_ids)} unique users in department '{department}'")
             
-            # Fetch user details for each user ID
+            # Batch Fetch
+            logger.info(f"🚀 Batch fetching {len(user_ids)} user details for department '{department}'...")
+            users_info_map = self._get_users_batch(list(user_ids))
+            
+            # Build users list from batch result 
             users_list = []
             for user_id in user_ids:
-                user_info = self._get_user_info(user_id)
-                users_list.append({
-                    'user_id': user_id,
-                    'full_name': f"{user_info['first_name']} {user_info['last_name']}".strip(),
-                    'first_name': user_info['first_name'],
-                    'last_name': user_info['last_name'],
-                    'email': user_info.get('email', '')
-                })
+                user_id_int = int(user_id) if isinstance(user_id, str) else user_id
+                
+                if user_id_int in users_info_map:
+                    user_info = users_info_map[user_id_int]
+                    users_list.append({
+                        'user_id': str(user_id),
+                        'full_name': f"{user_info['first_name']} {user_info['last_name']}".strip(),
+                        'first_name': user_info['first_name'],
+                        'last_name': user_info['last_name'],
+                        'email': user_info.get('email', '')
+                    })
+                else:
+                    # Fallback for missing users
+                    logger.warning(f"User {user_id} not found in batch result")
+                    users_list.append({
+                        'user_id': str(user_id),
+                        'full_name': f"User {user_id}",
+                        'first_name': 'User',
+                        'last_name': str(user_id),
+                        'email': ''
+                    })
             
             # Sort by full name
             users_list.sort(key=lambda x: x['full_name'])
             
-            logger.info(f"Retrieved details for {len(users_list)} users in department '{department}'")
+            logger.info(f"✅ Retrieved details for {len(users_list)} users in department '{department}'")
             return users_list
         
         except Exception as e:
             logger.error(f"Error getting department users: {str(e)}", exc_info=True)
             return []
 
-
-    # Update the generate_department_activity_report method
     def generate_department_activity_report(
         self,
         department: str,
@@ -500,40 +625,39 @@ class ReportService:
     ) -> ReportData:
         """
         Generate department task activity report with weekly or monthly aggregation
+        
+       
         """
         try:
             logger.info(f"Generating department activity report for '{department}' ({aggregation}) from {start_date} to {end_date}")
             report_id = str(uuid4())
             
-            # Get all tasks and filter by date range
             all_tasks = self.repo.get_all_tasks()
             filtered_tasks = self._filter_tasks_by_date(all_tasks, start_date, end_date)
             
-            # Filter tasks by department (handle array field)
+            # Filter tasks by department
             department_tasks = []
             for task in filtered_tasks:
                 task_departments = task.get('departments', [])
                 
-                # Handle if it's a list/array
                 if isinstance(task_departments, list):
                     if any(dept.strip().lower() == department.lower() for dept in task_departments if dept):
                         department_tasks.append(task)
-                # Handle if it's a string (fallback)
                 elif isinstance(task_departments, str):
                     if task_departments.strip().lower() == department.lower():
                         department_tasks.append(task)
             
-            logger.info(f"Found {len(department_tasks)} tasks for department '{department}' out of {len(filtered_tasks)} filtered tasks")
+            logger.info(f"Found {len(department_tasks)} tasks for department '{department}'")
             
             # Get aggregated data
             if aggregation == "weekly":
                 aggregated_data = self._aggregate_by_week(department_tasks, start_date, end_date)
                 data_key = "weekly_data"
-            else:  # monthly
+            else:
                 aggregated_data = self._aggregate_by_month(department_tasks, start_date, end_date)
                 data_key = "monthly_data"
             
-            # Calculate status totals across all periods
+            # Calculate status totals
             status_totals = {
                 'to_do': sum(period.get('to_do', 0) for period in aggregated_data),
                 'in_progress': sum(period.get('in_progress', 0) for period in aggregated_data),
@@ -544,7 +668,7 @@ class ReportService:
             
             total_tasks = len(department_tasks)
             
-            # NEW: Get list of users in the department
+            # Get users using BATCH fetching
             department_users = self._get_department_users(department, department_tasks)
             logger.info(f"Retrieved {len(department_users)} users for department '{department}'")
 
@@ -564,17 +688,17 @@ class ReportService:
             summary = {
                 "total_tasks": total_tasks,
                 "status_totals": status_totals,
-                "total_users": len(department_users)  # NEW: Add total users count
+                "total_users": len(department_users)
             }
             
             data = {
                 "department": department,
                 "aggregation": aggregation,
                 data_key: aggregated_data,
-                "users": department_users  # NEW: Add users list
+                "users": department_users
             }
             
-            logger.info(f"Department activity report generated. Total tasks: {total_tasks}, Users: {len(department_users)}")
+            logger.info(f"✅ Department activity report generated. Tasks: {total_tasks}, Users: {len(department_users)}")
             return ReportData(
                 metadata=metadata,
                 summary=summary,
@@ -584,3 +708,11 @@ class ReportService:
         except Exception as e:
             logger.error(f"Error generating department activity report: {str(e)}", exc_info=True)
             raise
+    
+    @classmethod
+    def close_session(cls):
+        """Close the shared session (call on application shutdown)"""
+        if cls._user_service_session:
+            cls._user_service_session.close()
+            cls._user_service_session = None
+            logger.info("ReportService: User service session closed")

@@ -240,7 +240,6 @@ export class ReportService {
         end_date: endDate,
       });
 
-      // ✅ FIXED: Added /api prefix to match backend route structure
       const response = await fetch(
         `${this.baseUrl}/api/reports/department-activity?${params.toString()}`,
         {
