@@ -13,7 +13,6 @@ services:
       - authentication
       - reports
       - users
-      - users
       - taskattachments
     restart: unless-stopped
 
