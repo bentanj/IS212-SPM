@@ -1,9 +1,8 @@
 import dayjs from 'dayjs';
-import { CurrentUser, User, Task, Comment, taskMockData } from '@/mocks/staff/taskMockData';
-import IFormData from "@/types/IFormData";
+import { User, Task, Comment, Priority, Status } from '@/types';
+import { taskMockData } from '@/mocks/staff/taskMockData';
+import { FormData as IFormData } from "@/types/IFormData";
 import DefaultFormData from '@/constants/DefaultFormData';
-import Priority from '@/types/TPriority';
-import Status from '@/types/TStatus';
 
 // Filter out already assigned users from available options
 export const getAvailableUsers = (allUsers: User[], assignedUsers: User[]): User[] => {
@@ -15,7 +14,7 @@ export const getAvailableUsers = (allUsers: User[], assignedUsers: User[]): User
 export const canRemoveUser = (
     user: User,
     isEditMode: boolean,
-    currentUser: CurrentUser,
+    currentUser: User,
     existingAssignees: User[]
 ): boolean => {
     if (!isEditMode) return user.userId !== currentUser.userId;
@@ -38,8 +37,8 @@ const validateForm = (formData: IFormData, setErrors: React.Dispatch<React.SetSt
     if (formData.assignedUsers.length === 0) newErrors.assignedUsers = 'At least one user must be assigned';
     if (formData.assignedUsers.length > 5) newErrors.assignedUsers = 'Maximum 5 users can be assigned to a task';
     if (!formData.status) newErrors.status = 'Status is required';
-    if (!formData.projectName.trim()) newErrors.projectName = 'Project name is required';
-    if (!formData.department) newErrors.department = 'Department is required';
+    if (!formData.project_name.trim()) newErrors.project_name = 'Project name is required';
+    if (formData.departments.length === 0) newErrors.departments = 'Department is required';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -54,7 +53,7 @@ export const resetForm = (
     setTagInput: React.Dispatch<React.SetStateAction<string>>,
     setNewComment: React.Dispatch<React.SetStateAction<string>>
 ) => {
-    setFormData(DefaultFormData);
+    setFormData({ ...DefaultFormData, taskId: 0 });
     setErrors({});
     setSubmitStatus('idle');
     setSubmitMessage('');
@@ -114,46 +113,90 @@ export const handleSubmit = async (params: {
                 tags: formData.tags,
                 status: formData.status as Status,
                 comments: updatedComments,
-                projectName: formData.projectName.trim(),
+                project_name: formData.project_name.trim(),
             };
 
             onTaskUpdated?.(updatedTask);
             setSubmitStatus('success');
             setSubmitMessage('Task updated successfully!');
         } else {
-            // Create new task with proper ID generation from live state (Updated)
-            const newTaskId = allTasks.length > 0
-                ? Math.max(...allTasks.map(t => t.taskId), 0) + 1
-                : 1;
-            const comments = formData.comments.trim()
-                ? [{
-                    commentId: 1,
-                    author: currentUser.name,
-                    content: formData.comments.trim(),
-                    timestamp: dayjs().toISOString(),
-                }]
-                : [];
+            // Create new task via backend API
+            const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-            const newTask: Task = {
-                taskId: newTaskId,
-                title: formData.title.trim(),
-                description: formData.description.trim(),
-                startDate: formData.startDate!.format('YYYY-MM-DD'),
-                completedDate: formData.completedDate?.format('YYYY-MM-DD') || null,
-                dueDate: formData.dueDate!.format('YYYY-MM-DD'),
-                department: formData.department,
-                priority: formData.priority as Priority,
-                assignedUsers: formData.assignedUsers,
-                tags: formData.tags,
-                status: formData.status as Status,
-                comments: comments,
-                projectName: formData.projectName.trim(),
-                parentTaskId: (formData as any).parentTaskId || null, // New 
-            };
+            if (formData.attachedFiles && formData.attachedFiles.length > 0) {
+                // Send as multipart/form-data with files
+                const formDataToSend = new FormData();
 
-            onTaskCreated?.(newTask);
-            setSubmitStatus('success');
-            setSubmitMessage('Task created successfully!');
+                // Add task data as JSON string
+                const taskData = {
+                    title: formData.title.trim(),
+                    description: formData.description.trim(),
+                    start_date: formData.startDate!.toISOString(),
+                    due_date: formData.dueDate!.toISOString(),
+                    priority: formData.priority,
+                    status: formData.status,
+                    project_name: formData.project_name.trim(),
+                    assigned_users: formData.assignedUsers.map(u => u.userId),
+                    tags: JSON.stringify(formData.tags),
+                    departments: formData.departments,
+                    uploaded_by: currentUser.userId,
+                };
+
+                formDataToSend.append('task_data', JSON.stringify(taskData));
+
+                // Append all files
+                formData.attachedFiles.forEach((file: File) => {
+                    formDataToSend.append('files', file);
+                });
+
+                const response = await fetch(`${API_BASE_URL}/api/tasks`, {
+                    method: 'POST',
+                    body: formDataToSend,
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to create task');
+                }
+
+                const createdTask = await response.json();
+                onTaskCreated?.(createdTask);
+                setSubmitStatus('success');
+                setSubmitMessage(`Task created successfully with ${formData.attachedFiles.length} file(s)!`);
+            } else {
+                // Send as JSON without files
+                const taskData = {
+                    title: formData.title.trim(),
+                    description: formData.description.trim(),
+                    start_date: formData.startDate!.toISOString(),
+                    due_date: formData.dueDate!.toISOString(),
+                    priority: formData.priority,
+                    status: formData.status,
+                    project_name: formData.project_name.trim(),
+                    assigned_users: formData.assignedUsers.map(u => u.userId),
+                    tags: JSON.stringify(formData.tags),
+                    departments: formData.departments,
+                    uploaded_by: currentUser.userId,
+                };
+
+                const response = await fetch(`${API_BASE_URL}/api/tasks`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(taskData),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to create task');
+                }
+
+                const createdTask = await response.json();
+                onTaskCreated?.(createdTask);
+                setSubmitStatus('success');
+                setSubmitMessage('Task created successfully!');
+            }
         }
 
         setTimeout(() => {
@@ -166,22 +209,26 @@ export const handleSubmit = async (params: {
     }
 };
 
-// Handle file upload
+// Handle file upload - accepts array of files
 export const handleFileUpload = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    files: File[],
     setFormData: React.Dispatch<React.SetStateAction<IFormData>>
 ) => {
-    const file = event.target.files?.[0];
-    if (file) {
-        setFormData(prev => ({ ...prev, attachedFile: file }));
-    }
+    setFormData(prev => ({
+        ...prev,
+        attachedFiles: [...(prev.attachedFiles || []), ...files]
+    }));
 };
 
-// Handle file removal
+// Handle file removal - accepts index of file to remove
 export const handleRemoveFile = (
+    index: number,
     setFormData: React.Dispatch<React.SetStateAction<IFormData>>
 ) => {
-    setFormData(prev => ({ ...prev, attachedFile: null }));
+    setFormData(prev => ({
+        ...prev,
+        attachedFiles: prev.attachedFiles?.filter((_, i) => i !== index) || []
+    }));
 };
 
 // Add tag

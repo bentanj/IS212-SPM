@@ -28,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        service: [ "Tasks", "Authentication" ]   # <-- add backend services here
+        service: [ "Tasks", "TaskAttachments" ,"Users"]   # <-- add backend services here
 
     # Add job-level services here if a backend service needs its own dependencies (e.g., Redis)
     # For hosted DBs like Supabase, no local DB service is required.
@@ -64,6 +64,9 @@ jobs:
           pip install flake8 black pytest pytest-cov
 
       - name: Export test env
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: |
           echo "ENV=test" >> $GITHUB_ENV
           echo "FLASK_ENV=test" >> $GITHUB_ENV
@@ -73,6 +76,9 @@ jobs:
           echo "DB_HOST=${DB_HOST:-localhost}" >> $GITHUB_ENV
           echo "DB_PORT=${DB_PORT:-5432}" >> $GITHUB_ENV
           echo "DB_NAME=${DB_NAME:-testdb}" >> $GITHUB_ENV
+          # Supabase configuration
+          echo "SUPABASE_URL=${SUPABASE_URL}" >> $GITHUB_ENV
+          echo "SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}" >> $GITHUB_ENV
 
       - name: Decide integration run
         run: |

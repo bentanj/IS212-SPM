@@ -1,18 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import {
-  Alert, AlertColor,
-  Box,
-  Paper,
-  Typography,
-  Card,
-  CardContent,
-  Stack,
-  useTheme,
-  useMediaQuery,
-  Snackbar
-} from '@mui/material';
+import { useState, useEffect, useCallback } from 'react';
+import { Alert, AlertColor, Box, useTheme, useMediaQuery, Snackbar } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
@@ -21,33 +10,27 @@ import weekOfYear from 'dayjs/plugin/weekOfYear';
 dayjs.extend(isBetween);
 dayjs.extend(weekOfYear);
 
-import { taskMockData, Task } from '@/mocks/staff/taskMockData';
-import Priority from '@/types/TPriority';
-import SideBar from './_components/SideBar';
-import Header from './_components/Header';
-import MonthHeader from './_components/_TaskCalendar/MonthHeader';
-import TaskDetailModal from './TaskDetailModal';
-import TaskCreateModal from './_components/TaskCreateModal';
-import SubtaskCreateModal from './_components/SubTaskCreateModal'; // New import
-import DayTasksModal from './DayTasksModal';
-import DayHeaders from './_components/_TaskCalendar/DayHeaders';
-import { getTaskTypeColor } from './_functions/TaskRenderingFunctions';
+import { taskMockData } from '@/mocks/staff/taskMockData';
+import { Task } from '@/types';
+import { SideBar, Header, TaskCreateModal, TaskDetailModal, DayTasksModal } from './_components';
+import { MonthHeader, CalendarBody, DayHeaders } from './_components/_TaskCalendar';
+import { getTaskTypeColor, isTaskOverdue } from '../../utils/TaskRenderingFunctions';
+
+// Functions
+import { getUserTask } from '@/utils/Tasks/getTask';
 
 const TaskCalendar: React.FC = () => {
   // Mock Data
-  const [tasks, setTasks] = useState(taskMockData.tasks);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [mockJWT, setMockJWT] = useState(taskMockData.currentUser);
 
   const [currentDate, setCurrentDate] = useState<Dayjs>(dayjs());
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [taskDetailModalOpen, setTaskDetailModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Create Tasks
   const [createModalOpen, setCreateModalOpen] = useState(false);
-
-  // Create Subtasks - NEW STATE
-  const [subtaskModalOpen, setSubtaskModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [selectedParentTask, setSelectedParentTask] = useState<Task | null>(null);
 
   // Task Day
@@ -70,86 +53,57 @@ const TaskCalendar: React.FC = () => {
     setSnackbarSeverity('success');
   }
 
+  const fetchTasks = useCallback(async () => {
+    try {
+      const TaskData = await getUserTask(mockJWT);
+      setTasks(TaskData);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    }
+  }, [mockJWT]);
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
-  // BUSINESS LOGIC 1: Filter tasks assigned to current user only
-  const assignedTasks = useMemo(() => {
-    return tasks.filter(task =>
-      task.assignedUsers.some(assignedUser => assignedUser.userId === mockJWT.userId)
-    );
-  }, [tasks]);
-
-  // BUSINESS LOGIC 2: Get tasks for current month by START DATE
-  const monthTasks = useMemo(() => {
-    const startOfMonth = currentDate.startOf('month');
-    const endOfMonth = currentDate.endOf('month');
-
-    return assignedTasks.filter(task => {
-      const taskStartDate = dayjs(task.startDate);
-      return taskStartDate.isBetween(startOfMonth, endOfMonth, 'day', '[]');
-    });
-  }, [currentDate, assignedTasks]);
-
-  // Generate calendar days
-  const calendarDays = useMemo(() => {
-    const startOfMonth = currentDate.startOf('month');
-    const endOfMonth = currentDate.endOf('month');
-    const startOfCalendar = startOfMonth.startOf('week');
-    const endOfCalendar = endOfMonth.endOf('week');
-
-    const days = [];
-    let day = startOfCalendar;
-
-    while (day.isBefore(endOfCalendar) || day.isSame(endOfCalendar, 'day')) {
-      days.push(day);
-      day = day.add(1, 'day');
-    }
-
-    return days;
-  }, [currentDate]);
-
-  // BUSINESS LOGIC 2: Get tasks for specific day by START DATE
   const getTasksForDay = (date: Dayjs) => {
-    return monthTasks.filter(task => dayjs(task.startDate).isSame(date, 'day'));
-  };
-
-  const handleTaskClick = (task: Task) => {
-    setSelectedTask(task);
-    setModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    setSelectedTask(null);
-  };
-
-  const navigateMonth = (direction: 'prev' | 'next') => {
-    setCurrentDate(prev => direction === 'prev' ? prev.subtract(1, 'month') : prev.add(1, 'month'));
+    return tasks.filter(task => dayjs(task.startDate).isSame(date, 'day'));
   };
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  const handleTaskCreated = (newTask: Task) => {
-    setTasks(prev => [...prev, newTask]);
-    setCreateModalOpen(false);
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    setCurrentDate(prev => direction === 'prev' ? prev.subtract(1, 'month') : prev.add(1, 'month'));
   };
 
-  // NEW FUNCTION: Handle subtask creation
-  const handleSubtaskCreated = (newSubtask: Task) => {
-    setTasks(prev => [...prev, newSubtask]);
-    setSubtaskModalOpen(false);
-    setSelectedParentTask(null);
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task);
+    setTaskDetailModalOpen(true);
+  };
+
+  const handleCloseTaskDetailModal = () => {
+    setTaskDetailModalOpen(false);
+    setSelectedTask(null);
   };
 
   // NEW FUNCTION: Open subtask modal with parent
   const handleCreateSubtask = (parentTask: Task) => {
     setSelectedParentTask(parentTask);
-    setSubtaskModalOpen(true);
+    setSelectedTask(null);
+    setCreateModalOpen(true);
   };
+
+  const handleCloseCreateTaskModal = () => {
+    setCreateModalOpen(false);
+    setSelectedParentTask(null);
+    setSelectedTask(null);
+  }
 
   const handleMoreTasksClick = (date: Dayjs, tasks: Task[]) => {
     setSelectedDate(date);
@@ -163,32 +117,6 @@ const TaskCalendar: React.FC = () => {
     setSelectedDayTasks([]);
   };
 
-  // Handle Task Updates
-  const handleTaskUpdated = (updatedTask: Task) => {
-    setTasks(prev =>
-      prev.map(task =>
-        task.taskId === updatedTask.taskId ? updatedTask : task
-      )
-    );
-    setModalOpen(false);
-  };
-
-  // Create weeks array for better calendar rendering
-  const weeks = useMemo(() => {
-    const weeksArray = [];
-    for (let i = 0; i < calendarDays.length; i += 7) {
-      weeksArray.push(calendarDays.slice(i, i + 7));
-    }
-    return weeksArray;
-  }, [calendarDays]);
-
-  // Calculate fixed cell height based on available space and number of weeks
-  const getCellHeight = () => {
-    if (isMobile) return 80;
-    if (isTablet) return 100;
-    return 120; // Desktop
-  };
-
   return (
     <Box sx={{ display: 'flex', height: '100vh', bgcolor: '#f5f5f5', overflow: 'hidden' }}>
       {/* Sidebar for Desktop */}
@@ -196,7 +124,7 @@ const TaskCalendar: React.FC = () => {
         sidebarOpen={sidebarOpen}
         toggleSidebar={toggleSidebar}
         currentUser={mockJWT}
-        assignedTasks={assignedTasks}
+        tasks={tasks}
       />
 
       {/* Main Content */}
@@ -213,186 +141,32 @@ const TaskCalendar: React.FC = () => {
 
         {/* Calendar Container */}
         <Box sx={{
-          flex: 1,
+          flex: 1, minHeight: 0, overflow: 'hidden',
           p: { xs: 1, sm: 2 },
-          minHeight: 0,
-          overflow: 'hidden'
         }}>
-          <Paper sx={{
-            height: '100%',
-            p: { xs: 1, sm: 2 },
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden'
-          }}>
-            {/* Month Navigation */}
-            <MonthHeader
-              isMobile={isMobile}
+          {/* Month Navigation */}
+          <MonthHeader
+            isMobile={isMobile}
+            currentDate={currentDate}
+            navigateMonth={navigateMonth} />
+
+          {/* Calendar Grid */}
+          <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+            {/* Day Headers */}
+            <DayHeaders isMobile={isMobile} />
+
+            {/* Calendar Body with Fixed Heights */}
+            <CalendarBody
               currentDate={currentDate}
-              navigateMonth={navigateMonth} />
-
-            {/* Calendar Grid */}
-            <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-              {/* Day Headers */}
-              <DayHeaders isMobile={isMobile} />
-
-              {/* Calendar Body with Fixed Heights */}
-              <Stack
-                spacing={0.5}
-                sx={{
-                  flex: 1,
-                  minHeight: 0
-                }}
-              >
-                {weeks.map((week, weekIndex) => (
-                  <Stack
-                    key={weekIndex}
-                    direction="row"
-                    spacing={0.5}
-                    sx={{
-                      height: getCellHeight(),
-                      flexShrink: 0
-                    }}
-                  >
-                    {week.map((day) => {
-                      const dayTasks = getTasksForDay(day);
-                      const isCurrentMonth = day.isSame(currentDate, 'month');
-                      const isToday = day.isSame(dayjs(), 'day');
-
-                      return (
-                        <Box
-                          key={day.toString()}
-                          sx={{
-                            flex: 1,
-                            minWidth: 0,
-                            height: '100%'
-                          }}
-                        >
-                          <Paper
-                            variant={isToday ? 'elevation' : 'outlined'}
-                            sx={{
-                              height: '100%',
-                              p: { xs: 0.5, sm: 1 },
-                              opacity: isCurrentMonth ? 1 : 0.3,
-                              bgcolor: isToday ? 'primary.50' : 'white',
-                              border: isToday ? '2px solid' : undefined,
-                              borderColor: isToday ? 'primary.main' : undefined,
-                              display: 'flex',
-                              flexDirection: 'column',
-                              overflow: 'hidden',
-                              minWidth: 0,
-                              width: '100%',
-                              cursor: isMobile && dayTasks.length > 0 ? 'pointer' : 'default'
-                            }}
-                            onClick={isMobile && dayTasks.length === 1 ? () => handleTaskClick(dayTasks[0]) : undefined}
-                          >
-                            <Typography
-                              variant="body2"
-                              fontWeight={isToday ? 'bold' : 'normal'}
-                              color={isToday ? 'primary.main' : 'text.primary'}
-                              sx={{
-                                mb: { xs: 0.5, sm: 1 },
-                                flexShrink: 0,
-                                fontSize: { xs: '0.7rem', sm: '0.875rem' }
-                              }}
-                            >
-                              {day.format('D')}
-                            </Typography>
-
-                            <Box sx={{
-                              flex: 1,
-                              overflow: 'hidden',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              minWidth: 0
-                            }}>
-                              {/* Only show tasks that fit within the cell */}
-                              {dayTasks.slice(0, isMobile ? 1 : 2).map((task) => (
-                                <Card
-                                  key={task.taskId}
-                                  sx={{
-                                    mb: 0.5,
-                                    cursor: 'pointer',
-                                    bgcolor: `${getTaskTypeColor(task)}20`,
-                                    borderLeft: task.parentTaskId
-                                      ? `2px dashed ${getTaskTypeColor(task)}`
-                                      : `3px solid ${getTaskTypeColor(task)}`,
-                                    // Add subtle styling for subtasks
-                                    borderLeftWidth: task.parentTaskId ? '2px' : '3px',
-                                    borderLeftStyle: task.parentTaskId ? 'dashed' : 'solid',
-                                    ml: task.parentTaskId ? 0.5 : 0,
-                                    '&:hover': {
-                                      bgcolor: `${getTaskTypeColor(task)}30`,
-                                    },
-                                    minHeight: 0,
-                                    flexShrink: 0,
-                                    height: { xs: '16px', sm: '20px' },
-                                    minWidth: 0,
-                                    width: '100%'
-                                  }}
-                                  onClick={() => handleTaskClick(task)}
-                                >
-                                  <CardContent sx={{
-                                    p: '2px 4px !important',
-                                    '&:last-child': { pb: '2px !important' },
-                                    height: '100%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    minWidth: 0,
-                                    width: '100%'
-                                  }}>
-                                    <Typography
-                                      variant="caption"
-                                      noWrap
-                                      sx={{
-                                        display: 'block',
-                                        lineHeight: 1,
-                                        fontSize: { xs: '0.6rem', sm: '0.7rem' },
-                                        width: '100%',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        fontStyle: task.parentTaskId ? 'italic' : 'normal'
-                                      }}
-                                    >
-                                      {task.parentTaskId ? '└ ' : ''}{task.title}
-                                    </Typography>
-                                  </CardContent>
-                                </Card>
-                              ))}
-
-                              {/* Show more indicator only if it fits - MAKE IT CLICKABLE */}
-                              {dayTasks.length > (isMobile ? 1 : 2) && (
-                                <Typography
-                                  variant="caption"
-                                  color="text.secondary"
-                                  sx={{
-                                    fontSize: { xs: '0.55rem', sm: '0.65rem' },
-                                    flexShrink: 0,
-                                    lineHeight: 1,
-                                    cursor: 'pointer',
-                                    '&:hover': {
-                                      color: 'primary.main',
-                                      textDecoration: 'underline'
-                                    }
-                                  }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleMoreTasksClick(day, dayTasks);
-                                  }}
-                                >
-                                  +{dayTasks.length - (isMobile ? 1 : 2)} more
-                                </Typography>
-                              )}
-                            </Box>
-                          </Paper>
-                        </Box>
-                      );
-                    })}
-                  </Stack>
-                ))}
-              </Stack>
-            </Box>
-          </Paper>
+              getTasksForDay={getTasksForDay}
+              isTaskOverdue={isTaskOverdue}
+              getTaskTypeColor={getTaskTypeColor}
+              handleTaskClick={handleTaskClick}
+              handleMoreTasksClick={handleMoreTasksClick}
+              isMobile={isMobile}
+              isTablet={isTablet}
+            />
+          </Box>
         </Box>
       </Box>
 
@@ -407,34 +181,24 @@ const TaskCalendar: React.FC = () => {
 
       {/* Task Detail Modal */}
       <TaskDetailModal
-        task={selectedTask}
-        open={modalOpen}
-        onClose={handleCloseModal}
-        onTaskUpdated={handleTaskUpdated}
+        task={selectedTask} setSelectedTask={setSelectedTask}
+        open={taskDetailModalOpen} onClose={handleCloseTaskDetailModal}
         currentUser={mockJWT}
-        setSnackbarContent={setSnackbarContent}
         onCreateSubtask={handleCreateSubtask}
         onSubtaskClick={handleTaskClick}
+        onEditButtonClick={() => setCreateModalOpen(true)}
+        allTasks={tasks}
+        setSnackbarContent={setSnackbarContent} refetchTasks={fetchTasks}
       />
 
       {/* Task Create Modal */}
       <TaskCreateModal
         open={createModalOpen}
-        onClose={() => setCreateModalOpen(false)}
-        onTaskCreated={handleTaskCreated}
+        onClose={handleCloseCreateTaskModal}
+        refetchTasks={fetchTasks}
         setSnackbarContent={setSnackbarContent}
         currentUser={mockJWT}
-        allTasks={tasks}
-      />
-
-      <SubtaskCreateModal
-        open={subtaskModalOpen}
-        onClose={() => {
-          setSubtaskModalOpen(false);
-          setSelectedParentTask(null);
-        }}
-        onTaskCreated={handleSubtaskCreated}
-        setSnackbarContent={setSnackbarContent}
+        existingTaskDetails={selectedTask || null}
         preselectedParentTask={selectedParentTask}
         allTasks={tasks}
       />
