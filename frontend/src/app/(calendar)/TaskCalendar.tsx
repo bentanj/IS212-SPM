@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSession } from 'next-auth/react';
 import { Alert, AlertColor, Box, useTheme, useMediaQuery, Snackbar } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -20,9 +21,11 @@ import { getTaskTypeColor, isTaskOverdue } from '@/utils/TaskRenderingFunctions'
 import { getUserTask } from '@/utils/Tasks/getTask';
 
 const TaskCalendar: React.FC = () => {
+  const { data: session } = useSession();
+
   // Mock Data
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [mockJWT, setMockJWT] = useState(taskMockData.currentUser);
+  const [mockJWT, setMockJWT] = useState(null);
 
   const [currentDate, setCurrentDate] = useState<Dayjs>(dayjs());
   const [taskDetailModalOpen, setTaskDetailModalOpen] = useState(false);
@@ -53,7 +56,18 @@ const TaskCalendar: React.FC = () => {
     setSnackbarSeverity('success');
   }
 
+  useEffect(() => {
+    if (session?.user) {
+      setMockJWT(session.user);
+    }
+  }, [session]);
+
   const fetchTasks = useCallback(async () => {
+    if (!mockJWT) {
+      // Session user not ready yet, exit early
+      return;
+    }
+
     try {
       const TaskData = await getUserTask(mockJWT);
       setTasks(TaskData);
@@ -116,6 +130,11 @@ const TaskCalendar: React.FC = () => {
     setSelectedDate(null);
     setSelectedDayTasks([]);
   };
+
+  if (!mockJWT) {
+    // Session/user data not ready yet, show loading or empty state
+    return <Box sx={{ textAlign: 'center', alignItems: 'center' }}>Loading Session Data...</Box>;
+  }
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', bgcolor: '#f5f5f5', overflow: 'hidden' }}>
