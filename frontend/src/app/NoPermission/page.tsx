@@ -1,5 +1,5 @@
 // Only required if Button to Home Page is enabled
-// "use client"
+"use client"
 // import Link from "next/link"
 // import { Button } from "@mui/material"
 // import { Home } from "@mui/icons-material"
