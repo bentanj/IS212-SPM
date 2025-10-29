@@ -2,9 +2,10 @@ import { User } from "@/types";
 
 const TASK_PORT = process.env.TASK_SERVICE_PORT || 8000;
 
-export async function getUserById(userId: string): Promise<User> {
+export async function getUserByEmail(email: string): Promise<User> {
+    email = encodeURIComponent(email.toLowerCase())
 
-    let targetURL = `http://localhost:${TASK_PORT}/api/users/${userId}`;
+    let targetURL = `http://localhost:${TASK_PORT}/api/users/email/${email}`;
 
     try {
         const response = await fetch(targetURL, {
