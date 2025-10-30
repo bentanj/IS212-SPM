@@ -11,7 +11,6 @@ import weekOfYear from 'dayjs/plugin/weekOfYear';
 dayjs.extend(isBetween);
 dayjs.extend(weekOfYear);
 
-import { taskMockData } from '@/mocks/staff/taskMockData';
 import { Task } from '@/types';
 import { SideBar, Header, DayTasksModal, TaskCreateModal, TaskDetailModal } from './_components';
 import { MonthHeader, CalendarBody, DayHeaders } from './_components/_TaskCalendar';

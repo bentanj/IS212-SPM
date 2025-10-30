@@ -1,9 +1,9 @@
 'use client';
 
+import { useSession } from 'next-auth/react';
 import React, { useState, useEffect, useCallback } from 'react';
 import { AlertColor, Box, Typography, Paper, CircularProgress, Alert, Stack, Snackbar, useMediaQuery, useTheme } from '@mui/material';
 
-import { taskMockData } from '@/mocks/staff/taskMockData';
 import { Task, TProject, TProjectStatus } from '@/types';
 import { getUserTask } from '@/utils/Tasks/getTask';
 import { getProjectsByTasks } from '../_functions/getProjectsByTasks';
@@ -24,8 +24,9 @@ export default function ProjectsUI() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Current user - using mock data (same as calendar)
-  const currentUser = taskMockData.currentUser;
+  // Current user - using session data
+  const { data: session } = useSession();
+  const currentUser = session?.user || null;
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
