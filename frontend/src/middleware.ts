@@ -10,6 +10,11 @@ export default auth((req) => {
         return NextResponse.next();
     }
 
+    // Redirect unauthenticated users to /SignIn
+    if (!req.auth) {
+        return NextResponse.redirect(new URL(`/SignIn`, req.url));
+    }
+
     if (pathname === "/reportgeneration" || pathname === "/usermanagement") {
         const userRole = req!.auth!.user!.role;
 
@@ -17,11 +22,6 @@ export default auth((req) => {
             // Redirect unauthorized users to /NoPermission
             return NextResponse.redirect(new URL(`/NoPermission`, req.url));
         }
-    }
-
-    // Redirect unauthenticated users to /SignIn
-    if (!req.auth) {
-        return NextResponse.redirect(new URL(`/SignIn`, req.url));
     }
 
     // Allow authenticated users
