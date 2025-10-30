@@ -1,6 +1,7 @@
+import { useState, useEffect } from 'react';
 import { Autocomplete, TextField } from '@mui/material';
 import { User } from '@/types';
-import { allUsers } from '@/mocks/allUsers';
+import { getAllUsers } from '@/utils/Users/getUser';
 import { getAvailableUsers, handleAssignedUsersChange } from '@/utils/TaskCreateModelFunctions';
 import renderAssignedUserTags from './renderAssignedUserTags';
 import { canEditTaskAssignees } from '@/utils/Permissions';
@@ -26,6 +27,20 @@ export const AssignedUsersAutocomplete: React.FC<AssignedUsersAutocompleteProps>
     helperText = '',
     canAddMoreUsers,
 }) => {
+    const [allUsers, setAllUsers] = useState<User[]>([]);
+
+    useEffect(() => {
+        async function fetchUsers() {
+            try {
+                const users = await getAllUsers();
+                setAllUsers(users);
+            } catch (error) {
+                console.error('Failed to fetch users:', error);
+            }
+        }
+        fetchUsers();
+    }, []);
+
     const availableUsers = getAvailableUsers(allUsers, assignedUsers);
     const canDelete = canEditTaskAssignees(currentUser);
 
