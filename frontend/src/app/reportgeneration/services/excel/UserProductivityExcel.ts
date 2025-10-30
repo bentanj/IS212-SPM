@@ -8,16 +8,13 @@ import { generateExcel } from './ExcelGenerator';
 export function exportUserProductivityToExcel(
   report: UserProductivityReport
 ): void {
-  // Validate data
+  // Get team members data (handle empty case)
   const teamMembers = report.data?.team_members || [];
-  
-  if (teamMembers.length === 0) {
-    alert('No user productivity data available to export');
-    return;
-  }
 
-  // Sort by completion rate (descending)
-  const sortedMembers = [...teamMembers].sort((a, b) => b.completion_rate - a.completion_rate);
+  // Sort by completion rate (descending) only if there are members
+  const sortedMembers = teamMembers.length > 0 
+    ? [...teamMembers].sort((a, b) => b.completion_rate - a.completion_rate)
+    : [];
 
   // Build array of objects
   const excelData = [];
@@ -47,7 +44,7 @@ export function exportUserProductivityToExcel(
     value_5: 'Completion Rate',
   });
 
-  // User data rows
+  // User data rows (will be empty if no team members)
   sortedMembers.forEach(member => {
     const fullName = member.full_name || 
                     `${member.first_name || ''} ${member.last_name || ''}`.trim() || 
