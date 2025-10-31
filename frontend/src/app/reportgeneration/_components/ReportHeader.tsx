@@ -33,7 +33,6 @@ export const ReportHeader: React.FC = () => {
           fontSize: { xs: '0.938rem', sm: '1rem' },
         }}
       >
-        Welcome, Sarah Davis (Admin)
       </Typography>
       <Typography
         variant="body2"

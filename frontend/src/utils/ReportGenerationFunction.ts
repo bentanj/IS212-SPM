@@ -100,25 +100,29 @@ export const generateProjectPerformanceReport = async (
   endDate: string
 ): Promise<ProjectPerformanceReport> => {
   try {
-    console.log(`Generating project performance report: ${startDate} to ${endDate}`);
+    console.log(`[Project Performance] Starting report generation: ${startDate} to ${endDate}`);
 
-    // 1. Fetch and filter tasks
+    // ═══════════════════════════════════════════════════════════════════
+    // STEP 1: FETCH AND FILTER TASKS
+    // ═══════════════════════════════════════════════════════════════════
     const allTasks = await fetchAllTasks();
-    console.log('All tasks fetched:', allTasks.length);
+    console.log(`[Project Performance] Fetched ${allTasks.length} total tasks from API`);
     
     const filteredTasks = filterTasksByDateRange(allTasks, startDate, endDate);
-    console.log('Filtered tasks:', filteredTasks.length);
+    console.log(`[Project Performance] Filtered to ${filteredTasks.length} tasks in date range`);
 
-    // 2. Group tasks by PROJECT NAME (not ID)
+    // ═══════════════════════════════════════════════════════════════════
+    // STEP 2: GROUP TASKS BY PROJECT NAME
+    // ═══════════════════════════════════════════════════════════════════
     const projectMap = new Map<string, any>();
     
     filteredTasks.forEach(task => {
-      // ✅ Use project_name as the key
+      // Use project_name as the key (supports both camelCase and snake_case)
       const projectName = task.project_name || task.projectName;
       
       // Skip tasks without a project name
       if (!projectName) {
-        console.warn('Task has no project name:', task.id || task.taskId || task.task_id);
+        console.warn(`[Project Performance] Task has no project name:`, task.id || task.taskId || task.task_id);
         return;
       }
       
@@ -134,14 +138,16 @@ export const generateProjectPerformanceReport = async (
       projectMap.get(projectName)!.tasks.push(task);
     });
 
-    console.log('Projects found:', projectMap.size);
-    console.log('Project names:', Array.from(projectMap.keys()));
+    console.log(`[Project Performance] Projects found: ${projectMap.size}`);
+    console.log(`[Project Performance] Project names:`, Array.from(projectMap.keys()).slice(0, 5));
 
-    // 3. Calculate project statistics
+    // ═══════════════════════════════════════════════════════════════════
+    // STEP 3: CALCULATE PROJECT STATISTICS
+    // ═══════════════════════════════════════════════════════════════════
     const projects: ProjectStatistics[] = Array.from(projectMap.values()).map(project => {
       const totalTasks = project.tasks.length;
       
-      // Count tasks by status (case-insensitive)
+      // Count tasks by status (case-insensitive, trimmed)
       const completed = project.tasks.filter(t => {
         const status = (t.status || '').toLowerCase().trim();
         return status === 'completed';
@@ -176,24 +182,53 @@ export const generateProjectPerformanceReport = async (
       };
     });
 
-    // Sort projects by total tasks (descending)
-    projects.sort((a, b) => b.total_tasks - a.total_tasks);
+    // ═══════════════════════════════════════════════════════════════════
+    // ✨ STEP 4: SORT BY COMPLETION RATE (DESCENDING)
+    // ═══════════════════════════════════════════════════════════════════
+    projects.sort((a, b) => {
+      // Primary sort: completion_rate descending
+      if (b.completion_rate !== a.completion_rate) {
+        return b.completion_rate - a.completion_rate;
+      }
+      // Secondary sort: total_tasks descending (tie-breaker)
+      if (b.total_tasks !== a.total_tasks) {
+        return b.total_tasks - a.total_tasks;
+      }
+      // Tertiary sort: alphabetical by project name (tie-breaker)
+      return (a.project_name || '').localeCompare(b.project_name || '');
+    });
 
-    // 4. Calculate summary statistics
+    console.log(`[Project Performance] Sorted ${projects.length} projects by completion rate (descending)`);
+
+    // ═══════════════════════════════════════════════════════════════════
+    // STEP 5: CALCULATE SUMMARY STATISTICS
+    // ═══════════════════════════════════════════════════════════════════
     const totalProjects = projects.length;
     const totalTasks = projects.reduce((sum, p) => sum + p.total_tasks, 0);
     const totalCompleted = projects.reduce((sum, p) => sum + p.completed, 0);
     const avgCompletion = totalProjects > 0 ?
       Math.round((projects.reduce((sum, p) => sum + p.completion_rate, 0) / totalProjects) * 10) / 10 : 0;
 
-    console.log('Report summary:', {
+    console.log(`[Project Performance] Summary calculated:`, {
       totalProjects,
       totalTasks,
       totalCompleted,
-      avgCompletion
+      avgCompletion: `${avgCompletion}%`
     });
 
-    return {
+    // Log top performing projects
+    if (projects.length > 0) {
+      const topProjects = projects
+        .slice(0, 3)
+        .map(p => `${p.project_name} (${p.completion_rate}%)`)
+        .join(', ');
+      console.log(`[Project Performance] Top projects: ${topProjects}`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // STEP 6: BUILD AND RETURN REPORT
+    // ═══════════════════════════════════════════════════════════════════
+    const report: ProjectPerformanceReport = {
       metadata: {
         report_id: `project-${Date.now()}`,
         report_type: 'project_performance',
@@ -214,75 +249,168 @@ export const generateProjectPerformanceReport = async (
       },
       data: { projects }
     };
+
+    console.log(`[Project Performance] Report generation complete`);
+    return report;
+
   } catch (error) {
-    console.error('Error generating project performance report:', error);
+    console.error('[Project Performance] Error generating report:', error);
+    
+    // Enhanced error logging
+    if (error instanceof Error) {
+      console.error('[Project Performance] Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+    }
+    
     throw error;
   }
 };
 
+
 /**
  * Generate User Productivity Report
- * Migrated from: ReportService.generate_user_productivity_report()
+ * @param startDate - Report start date (YYYY-MM-DD)
+ * @param endDate - Report end date (YYYY-MM-DD)
+ * @returns UserProductivityReport with team member statistics
+ * 
+ * This function:
+ * 1. Fetches all tasks from the Task Service
+ * 2. Filters tasks by date range
+ * 3. Groups tasks by assigned users
+ * 4. Fetches user details in batch
+ * 5. Calculates productivity metrics per user
+ * 6. Returns comprehensive report with summary
  */
 export const generateUserProductivityReport = async (
   startDate: string,
   endDate: string
 ): Promise<UserProductivityReport> => {
   try {
-    console.log(`Generating user productivity report: ${startDate} to ${endDate}`);
+    console.log(`[User Productivity] Starting report generation: ${startDate} to ${endDate}`);
     
-    // 1. Fetch and filter tasks
+    // ═══════════════════════════════════════════════════════════════════
+    // STEP 1: FETCH AND FILTER TASKS
+    // ═══════════════════════════════════════════════════════════════════
     const allTasks = await fetchAllTasks();
-    const filteredTasks = filterTasksByDateRange(allTasks, startDate, endDate);
+    console.log(`[User Productivity] Fetched ${allTasks.length} total tasks from API`);
     
-    // 2. Group tasks by user
-    const userMap = new Map<number, any[]>();
-    filteredTasks.forEach(task => {
+    const filteredTasks = filterTasksByDateRange(allTasks, startDate, endDate);
+    console.log(`[User Productivity] Filtered to ${filteredTasks.length} tasks in date range`);
+    
+    if (filteredTasks.length === 0) {
+      console.warn(`[User Productivity] No tasks found in date range`);
+      return createEmptyReport(startDate, endDate, allTasks.length);
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════
+    // STEP 2: GROUP TASKS BY USER
+    // ═══════════════════════════════════════════════════════════════════
+    const userTaskMap = new Map<number, any[]>();
+    
+    filteredTasks.forEach((task, taskIndex) => {
+      // Support both camelCase and snake_case
       const assignedUsers = task.assignedUsers || task.assigned_users || [];
-      if (Array.isArray(assignedUsers)) {
-        assignedUsers.forEach((user: any) => {
-          const userId = typeof user === 'object' ? (user.userId || user.user_id) : user;
-          if (userId) {
-            const numericUserId = Number(userId);
-            if (!userMap.has(numericUserId)) userMap.set(numericUserId, []);
-            userMap.get(numericUserId)!.push(task);
-          }
-        });
+      
+      if (!Array.isArray(assignedUsers)) {
+        console.warn(`[User Productivity] Task ${task.taskId || taskIndex} has invalid assignedUsers format:`, typeof assignedUsers);
+        return;
       }
+      
+      assignedUsers.forEach((user: any) => {
+        // Extract userId from both object and primitive formats
+        // Supports: {userId: 1}, {user_id: 1}, or raw number 1
+        let userId: number | undefined;
+        
+        if (typeof user === 'object' && user !== null) {
+          userId = user.userId || user.user_id;
+        } else if (typeof user === 'number' || typeof user === 'string') {
+          userId = Number(user);
+        }
+        
+        if (!userId || isNaN(userId)) {
+          console.warn(`[User Productivity] Could not extract valid userId from:`, user);
+          return;
+        }
+        
+        const numericUserId = Number(userId);
+        
+        // Initialize array if first task for this user
+        if (!userTaskMap.has(numericUserId)) {
+          userTaskMap.set(numericUserId, []);
+        }
+        
+        userTaskMap.get(numericUserId)!.push(task);
+      });
     });
     
-    // 3. Batch fetch user details
-    const userIds = Array.from(userMap.keys());
-    const users = await fetchUsersBatch(userIds);
-    const userInfoMap = new Map(users.map((u: any) => [u.userId || u.user_id || u.id, u]));
+    console.log(`[User Productivity] Grouped tasks for ${userTaskMap.size} unique users`);
     
-    // 4. Calculate user productivity
-    const teamMembers: TeamMemberStats[] = Array.from(userMap.entries()).map(([userId, tasks]) => {
+    // Log user distribution for debugging
+    if (userTaskMap.size > 0) {
+      const distribution = Array.from(userTaskMap.entries())
+        .map(([userId, tasks]) => `User ${userId}: ${tasks.length} tasks`)
+        .slice(0, 5)
+        .join(', ');
+      console.log(`[User Productivity] Sample distribution: ${distribution}${userTaskMap.size > 5 ? ', ...' : ''}`);
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════
+    // STEP 3: BATCH FETCH USER DETAILS
+    // ═══════════════════════════════════════════════════════════════════
+    const userIds = Array.from(userTaskMap.keys());
+    console.log(`[User Productivity] Fetching details for ${userIds.length} users`);
+    
+    const users = await fetchUsersBatch(userIds);
+    console.log(`[User Productivity] Received ${users.length} user records from API`);
+    
+    // Create lookup map for O(1) access
+    const userInfoMap = new Map(
+      users.map((u: any) => [
+        u.userId || u.user_id || u.id,
+        u
+      ])
+    );
+    
+    // ═══════════════════════════════════════════════════════════════════
+    // STEP 4: CALCULATE USER PRODUCTIVITY METRICS
+    // ═══════════════════════════════════════════════════════════════════
+    console.log(`[User Productivity] Calculating metrics for each user`);
+    
+    const teamMembers: TeamMemberStats[] = Array.from(userTaskMap.entries()).map(([userId, userTasks]) => {
       const userInfo = userInfoMap.get(userId);
-      const totalTasks = tasks.length;
-        const completed = tasks.filter(t => {
-        const status = (t.status || '').toLowerCase().trim();
+      const totalTasks = userTasks.length;
+      
+      // Count tasks by status (case-insensitive, trimmed)
+      const completed = userTasks.filter(task => {
+        const status = (task.status || '').toLowerCase().trim();
         return status === 'completed';
       }).length;
       
-      const inProgress = tasks.filter(t => {
-        const status = (t.status || '').toLowerCase().trim();
+      const inProgress = userTasks.filter(task => {
+        const status = (task.status || '').toLowerCase().trim();
         return status === 'in progress';
       }).length;
       
-      const toDo = tasks.filter(t => {
-        const status = (t.status || '').toLowerCase().trim();
+      const toDo = userTasks.filter(task => {
+        const status = (task.status || '').toLowerCase().trim();
         return status === 'to do';
       }).length;
       
-      const blocked = tasks.filter(t => {
-        const status = (t.status || '').toLowerCase().trim();
+      const blocked = userTasks.filter(task => {
+        const status = (task.status || '').toLowerCase().trim();
         return status === 'blocked';
       }).length;
-
       
-      // Extract name from user info
-      const userName = userInfo?.name || userInfo?.full_name || `User ${userId}`;
+      // Calculate completion rate (rounded to 1 decimal)
+      const completionRate = totalTasks > 0 
+        ? Math.round((completed / totalTasks) * 100 * 10) / 10 
+        : 0;
+      
+      // Extract user name (support multiple field names)
+      const userName = userInfo?.name || userInfo?.full_name || userInfo?.fullname || `User ${userId}`;
       const nameParts = userName.split(' ', 2);
       
       return {
@@ -295,19 +423,51 @@ export const generateUserProductivityReport = async (
         in_progress: inProgress,
         todo: toDo,
         blocked,
-        completion_rate: totalTasks > 0 ? 
-          Math.round((completed / totalTasks) * 100 * 10) / 10 : 0
+        completion_rate: completionRate
       };
     });
+
+    teamMembers.sort((a, b) => {
+      // Primary sort: completion_rate descending
+      if (b.completion_rate !== a.completion_rate) {
+        return b.completion_rate - a.completion_rate;
+      }
+      // Secondary sort: total_tasks descending (tie-breaker)
+      if (b.total_tasks !== a.total_tasks) {
+        return b.total_tasks - a.total_tasks;
+      }
+      // Tertiary sort: alphabetical by name (tie-breaker)
+      return (a.full_name || '').localeCompare(b.full_name || '');
+    });
     
-    // 5. Calculate summary
+    // ═══════════════════════════════════════════════════════════════════
+    // STEP 5: CALCULATE SUMMARY METRICS
+    // ═══════════════════════════════════════════════════════════════════
     const totalUsers = teamMembers.length;
-    const totalTasks = teamMembers.reduce((sum, u) => sum + u.total_tasks, 0);
-    const totalCompleted = teamMembers.reduce((sum, u) => sum + u.completed, 0);
-    const avgCompletion = totalUsers > 0 ?
-      teamMembers.reduce((sum, u) => sum + u.completion_rate, 0) / totalUsers : 0;
+    const totalTasksAssigned = teamMembers.reduce((sum, user) => sum + user.total_tasks, 0);
+    const totalCompleted = teamMembers.reduce((sum, user) => sum + user.completed, 0);
+    const totalInProgress = teamMembers.reduce((sum, user) => sum + user.in_progress, 0);
+    const totalToDo = teamMembers.reduce((sum, user) => sum + user.todo, 0);
+    const totalBlocked = teamMembers.reduce((sum, user) => sum + user.blocked, 0);
     
-    return {
+    // Average completion rate across all users
+    const avgCompletionRate = totalUsers > 0
+      ? teamMembers.reduce((sum, user) => sum + user.completion_rate, 0) / totalUsers
+      : 0;
+    
+    console.log(`[User Productivity] Summary calculated:`);
+    console.log(`  - Total Users: ${totalUsers}`);
+    console.log(`  - Total Tasks Assigned: ${totalTasksAssigned}`);
+    console.log(`  - Total Completed: ${totalCompleted}`);
+    console.log(`  - Total In Progress: ${totalInProgress}`);
+    console.log(`  - Total To-Do: ${totalToDo}`);
+    console.log(`  - Total Blocked: ${totalBlocked}`);
+    console.log(`  - Avg Completion Rate: ${avgCompletionRate.toFixed(1)}%`);
+    
+    // ═══════════════════════════════════════════════════════════════════
+    // STEP 6: BUILD AND RETURN REPORT
+    // ═══════════════════════════════════════════════════════════════════
+    const report: UserProductivityReport = {
       metadata: {
         report_id: `user-${Date.now()}`,
         report_type: 'user_productivity',
@@ -322,18 +482,68 @@ export const generateUserProductivityReport = async (
       },
       summary: {
         total_users: totalUsers,
-        total_tasks_assigned: totalTasks,
+        total_tasks_assigned: totalTasksAssigned,
         total_completed: totalCompleted,
-        average_completion_rate: Math.round(avgCompletion * 10) / 10
+        average_completion_rate: Math.round(avgCompletionRate * 10) / 10
       },
-      data: { team_members: teamMembers }
+      data: {
+        team_members: teamMembers
+      }
     };
     
+    console.log(`[User Productivity] Report generation complete`);
+    return report;
+    
   } catch (error) {
-    console.error('Error generating user productivity report:', error);
+    console.error('[User Productivity] Error generating report:', error);
+    
+    // Enhanced error logging
+    if (error instanceof Error) {
+      console.error('[User Productivity] Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+    }
+    
     throw error;
   }
 };
+
+/**
+ * Helper: Create empty report when no tasks found
+ * @private
+ */
+function createEmptyReport(
+  startDate: string, 
+  endDate: string, 
+  totalTasks: number
+): UserProductivityReport {
+  return {
+    metadata: {
+      report_id: `user-${Date.now()}`,
+      report_type: 'user_productivity',
+      generated_at: new Date().toISOString(),
+      generated_by: 'frontend',
+      parameters: {
+        start_date: startDate,
+        end_date: endDate,
+        tasks_in_range: 0,
+        total_tasks: totalTasks
+      }
+    },
+    summary: {
+      total_users: 0,
+      total_tasks_assigned: 0,
+      total_completed: 0,
+      average_completion_rate: 0
+    },
+    data: {
+      team_members: []
+    }
+  };
+}
+
 
 /**
  * Generate Department Activity Report
