@@ -2,35 +2,36 @@
 
 import { useSession } from 'next-auth/react';
 import React, { useState, useEffect, useCallback } from 'react';
-import { AlertColor, Box, Typography, Paper, CircularProgress, Alert, Stack, Snackbar, useMediaQuery, useTheme } from '@mui/material';
+import { AlertColor, Box, Typography, Paper, CircularProgress, Alert, Stack, useMediaQuery, useTheme } from '@mui/material';
+import { enqueueSnackbar } from 'notistack';
 
 import { Task, TProject, TProjectStatus } from '@/types';
 import { getUserTask } from '@/utils/Tasks/getTask';
 import { getProjectsByTasks } from '../_functions/getProjectsByTasks';
+import { applyProjectFilters } from '../_functions/filterHelpers';
 
 import { ProjectsDataGrid } from './ProjectsDataGrid';
 import { ProjectDetailModal } from './ProjectDetailModal';
 import { SearchBar } from './SearchBar';
 import { FilterControls } from './FilterControls';
 import { ProjectCardList } from './ProjectCardList';
-
-import { applyProjectFilters } from '../_functions/filterHelpers';
 import { TaskDetailModal } from '@/components/TaskDetailModal';
-import { enqueueSnackbar } from 'notistack';
+import { TaskCreateModal } from '@/components/TaskCreateModal';
 
 export default function ProjectsUI() {
+  // Session & User
+  const { data: session } = useSession();
+  const currentUser = session?.user || null;
+
+  // Responsive
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
   // Data state
   const [projects, setProjects] = useState<TProject[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Current user - using session data
-  const { data: session } = useSession();
-  const currentUser = session?.user || null;
-
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // Search and filter state
   const [searchTerm, setSearchTerm] = useState('');
@@ -39,24 +40,23 @@ export default function ProjectsUI() {
   // Modal state
   const [selectedProject, setSelectedProject] = useState<TProject | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
-  // Snackbar
+  // Snackbar helper
   const setSnackbarContent = (message: string, severity: AlertColor) => {
     enqueueSnackbar(message, { variant: severity });
   };
 
+  // Data loading
   const loadProjectsAndTasks = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      // 1. Fetch tasks from API (same as calendar does)
       const taskData = await getUserTask(currentUser);
       setTasks(taskData);
 
-      // 2. Extract projects from tasks
       const projectData = getProjectsByTasks(taskData);
       setProjects(projectData);
-
     } catch (err) {
       console.error('Error loading projects and tasks:', err);
       setError('Failed to load projects. Please try again.');
@@ -69,8 +69,10 @@ export default function ProjectsUI() {
     loadProjectsAndTasks();
   }, [loadProjectsAndTasks]);
 
+  // Filtered data
   const filteredProjects = applyProjectFilters(projects, searchTerm, statusFilter);
 
+  // Event handlers
   const handleProjectClick = (project: TProject) => {
     setSelectedProject(project);
   };
@@ -91,10 +93,9 @@ export default function ProjectsUI() {
     setSelectedTask(subtask);
   };
 
-  const handleTaskUpdated = (newAllTasks: Task[]) => {
-    // The modal gives us the complete, updated list.
-    setTasks(newAllTasks);
-    console.log('Task list updated via modal.');
+  const handleCloseCreateTaskModal = () => {
+    setCreateModalOpen(false);
+    setSelectedTask(null);
   };
 
   return (
@@ -227,10 +228,21 @@ export default function ProjectsUI() {
         setSnackbarContent={setSnackbarContent}
         currentUser={currentUser}
         onSubtaskClick={handleSubtaskClick}
+        onEditButtonClick={() => setCreateModalOpen(true)}
         allTasks={tasks}
         refetchTasks={loadProjectsAndTasks}
       />
 
+      <TaskCreateModal
+        open={createModalOpen}
+        onClose={handleCloseCreateTaskModal}
+        refetchTasks={loadProjectsAndTasks}
+        setSnackbarContent={setSnackbarContent}
+        currentUser={currentUser}
+        existingTaskDetails={selectedTask || null}
+        preselectedParentTask={null}
+        allTasks={tasks}
+      />
     </Box>
   );
 }
