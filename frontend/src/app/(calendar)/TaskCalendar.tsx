@@ -1,7 +1,7 @@
 'use client';
-
 import { useState, useEffect, useCallback } from 'react';
-import { Alert, AlertColor, Box, useTheme, useMediaQuery, Snackbar } from '@mui/material';
+import { useSession } from 'next-auth/react';
+import { AlertColor, Box, useTheme, useMediaQuery } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
@@ -10,19 +10,21 @@ import weekOfYear from 'dayjs/plugin/weekOfYear';
 dayjs.extend(isBetween);
 dayjs.extend(weekOfYear);
 
-import { taskMockData } from '@/mocks/staff/taskMockData';
 import { Task } from '@/types';
-import { SideBar, Header, TaskCreateModal, TaskDetailModal, DayTasksModal } from './_components';
+import { SideBar, Header, DayTasksModal, TaskCreateModal, TaskDetailModal } from './_components';
 import { MonthHeader, CalendarBody, DayHeaders } from './_components/_TaskCalendar';
-import { getTaskTypeColor, isTaskOverdue } from '../../utils/TaskRenderingFunctions';
+import { getTaskTypeColor, isTaskOverdue } from '@/utils/TaskRenderingFunctions';
 
 // Functions
+import { enqueueSnackbar } from 'notistack';
 import { getUserTask } from '@/utils/Tasks/getTask';
 
 const TaskCalendar: React.FC = () => {
+  const { data: session } = useSession();
+
   // Mock Data
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [mockJWT, setMockJWT] = useState(taskMockData.currentUser);
+  const [mockJWT, setMockJWT] = useState(null);
 
   const [currentDate, setCurrentDate] = useState<Dayjs>(dayjs());
   const [taskDetailModalOpen, setTaskDetailModalOpen] = useState(false);
@@ -39,21 +41,22 @@ const TaskCalendar: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
 
   // Snackbar
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState<AlertColor>('success');
   const setSnackbarContent = (message: string, severity: AlertColor) => {
-    setSnackbarMessage(message);
-    setSnackbarSeverity(severity);
-    setSnackbarOpen(true);
+    enqueueSnackbar(message, { variant: severity });
   };
-  const snackbarReset = () => {
-    setSnackbarOpen(false);
-    setSnackbarMessage('');
-    setSnackbarSeverity('success');
-  }
+
+  useEffect(() => {
+    if (session?.user) {
+      setMockJWT(session.user);
+    }
+  }, [session]);
 
   const fetchTasks = useCallback(async () => {
+    if (!mockJWT) {
+      // Session user not ready yet, exit early
+      return;
+    }
+
     try {
       const TaskData = await getUserTask(mockJWT);
       setTasks(TaskData);
@@ -116,6 +119,11 @@ const TaskCalendar: React.FC = () => {
     setSelectedDate(null);
     setSelectedDayTasks([]);
   };
+
+  if (!mockJWT) {
+    // Session/user data not ready yet, show loading or empty state
+    return <Box sx={{ textAlign: 'center', alignItems: 'center' }}>Loading Session Data...</Box>;
+  }
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', bgcolor: '#f5f5f5', overflow: 'hidden' }}>
@@ -202,17 +210,6 @@ const TaskCalendar: React.FC = () => {
         preselectedParentTask={selectedParentTask}
         allTasks={tasks}
       />
-
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={2000}
-        onClose={snackbarReset}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert onClose={snackbarReset} severity={snackbarSeverity} sx={{ width: '100%' }}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
 
     </Box>
   );

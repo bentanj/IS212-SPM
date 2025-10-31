@@ -43,7 +43,8 @@ import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon
 } from '@mui/icons-material';
-import { allUsers, taskMockData } from '@/mocks/staff/taskMockData';
+import { getAllUsers } from '@/utils/Users/getUser';
+import { ALL_DEPARTMENTS } from '@/constants/Organisation';
 import { User } from '@/types';
 import UserEditModal from './UserEditModal';
 import UserCreateModal from './UserCreateModal';
@@ -211,11 +212,16 @@ export default function UserManagement() {
 
   // Initialize users and departments
   useEffect(() => {
-    const extendedUsers: ExtendedUser[] = allUsers.map(user => ({
-      ...user
-    }));
-    setUsers(extendedUsers);
-    setDepartments([...new Set(allUsers.map(user => user.department))]);
+    async function fetchUsers() {
+      try {
+        const users = await getAllUsers();
+        setUsers(users);
+        setDepartments(ALL_DEPARTMENTS);
+      } catch (error) {
+        console.error('Failed to fetch users:', error);
+      }
+    }
+    fetchUsers();
   }, []);
 
   const roles = useMemo(() => ALL_ROLES, []);

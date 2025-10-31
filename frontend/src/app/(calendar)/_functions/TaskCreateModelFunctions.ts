@@ -1,6 +1,5 @@
 import dayjs from 'dayjs';
 import { User, Task, Comment, Priority, Status } from '@/types';
-import { taskMockData } from '@/mocks/staff/taskMockData';
 import { FormData as IFormData } from "@/types/IFormData";
 import DefaultFormData from '@/constants/DefaultFormData';
 

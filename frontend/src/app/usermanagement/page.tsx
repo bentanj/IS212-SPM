@@ -1,14 +1,14 @@
 'use client';
-
+import { useSession } from 'next-auth/react';
 import UserManagement from './UserManagement';
-import { taskMockData } from '@/mocks/staff/taskMockData';
 
 export default function UserManagementPage() {
   // Mock authentication check - replace with actual auth
-  const currentUser = taskMockData.currentUser;
-  
+  const { data: session } = useSession();
+  const currentUser = session?.user || null;
+
   // Only allow HR/Admin access
-  if (!currentUser || (currentUser.role !== 'HR/Admin' && currentUser.department !== 'Human Resources')) {
+  if (!currentUser || (currentUser.role !== 'HR/Admin')) {
     return (
       <div style={{
         display: 'flex',

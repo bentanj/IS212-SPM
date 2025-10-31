@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import TaskAttachmentsSection from './TaskAttachmentsSection';
+import { TaskAttachmentsSection } from './index';
 import * as taskAttachmentsUtils from '@/utils/taskAttachments';
 
 // Mock the taskAttachments utility functions

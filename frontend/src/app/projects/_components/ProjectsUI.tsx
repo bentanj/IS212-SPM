@@ -1,9 +1,9 @@
 'use client';
 
+import { useSession } from 'next-auth/react';
 import React, { useState, useEffect, useCallback } from 'react';
 import { AlertColor, Box, Typography, Paper, CircularProgress, Alert, Stack, Snackbar, useMediaQuery, useTheme } from '@mui/material';
 
-import { taskMockData } from '@/mocks/staff/taskMockData';
 import { Task, TProject, TProjectStatus } from '@/types';
 import { getUserTask } from '@/utils/Tasks/getTask';
 import { getProjectsByTasks } from '../_functions/getProjectsByTasks';
@@ -16,6 +16,7 @@ import { ProjectCardList } from './ProjectCardList';
 
 import { applyProjectFilters } from '../_functions/filterHelpers';
 import { TaskDetailModal } from '@/components/TaskDetailModal';
+import { enqueueSnackbar } from 'notistack';
 
 export default function ProjectsUI() {
   // Data state
@@ -24,8 +25,9 @@ export default function ProjectsUI() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Current user - using mock data (same as calendar)
-  const currentUser = taskMockData.currentUser;
+  // Current user - using session data
+  const { data: session } = useSession();
+  const currentUser = session?.user || null;
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -39,19 +41,9 @@ export default function ProjectsUI() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   // Snackbar
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState<AlertColor>('success');
   const setSnackbarContent = (message: string, severity: AlertColor) => {
-    setSnackbarMessage(message);
-    setSnackbarSeverity(severity);
-    setSnackbarOpen(true);
+    enqueueSnackbar(message, { variant: severity });
   };
-  const snackbarReset = () => {
-    setSnackbarOpen(false);
-    setSnackbarMessage('');
-    setSnackbarSeverity('success');
-  }
 
   const loadProjectsAndTasks = useCallback(async () => {
     setLoading(true);
@@ -239,16 +231,6 @@ export default function ProjectsUI() {
         refetchTasks={loadProjectsAndTasks}
       />
 
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={2000}
-        onClose={snackbarReset}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert onClose={snackbarReset} severity={snackbarSeverity} sx={{ width: '100%' }}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 }

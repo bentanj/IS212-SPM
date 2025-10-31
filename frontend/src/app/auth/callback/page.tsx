@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function AuthCallbackPage() {
-  const { isAuthenticated, isLoading, error, checkAuthStatus } = useAuth();
+  const { isAuthenticated, isLoading, error } = useAuth();
   const router = useRouter();
 
   useEffect(() => {

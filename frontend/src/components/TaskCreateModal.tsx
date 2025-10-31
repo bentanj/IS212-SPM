@@ -13,15 +13,16 @@ import dayjs from 'dayjs';
 import { handleAddTag, handleRemoveTag, resetForm, handleSubmit, canAddMoreUsers } from '@/utils/TaskCreateModelFunctions';
 
 // Types and Constants
-import { taskMockData } from '@/mocks/staff/taskMockData';
 import DefaultFormData, { PriorityOptions, StatusOptions } from '@/constants/DefaultFormData';
 import { ALL_DEPARTMENTS } from '@/constants/Organisation';
 import { Task, User, FormData, Departments, Priority, Status } from '@/types'
-import { getProjectsByTasks } from '../app/projects/_functions/getProjectsByTasks'
+import { getProjectsByTasks } from '@/app/projects/_functions/getProjectsByTasks'
 
 // Components
-import { ModalTitle, ParentTaskField, DateRow, RecurringParams, MultiSelectInput, DropDownMenu, Tags, AssignedUsersAutocomplete, Comments, FileUpload } from './_TaskCreateModal/';
-import TaskAttachmentsSection from '@/app/calendar/_components/TaskAttachmentsSection';
+import {
+  ModalTitle, ParentTaskField, DateRow, RecurringParams, MultiSelectInput, DropDownMenu,
+  Tags, AssignedUsersAutocomplete, Comments, FileUpload, TaskAttachmentsSection
+} from './_TaskCreateModal/';
 
 interface TaskCreateModalProps {
   open: boolean;

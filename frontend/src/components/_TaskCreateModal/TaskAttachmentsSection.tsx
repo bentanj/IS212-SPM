@@ -34,7 +34,7 @@ interface TaskAttachmentsSectionProps {
   setSnackbarContent: (message: string, severity: AlertColor) => void;
 }
 
-const TaskAttachmentsSection: React.FC<TaskAttachmentsSectionProps> = ({
+export const TaskAttachmentsSection: React.FC<TaskAttachmentsSectionProps> = ({
   taskId,
   uploadedBy,
   setSnackbarContent,
@@ -83,7 +83,7 @@ const TaskAttachmentsSection: React.FC<TaskAttachmentsSectionProps> = ({
       'application/vnd.ms-excel',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     ];
-    
+
     if (!validTypes.includes(file.type)) {
       setSnackbarContent('Only PDF and Excel files are allowed', 'error');
       return;
@@ -222,5 +222,3 @@ const TaskAttachmentsSection: React.FC<TaskAttachmentsSectionProps> = ({
     </>
   );
 };
-
-export default TaskAttachmentsSection;
