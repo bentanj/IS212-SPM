@@ -4,6 +4,12 @@ import { getUserByEmail } from "./utils/Users/getUser";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     providers: [Google],
+    jwt: {
+        maxAge: 15 * 60
+    },
+    session: {
+        maxAge: 15 * 60
+    },
     callbacks: {
         async signIn({ user }: { user: User | null }) {
             // Check if email is not a string, convert it to a string
