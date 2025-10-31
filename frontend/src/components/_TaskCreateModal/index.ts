@@ -9,3 +9,4 @@ export * from "./NoPermission";
 export * from "./ParentTaskField";
 export * from "./RecurringParams";
 export * from "./Tags";
+export * from "./TaskAttachmentsSection";
