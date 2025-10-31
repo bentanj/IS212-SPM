@@ -57,12 +57,6 @@ cd backend/Example
 
 ### Test Configuration
 
-#### Authentication Service
-- **Read-only mode**: Configured for read-only operations only
-- **OAuth 2.0**: Tests Google OAuth flow with PKCE
-- **Database**: PostgreSQL with connection pooling
-- **Note**: Integration tests automatically skip when no real database credentials are available
-
 #### Tasks Service
 - **Full CRUD**: Complete task management functionality
 - **Database**: PostgreSQL with SQLAlchemy ORM
@@ -78,7 +72,7 @@ cd backend/Example
 #### Environment Variables
 Each service requires its own `.env` file with:
 - Database connection strings
-- OAuth credentials (for Authentication service)
+- OAuth credentials
 - Service-specific configuration
 
 ### Test Coverage
