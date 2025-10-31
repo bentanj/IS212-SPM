@@ -1,8 +1,7 @@
 'use client';
-
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
-import { Alert, AlertColor, Box, useTheme, useMediaQuery, Snackbar } from '@mui/material';
+import { AlertColor, Box, useTheme, useMediaQuery } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
@@ -17,6 +16,7 @@ import { MonthHeader, CalendarBody, DayHeaders } from './_components/_TaskCalend
 import { getTaskTypeColor, isTaskOverdue } from '@/utils/TaskRenderingFunctions';
 
 // Functions
+import { enqueueSnackbar } from 'notistack';
 import { getUserTask } from '@/utils/Tasks/getTask';
 
 const TaskCalendar: React.FC = () => {
@@ -41,19 +41,9 @@ const TaskCalendar: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
 
   // Snackbar
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState<AlertColor>('success');
   const setSnackbarContent = (message: string, severity: AlertColor) => {
-    setSnackbarMessage(message);
-    setSnackbarSeverity(severity);
-    setSnackbarOpen(true);
+    enqueueSnackbar(message, { variant: severity });
   };
-  const snackbarReset = () => {
-    setSnackbarOpen(false);
-    setSnackbarMessage('');
-    setSnackbarSeverity('success');
-  }
 
   useEffect(() => {
     if (session?.user) {
@@ -220,17 +210,6 @@ const TaskCalendar: React.FC = () => {
         preselectedParentTask={selectedParentTask}
         allTasks={tasks}
       />
-
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={2000}
-        onClose={snackbarReset}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert onClose={snackbarReset} severity={snackbarSeverity} sx={{ width: '100%' }}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
 
     </Box>
   );
