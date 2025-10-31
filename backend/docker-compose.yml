@@ -9,7 +9,6 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - tasks
-      - authentication
       - users
       - taskattachments
     restart: unless-stopped
@@ -30,29 +29,6 @@ services:
       - ENV=${ENV}
     expose:
       - "8001"
-    restart: unless-stopped
-
-  # Authentication
-  authentication:
-    build:
-      context: ./Authentication
-      dockerfile: Dockerfile
-    container_name: authentication_app
-    environment:
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
-      - SQLALCHEMY_ECHO=${SQLALCHEMY_ECHO}
-      - ENV=${ENV}
-      - FRONTEND_ORIGIN=${FRONTEND_ORIGIN}
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}
-      - SECRET_KEY=${SECRET_KEY}
-    expose:
-      - "8002"
     restart: unless-stopped
 
   # Users
