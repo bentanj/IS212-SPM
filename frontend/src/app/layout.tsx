@@ -2,9 +2,10 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
-import { SnackbarProvider } from "notistack";
+import { SnackbarProvider, closeSnackbar } from "notistack";
 import SnackbarCloseButton from "@/components/SnackBarCloseButton";
 import CustomNavBar from "@/components/CustomNavBar";
+import { Button } from "@mui/material";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,6 +29,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {/* Application Content Starts Here */}
             <CustomNavBar />
             {children}
+
+
+            <Button onClick={() => closeSnackbar()}>
+              Remove all Notifications
+            </Button>
 
           </SnackbarProvider>
         </SessionProvider>
