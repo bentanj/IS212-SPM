@@ -148,22 +148,22 @@ export const generateProjectPerformanceReport = async (
       const totalTasks = project.tasks.length;
       
       // Count tasks by status (case-insensitive, trimmed)
-      const completed = project.tasks.filter(t => {
+      const completed = project.tasks.filter((t: any) => {
         const status = (t.status || '').toLowerCase().trim();
         return status === 'completed';
       }).length;
-      
-      const inProgress = project.tasks.filter(t => {
+
+      const inProgress = project.tasks.filter((t: any) => {
         const status = (t.status || '').toLowerCase().trim();
         return status === 'in progress';
       }).length;
-      
-      const toDo = project.tasks.filter(t => {
+
+      const toDo = project.tasks.filter((t: any) => {
         const status = (t.status || '').toLowerCase().trim();
         return status === 'to do';
       }).length;
-      
-      const blocked = project.tasks.filter(t => {
+
+      const blocked = project.tasks.filter((t: any) => {
         const status = (t.status || '').toLowerCase().trim();
         return status === 'blocked';
       }).length;
