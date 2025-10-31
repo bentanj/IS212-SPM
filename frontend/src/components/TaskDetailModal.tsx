@@ -57,6 +57,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   }, [task, allTasks]); // ✅ Add allTasks to dependency array
 
   // Preserve original priority and status to detect changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const [originalPriority, originalStatus] = useMemo(() => [task?.priority, task?.status], [task?.taskId]);
 
   if (!task) return null;
