@@ -83,6 +83,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     const TaskData = {
       ...task,
       assigned_users: task.assignedUsers.map(user => user.userId),
+      uploaded_by: currentUser.userId,
     }
 
     if (task.status == "Completed") {
@@ -92,7 +93,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
       }
       const canComplete = await validateCanCompleteTask(TaskData, setSnackbarContent)
       if (!canComplete) return;
-      taskCompletedTrigger(TaskData, setSnackbarContent);
+      taskCompletedTrigger(TaskData, setSnackbarContent, currentUser.userId);
     }
 
     updateTask(TaskData)

@@ -10,7 +10,7 @@ const RecurrenceFreqOptionsMap: Record<RecurrenceFrequency, dayjs.ManipulateType
     "Yearly": "year",
 }
 
-export function replicateRecurringTaskData(task: APITaskParams) {
+export function replicateRecurringTaskData(task: APITaskParams, currentUserId: number) {
     if (task.recurrenceFrequency == "One-Off") return null;
 
     const newStartDate = recurringTaskDate(task);
@@ -26,6 +26,7 @@ export function replicateRecurringTaskData(task: APITaskParams) {
         completedDate: null,
         status: "To Do",
         comments: [],
+        uploaded_by: currentUserId,
         ...IsReplicateFromCompletedSubtask,
     };
 
@@ -55,7 +56,8 @@ import createTask from "./Tasks/createTask";
 export async function autoReplicateAllSubtasks(
     parentTask: APITaskParams,
     newParentTaskId: number,
-    setSnackBarContent: (message: string, severity: AlertColor) => void
+    setSnackBarContent: (message: string, severity: AlertColor) => void,
+    currentUserId: number
 ) {
     const subtasks = await getSubtasks(String(parentTask.taskId));
     // If no subtasks, return
@@ -73,6 +75,7 @@ export async function autoReplicateAllSubtasks(
                 const newSubtask = {
                     ...newSubtaskData,
                     assigned_users: newSubtaskData.assignedUsers.map(user => user.userId),
+                    uploaded_by: currentUserId,
                 }
                 await createTask(newSubtask);
                 newSubtasksCreated++;

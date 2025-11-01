@@ -146,7 +146,7 @@ export const handleSubmit = async (params: {
         }
 
         if (TaskData.status === 'Completed') {
-            await taskCompletedTrigger(TaskData, setSnackbarContent);
+            await taskCompletedTrigger(TaskData, setSnackbarContent, currentUser.userId);
         }
 
         // Return response immediately so refetchTasks() is called
@@ -186,9 +186,10 @@ export const validateCanCompleteTask = async (
 import { replicateRecurringTaskData, autoReplicateAllSubtasks } from './recurringTask';
 export const taskCompletedTrigger = async (
     task: APITaskParams,
-    setSnackbarContent: (message: string, severity: AlertColor) => void
+    setSnackbarContent: (message: string, severity: AlertColor) => void,
+    currentUserId: number
 ) => {
-    const newTask = replicateRecurringTaskData(task);
+    const newTask = replicateRecurringTaskData(task, currentUserId);
 
     if (!newTask) return null;
 
@@ -196,7 +197,7 @@ export const taskCompletedTrigger = async (
         const response = await createTask(newTask);
         setSnackbarContent('Replicated task created', 'success');
 
-        await autoReplicateAllSubtasks(task, response.taskId, setSnackbarContent);
+        await autoReplicateAllSubtasks(task, response.taskId, setSnackbarContent, currentUserId);
     }
     catch (error) {
         setSnackbarContent('Failed to create replicated task. Please try again', 'error');
