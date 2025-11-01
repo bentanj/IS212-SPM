@@ -1,6 +1,5 @@
 import os
 import time
-import uuid
 import tempfile
 import mimetypes
 from typing import Tuple
@@ -22,8 +21,11 @@ class StorageService:
 
     def _generate_path(self, task_id: int, original_filename: str) -> str:
         base, ext = os.path.splitext(original_filename)
-        # Keep base verbatim, but prevent path traversal/separators
-        safe_base = base.replace('/', '-').replace('\\', '-')
+        # Sanitize filename to only allow alphanumeric, hyphens, underscores, spaces, and periods
+        # This prevents issues with special characters in Supabase Storage
+        safe_base = ''.join(c if c.isalnum() or c in (' ', '-', '_', '.') else '_' for c in base)
+        # Replace multiple consecutive spaces or underscores with a single one
+        safe_base = ' '.join(safe_base.split())
         ext_only = ext.lstrip('.')
         timestamp = int(time.time())
         return f"{task_id}/{timestamp}-{safe_base}.{ext_only}"

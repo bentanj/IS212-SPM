@@ -95,6 +95,7 @@ const transformFormDataToAPITaskParams = (
         assigned_users: formData.assignedUsers.map(user => user.userId),
         comments: Comments,
         project_name: formData.project_name.trim(),
+        uploaded_by: currentUser.userId,
     };
 };
 

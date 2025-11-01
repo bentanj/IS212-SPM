@@ -239,7 +239,13 @@ class TestStorageService:
         """Test path generation with special characters"""
         with patch('time.time', return_value=1234567890):
             path = storage_service._generate_path(1, "test/file\\name.pdf")
-            assert path == "1/1234567890-test-file-name.pdf"
+            assert path == "1/1234567890-test_file_name.pdf"
+
+    def test_generate_path_with_unicode_dash(self, storage_service):
+        """Test path generation with unicode dash characters like en-dash"""
+        with patch('time.time', return_value=1761919616):
+            path = storage_service._generate_path(144, "Week 11 Lab – Refactoring.pdf")
+            assert path == "144/1761919616-Week 11 Lab _ Refactoring.pdf"
 
     def test_generate_path_no_extension(self, storage_service):
         """Test path generation without file extension"""
