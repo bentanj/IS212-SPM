@@ -22,4 +22,5 @@ export interface Task {
 
 export interface APITaskParams extends Omit<Task, 'assignedUsers'> {
     assigned_users: number[]; // Only require array of user IDs for API, not full User objects
+    uploaded_by: number; // User ID of the person uploading task attachments
 }
