@@ -107,3 +107,16 @@ def delete_attachment(attachment_id: str):
         return jsonify({'error': str(e)}), 500
 
 
+@bp.route('/copy/<int:source_task_id>/<int:target_task_id>', methods=['POST'])
+def copy_attachments(source_task_id: int, target_task_id: int):
+    """Copy all attachments from source task to target task (for recurring tasks)."""
+    try:
+        service = AttachmentService()
+        copied = service.copy_attachments_to_task(source_task_id, target_task_id)
+        return jsonify({'copied': copied, 'count': len(copied)}), 201
+    except Exception as e:
+        print("[Copy Attachments Error]", str(e))
+        print(traceback.format_exc())
+        return jsonify({'error': f'Copy failed: {str(e)}'}), 500
+
+

@@ -13,6 +13,8 @@ class TaskAttachment:
     file_type: str
     uploaded_by: int
     uploaded_at: datetime
+    original_task_id: Optional[int] = None
+    is_inherited: bool = False
 
     @staticmethod
     def from_record(record: dict) -> "TaskAttachment":
@@ -25,6 +27,8 @@ class TaskAttachment:
             file_type=record.get("file_type"),
             uploaded_by=record.get("uploaded_by"),
             uploaded_at=datetime.fromisoformat(record.get("uploaded_at")) if isinstance(record.get("uploaded_at"), str) else record.get("uploaded_at"),
+            original_task_id=record.get("original_task_id"),
+            is_inherited=record.get("is_inherited", False),
         )
 
     def to_dict(self) -> dict:
@@ -37,6 +41,8 @@ class TaskAttachment:
             "file_type": self.file_type,
             "uploaded_by": self.uploaded_by,
             "uploaded_at": self.uploaded_at.isoformat() if isinstance(self.uploaded_at, datetime) else self.uploaded_at,
+            "original_task_id": self.original_task_id,
+            "is_inherited": self.is_inherited,
         }
 
 
