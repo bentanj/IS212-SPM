@@ -594,7 +594,7 @@ class TestAttachmentServiceIntegration:
         # Mock repository
         mock_repo = Mock()
         mock_repo_class.return_value = mock_repo
-        
+
         sample_attachment = TaskAttachment(
             id="test-id",
             task_id=1,
@@ -606,6 +606,8 @@ class TestAttachmentServiceIntegration:
             uploaded_at=datetime.now(timezone.utc)
         )
         mock_repo.delete.return_value = sample_attachment
+        # Mock reference counting to return 0 (no other references)
+        mock_repo.count_file_references.return_value = 0
 
         # Mock storage
         mock_storage = Mock()
@@ -618,6 +620,10 @@ class TestAttachmentServiceIntegration:
         attachment_service.delete_attachment("test-id")
 
         mock_repo.delete.assert_called_once_with("test-id")
+        mock_repo.count_file_references.assert_called_once_with(
+            sample_attachment.file_path,
+            exclude_id="test-id"
+        )
         mock_storage.delete_file.assert_called_once_with(sample_attachment.file_path)
 
 

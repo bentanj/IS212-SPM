@@ -192,18 +192,39 @@ class TestAttachmentService:
         attachment_service.repo.find_by_id.assert_called_once_with("test-attachment-id")
         attachment_service.storage.get_signed_url.assert_called_once_with(sample_attachment.file_path, expires_in_seconds=3600)
 
-    def test_delete_attachment_success(self, attachment_service, sample_attachment):
-        """Test successful attachment deletion"""
+    def test_delete_attachment_with_no_references(self, attachment_service, sample_attachment):
+        """Test attachment deletion when no other tasks reference the file"""
         attachment_service.repo.delete.return_value = sample_attachment
+        attachment_service.repo.count_file_references.return_value = 0
 
         attachment_service.delete_attachment("test-attachment-id")
 
         attachment_service.repo.delete.assert_called_once_with("test-attachment-id")
+        attachment_service.repo.count_file_references.assert_called_once_with(
+            sample_attachment.file_path,
+            exclude_id="test-attachment-id"
+        )
         attachment_service.storage.delete_file.assert_called_once_with(sample_attachment.file_path)
+
+    def test_delete_attachment_with_references(self, attachment_service, sample_attachment):
+        """Test attachment deletion when other tasks still reference the file"""
+        attachment_service.repo.delete.return_value = sample_attachment
+        attachment_service.repo.count_file_references.return_value = 2  # 2 other tasks still reference this file
+
+        attachment_service.delete_attachment("test-attachment-id")
+
+        attachment_service.repo.delete.assert_called_once_with("test-attachment-id")
+        attachment_service.repo.count_file_references.assert_called_once_with(
+            sample_attachment.file_path,
+            exclude_id="test-attachment-id"
+        )
+        # Storage delete should NOT be called because other tasks reference the file
+        attachment_service.storage.delete_file.assert_not_called()
 
     def test_delete_attachment_storage_failure_ignored(self, attachment_service, sample_attachment):
         """Test attachment deletion with storage failure is ignored"""
         attachment_service.repo.delete.return_value = sample_attachment
+        attachment_service.repo.count_file_references.return_value = 0
         attachment_service.storage.delete_file.side_effect = Exception("Storage delete failed")
 
         # Should not raise exception even if storage delete fails
@@ -211,6 +232,243 @@ class TestAttachmentService:
 
         attachment_service.repo.delete.assert_called_once_with("test-attachment-id")
         attachment_service.storage.delete_file.assert_called_once_with(sample_attachment.file_path)
+
+    def test_copy_attachments_to_task_success(self, attachment_service):
+        """Test successful attachment copying from source to target task"""
+        source_attachment1 = TaskAttachment(
+            id="att-1",
+            task_id=1,
+            file_name="file1.pdf",
+            file_path="1/123-file1.pdf",
+            file_size=1024,
+            file_type="application/pdf",
+            uploaded_by=5,
+            uploaded_at=datetime(2023, 1, 1, tzinfo=timezone.utc),
+            original_task_id=None,
+            is_inherited=False
+        )
+
+        source_attachment2 = TaskAttachment(
+            id="att-2",
+            task_id=1,
+            file_name="file2.xlsx",
+            file_path="1/456-file2.xlsx",
+            file_size=2048,
+            file_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            uploaded_by=5,
+            uploaded_at=datetime(2023, 1, 2, tzinfo=timezone.utc),
+            original_task_id=None,
+            is_inherited=False
+        )
+
+        attachment_service.repo.find_by_task_id.return_value = [source_attachment1, source_attachment2]
+
+        # Mock created attachments
+        created_att1 = Mock()
+        created_att1.to_dict.return_value = {
+            "id": "new-att-1",
+            "task_id": 2,
+            "file_name": "file1.pdf",
+            "file_path": "1/123-file1.pdf",
+            "file_size": 1024,
+            "file_type": "application/pdf",
+            "uploaded_by": 5,
+            "uploaded_at": "2023-01-01T00:00:00+00:00",
+            "original_task_id": 1,
+            "is_inherited": True
+        }
+
+        created_att2 = Mock()
+        created_att2.to_dict.return_value = {
+            "id": "new-att-2",
+            "task_id": 2,
+            "file_name": "file2.xlsx",
+            "file_path": "1/456-file2.xlsx",
+            "file_size": 2048,
+            "file_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "uploaded_by": 5,
+            "uploaded_at": "2023-01-02T00:00:00+00:00",
+            "original_task_id": 1,
+            "is_inherited": True
+        }
+
+        attachment_service.repo.create.side_effect = [created_att1, created_att2]
+
+        result = attachment_service.copy_attachments_to_task(1, 2)
+
+        assert len(result) == 2
+        assert result[0]["id"] == "new-att-1"
+        assert result[0]["task_id"] == 2
+        assert result[0]["original_task_id"] == 1
+        assert result[0]["is_inherited"] is True
+        assert result[1]["id"] == "new-att-2"
+
+        # Verify repository methods called correctly
+        attachment_service.repo.find_by_task_id.assert_called_once_with(1)
+        assert attachment_service.repo.create.call_count == 2
+
+    def test_copy_attachments_to_task_preserves_original_uploader(self, attachment_service):
+        """Test that copying attachments preserves the original uploader ID"""
+        source_attachment = TaskAttachment(
+            id="att-1",
+            task_id=1,
+            file_name="file.pdf",
+            file_path="1/123-file.pdf",
+            file_size=1024,
+            file_type="application/pdf",
+            uploaded_by=5,  # Original uploader
+            uploaded_at=datetime(2023, 1, 1, tzinfo=timezone.utc),
+            original_task_id=None,
+            is_inherited=False
+        )
+
+        attachment_service.repo.find_by_task_id.return_value = [source_attachment]
+
+        created_att = Mock()
+        created_att.to_dict.return_value = {
+            "id": "new-att",
+            "task_id": 2,
+            "file_name": "file.pdf",
+            "file_path": "1/123-file.pdf",
+            "file_size": 1024,
+            "file_type": "application/pdf",
+            "uploaded_by": 5,  # Should preserve original uploader
+            "uploaded_at": "2023-01-01T00:00:00+00:00",
+            "original_task_id": 1,
+            "is_inherited": True
+        }
+
+        attachment_service.repo.create.return_value = created_att
+
+        result = attachment_service.copy_attachments_to_task(1, 2)
+
+        assert result[0]["uploaded_by"] == 5  # Original uploader preserved
+
+        # Verify the record passed to create has correct uploaded_by
+        call_args = attachment_service.repo.create.call_args[0][0]
+        assert call_args["uploaded_by"] == 5
+
+    def test_copy_attachments_to_task_tracks_inheritance_chain(self, attachment_service):
+        """Test that copying already-inherited attachments maintains the original task ID"""
+        # This attachment was already inherited from task 1
+        inherited_attachment = TaskAttachment(
+            id="att-1",
+            task_id=2,
+            file_name="file.pdf",
+            file_path="1/123-file.pdf",
+            file_size=1024,
+            file_type="application/pdf",
+            uploaded_by=5,
+            uploaded_at=datetime(2023, 1, 1, tzinfo=timezone.utc),
+            original_task_id=1,  # Originally from task 1
+            is_inherited=True
+        )
+
+        attachment_service.repo.find_by_task_id.return_value = [inherited_attachment]
+
+        created_att = Mock()
+        created_att.to_dict.return_value = {
+            "id": "new-att",
+            "task_id": 3,
+            "file_name": "file.pdf",
+            "file_path": "1/123-file.pdf",
+            "file_size": 1024,
+            "file_type": "application/pdf",
+            "uploaded_by": 5,
+            "uploaded_at": "2023-01-01T00:00:00+00:00",
+            "original_task_id": 1,  # Should track back to original task 1, not task 2
+            "is_inherited": True
+        }
+
+        attachment_service.repo.create.return_value = created_att
+
+        result = attachment_service.copy_attachments_to_task(2, 3)
+
+        # Should track back to original task 1, not the intermediate task 2
+        assert result[0]["original_task_id"] == 1
+
+        call_args = attachment_service.repo.create.call_args[0][0]
+        assert call_args["original_task_id"] == 1
+
+    def test_copy_attachments_to_task_no_attachments(self, attachment_service):
+        """Test copying when source task has no attachments"""
+        attachment_service.repo.find_by_task_id.return_value = []
+
+        result = attachment_service.copy_attachments_to_task(1, 2)
+
+        assert len(result) == 0
+        attachment_service.repo.find_by_task_id.assert_called_once_with(1)
+        attachment_service.repo.create.assert_not_called()
+
+    def test_copy_attachments_to_task_partial_failure(self, attachment_service):
+        """Test copying attachments when some creations fail"""
+        source_att1 = TaskAttachment(
+            id="att-1",
+            task_id=1,
+            file_name="file1.pdf",
+            file_path="1/123-file1.pdf",
+            file_size=1024,
+            file_type="application/pdf",
+            uploaded_by=5,
+            uploaded_at=datetime(2023, 1, 1, tzinfo=timezone.utc)
+        )
+
+        source_att2 = TaskAttachment(
+            id="att-2",
+            task_id=1,
+            file_name="file2.pdf",
+            file_path="1/456-file2.pdf",
+            file_size=2048,
+            file_type="application/pdf",
+            uploaded_by=5,
+            uploaded_at=datetime(2023, 1, 2, tzinfo=timezone.utc)
+        )
+
+        attachment_service.repo.find_by_task_id.return_value = [source_att1, source_att2]
+
+        # First creation succeeds, second fails
+        created_att = Mock()
+        created_att.to_dict.return_value = {"id": "new-att-1"}
+
+        attachment_service.repo.create.side_effect = [
+            created_att,
+            Exception("Database error")
+        ]
+
+        result = attachment_service.copy_attachments_to_task(1, 2)
+
+        # Should return only the successful copy
+        assert len(result) == 1
+        assert result[0]["id"] == "new-att-1"
+        assert attachment_service.repo.create.call_count == 2
+
+    def test_copy_attachments_does_not_duplicate_files_in_storage(self, attachment_service):
+        """Test that copying attachments reuses file paths and doesn't upload new files"""
+        source_attachment = TaskAttachment(
+            id="att-1",
+            task_id=1,
+            file_name="file.pdf",
+            file_path="1/123-file.pdf",
+            file_size=1024,
+            file_type="application/pdf",
+            uploaded_by=5,
+            uploaded_at=datetime(2023, 1, 1, tzinfo=timezone.utc)
+        )
+
+        attachment_service.repo.find_by_task_id.return_value = [source_attachment]
+
+        created_att = Mock()
+        created_att.to_dict.return_value = {"id": "new-att"}
+        attachment_service.repo.create.return_value = created_att
+
+        attachment_service.copy_attachments_to_task(1, 2)
+
+        # Storage service should NOT be called at all
+        attachment_service.storage.upload_file.assert_not_called()
+
+        # Verify the created record uses the same file_path
+        call_args = attachment_service.repo.create.call_args[0][0]
+        assert call_args["file_path"] == "1/123-file.pdf"
 
 
 @pytest.mark.unit
