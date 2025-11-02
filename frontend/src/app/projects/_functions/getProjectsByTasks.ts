@@ -27,7 +27,7 @@ export function getProjectsByTasks(tasks: Task[]): TProject[] {
 
     // Count actual tasks for this project (including subtasks)
     const taskCount = tasks.filter(
-      task => task.project_name.toLowerCase() === projectName.toLowerCase()
+      task => task.project_name?.toLowerCase() === projectName.toLowerCase()
     ).length;
 
     if (mockProject) {
@@ -61,7 +61,7 @@ export function getProjectsByTasks(tasks: Task[]): TProject[] {
  */
 export function getTasksByProject(projectName: string, tasks: Task[]): Task[] {
   return tasks.filter(
-    task => task.project_name.toLowerCase() === projectName.toLowerCase()
+    task => task.project_name?.toLowerCase() === projectName.toLowerCase()
   );
 }
 
