@@ -47,4 +47,12 @@ class AttachmentRepository:
         sizes = [r["file_size"] for r in (response.data or []) if r.get("file_size")]
         return sum(sizes)
 
+    def count_file_references(self, file_path: str, exclude_id: str = None) -> int:
+        """Count how many attachment records reference this file path."""
+        query = self.table.select("id", count="exact").eq("file_path", file_path)
+        if exclude_id:
+            query = query.neq("id", exclude_id)
+        response = query.execute()
+        return response.count or 0
+
 

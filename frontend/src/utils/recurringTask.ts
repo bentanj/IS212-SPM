@@ -53,6 +53,8 @@ export function recurringTaskDate(task: Omit<APITaskParams, "taskId">): dayjs.Da
 
 import { getSubtasks } from "@/utils/Tasks/getTask";
 import createTask from "./Tasks/createTask";
+import { copyTaskAttachments } from "./taskAttachments";
+
 export async function autoReplicateAllSubtasks(
     parentTask: APITaskParams,
     newParentTaskId: number,
@@ -77,7 +79,19 @@ export async function autoReplicateAllSubtasks(
                     assigned_users: newSubtaskData.assignedUsers.map(user => user.userId),
                     uploaded_by: currentUserId,
                 }
-                await createTask(newSubtask);
+                const response = await createTask(newSubtask);
+
+                // Copy attachments from original subtask to new subtask
+                try {
+                    const copyResult = await copyTaskAttachments(subtask.taskId, response.taskId);
+                    if (copyResult.count > 0) {
+                        console.log(`Copied ${copyResult.count} attachment(s) to recurring subtask ${response.taskId}`);
+                    }
+                } catch (error) {
+                    console.error(`Error copying attachments for subtask ${subtask.title}:`, error);
+                    // Don't fail the whole operation if attachment copy fails
+                }
+
                 newSubtasksCreated++;
             } catch (error) {
                 const errorMessage = `Error creating recurring subtask ${newSubtaskData.title}: ${error instanceof Error ? error.message : String(error)}`;
@@ -113,12 +127,12 @@ export function replicateRecurringSubtaskData(
     const newSubtaskStartDate = dayjs(subtask.startDate.replace(" ", "T")).add(parentInterval!, parentFreq!);
     const newSubtaskDueDate = dayjs(subtask.dueDate.replace(" ", "T")).add(parentInterval!, parentFreq!);
 
-    // If the new start date is after the original due date, return null
+    // If the new start date is after the original parent due date, return error
     if (newSubtaskStartDate.isAfter(dayjs(parentTask.dueDate.replace(" ", "T")))) {
         return `Subtask ${subtask.title} start date exceeds parent task due date`;
     }
 
-    // If the new due date is after the original due date, return null
+    // If the new due date is after the original parent due date, return error
     if (newSubtaskDueDate.isAfter(dayjs(parentTask.dueDate.replace(" ", "T")))) {
         return `Subtask ${subtask.title} due date exceeds parent task due date`;
     }

@@ -107,9 +107,55 @@ class AttachmentService:
 
     def delete_attachment(self, attachment_id: str) -> None:
         att = self.repo.delete(attachment_id)
-        try:
-            self.storage.delete_file(att.file_path)
-        except Exception:
-            pass
+
+        # Check if any other tasks reference this file before deleting from storage
+        references_count = self.repo.count_file_references(att.file_path, exclude_id=attachment_id)
+
+        # Only delete from storage if no other tasks reference this file
+        if references_count == 0:
+            try:
+                self.storage.delete_file(att.file_path)
+            except Exception:
+                pass
+
+    def copy_attachments_to_task(self, source_task_id: int, target_task_id: int) -> List[dict]:
+        """
+        Copy all attachments from source task to target task.
+        Used for recurring tasks to inherit parent task attachments.
+        Does NOT duplicate files in storage - only creates new database records.
+
+        Returns list of created attachment dictionaries.
+        """
+        source_attachments = self.repo.find_by_task_id(source_task_id)
+        copied_attachments = []
+
+        for source_att in source_attachments:
+            now_iso = datetime.now(timezone.utc).isoformat()
+
+            # Determine the original task ID
+            original_task_id = source_att.original_task_id if source_att.is_inherited else source_task_id
+
+            # Create new record pointing to same file
+            record = {
+                "task_id": target_task_id,
+                "file_name": source_att.file_name,
+                "file_path": source_att.file_path,  # Same path - no file copy!
+                "file_size": source_att.file_size,
+                "file_type": source_att.file_type,
+                "uploaded_by": source_att.uploaded_by,  # Preserve original uploader
+                "uploaded_at": source_att.uploaded_at.isoformat() if isinstance(source_att.uploaded_at, datetime) else source_att.uploaded_at,
+                "original_task_id": original_task_id,  # Track original source
+                "is_inherited": True,  # Mark as inherited
+            }
+
+            try:
+                created = self.repo.create(record)
+                copied_attachments.append(created.to_dict())
+            except Exception as e:
+                # Log error but continue with other files
+                print(f"Error copying attachment {source_att.id}: {str(e)}")
+                continue
+
+        return copied_attachments
 
 

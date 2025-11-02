@@ -11,6 +11,8 @@ export interface TaskAttachment {
   uploaded_by: number;
   uploaded_at: string;
   download_url?: string;
+  original_task_id?: number;
+  is_inherited?: boolean;
 }
 
 /**
@@ -100,6 +102,28 @@ export async function deleteTaskAttachment(attachmentId: string): Promise<void> 
     const error = await response.json();
     throw new Error(error.error || 'Failed to delete attachment');
   }
+}
+
+/**
+ * Copy all attachments from source task to target task (for recurring tasks)
+ */
+export async function copyTaskAttachments(
+  sourceTaskId: number,
+  targetTaskId: number
+): Promise<{ copied: TaskAttachment[]; count: number }> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/task-attachments/copy/${sourceTaskId}/${targetTaskId}`,
+    {
+      method: 'POST',
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to copy attachments');
+  }
+
+  return response.json();
 }
 
 /**
