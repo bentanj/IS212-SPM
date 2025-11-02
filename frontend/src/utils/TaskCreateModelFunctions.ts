@@ -184,6 +184,8 @@ export const validateCanCompleteTask = async (
 };
 
 import { replicateRecurringTaskData, autoReplicateAllSubtasks } from './recurringTask';
+import { copyTaskAttachments } from './taskAttachments';
+
 export const taskCompletedTrigger = async (
     task: APITaskParams,
     setSnackbarContent: (message: string, severity: AlertColor) => void,
@@ -196,6 +198,17 @@ export const taskCompletedTrigger = async (
     try {
         const response = await createTask(newTask);
         setSnackbarContent('Replicated task created', 'success');
+
+        // Copy attachments from completed task to new recurring task
+        try {
+            const copyResult = await copyTaskAttachments(task.taskId, response.taskId);
+            if (copyResult.count > 0) {
+                console.log(`Copied ${copyResult.count} attachment(s) to recurring task`);
+            }
+        } catch (error) {
+            console.error('Error copying attachments to recurring task:', error);
+            // Don't fail the whole operation if attachment copy fails
+        }
 
         await autoReplicateAllSubtasks(task, response.taskId, setSnackbarContent, currentUserId);
     }
