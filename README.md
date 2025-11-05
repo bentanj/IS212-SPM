@@ -4,15 +4,15 @@
 
 This project includes comprehensive testing across both frontend and backend.
 
+
 ### Running Tests
 
 #### Frontend Tests
 To run all frontend tests:
 ```bash
 cd frontend
-npm test                 # Run all tests
-npm run test:watch      # Run tests in watch mode
-npm run test:coverage   # Run tests with coverage report
+npm run build           # Tests build
+npm test                # Run all tests
 ```
 
 #### All Backend Tests
@@ -32,6 +32,7 @@ cd backend/Example
 ./Scripts/test-integration.sh  # Integration tests only
 ```
 
+
 ### Test Structure
 
 #### Frontend Tests
@@ -50,57 +51,40 @@ cd backend/Example
 - **Speed**: Fast execution, no database or network calls
 
 #### Backend Integration Tests
-- **Purpose**: Test complete workflows and service interactions
+- **Purpose**: Test complete workflows and API endpoints
 - **Markers**: `@pytest.mark.integration`
-- **Scope**: End-to-end functionality with real dependencies
-- **Requirements**: Real database credentials for integration tests
+- **Scope**: End-to-end API testing with mocked external dependencies
+- **Requirements**: No external database required (tests use mocks)
 
-### Test Configuration
-
-#### Tasks Service
-- **Full CRUD**: Complete task management functionality
-- **Database**: PostgreSQL with SQLAlchemy ORM
-- **API**: RESTful endpoints with proper error handling
 
 ### Test Environment Setup
 
 #### Prerequisites
-- Python 3.12 (recommended for CI/CD compatibility)
+- Python 3.12
 - pytest and pytest-cov
 - Service-specific dependencies
 
-#### Environment Variables
-Each service requires its own `.env` file with:
-- Database connection strings
-- OAuth credentials
-- Service-specific configuration
 
 ### Test Coverage
 
 Tests cover:
-- **Core functionality**: All business logic and API endpoints
+- **Core functionality**: Business logic and API endpoints
 - **Error handling**: Invalid inputs, network failures, database errors
-- **Security**: Authentication, authorization, input validation
-- **Integration**: Service-to-service communication
+- **Integration**: API endpoint workflows (with mocked external dependencies)
 - **Edge cases**: Boundary conditions and error scenarios
+
 
 ### Continuous Integration
 
-Tests are designed to run in CI/CD pipelines:
-- **Docker-based**: Consistent environment across platforms
-- **Parallel execution**: Services can be tested independently
-- **XML reporting**: JUnit-compatible test results
-- **Coverage reporting**: Code coverage metrics (Tasks service only)
+Tests run automatically in GitHub Actions CI/CD pipeline:
+- **Automated**: Triggers on push to main and pull requests
+- **Matrix strategy**: Backend services tested independently in parallel
+- **Integration tests**: Optional via manual workflow dispatch or repository variable
+- **XML reporting**: JUnit-compatible test results for all services
+
 
 ### Troubleshooting
 
-#### Common Issues
-1. **Python version mismatch**: Use Python 3.12 for consistency with CI/CD
-2. **Missing dependencies**: Run `pip install -r requirements.txt`
-3. **Database connection**: Ensure PostgreSQL is accessible
-4. **Integration test credentials**: Provide real database credentials for integration tests
-
-#### Getting Help
 - Check service-specific test documentation
 - Review test output for specific error messages
-- Ensure all environment variables are properly configured
+- Integration tests use mocks, so no external credentials needed
