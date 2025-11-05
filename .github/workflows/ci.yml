@@ -30,9 +30,6 @@ jobs:
       matrix:
         service: [ "Tasks", "TaskAttachments" ,"Users"]   # <-- add backend services here
 
-    # Add job-level services here if a backend service needs its own dependencies (e.g., Redis)
-    # For hosted DBs like Supabase, no local DB service is required.
-
     defaults:
       run:
         working-directory: backend/${{ matrix.service }}
@@ -86,22 +83,10 @@ jobs:
           INTEG="${{ github.event.inputs.run_integration || vars.CI_RUN_INTEGRATION || 'false' }}"
           echo "RUN_INTEGRATION=$INTEG" >> $GITHUB_ENV
 
-      # TODO: Uncomment after adding formatter/linter
-      # - name: Lint (flake8)
-      #   run: flake8 .
-
-      # - name: Format check (black)
-      #   run: black --check .
-
-
-      # If you use Alembic per service, uncomment and adapt path:
-      # - name: Run DB migrations
-      #   run: alembic upgrade head
-
-      - name: Run tests (skipped if none)
+      - name: Run unit tests
         run: |
           set -e
-          if pytest -q --maxfail=1 --disable-warnings \
+          if pytest -m "not integration" -q --maxfail=1 --disable-warnings \
                --cov=. --cov-report=term-missing --junitxml=pytest-report.xml; then
             echo "Pytest completed."
           else
