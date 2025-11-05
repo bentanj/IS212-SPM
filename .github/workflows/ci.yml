@@ -30,9 +30,6 @@ jobs:
       matrix:
         service: [ "Tasks", "TaskAttachments" ,"Users"]   # <-- add backend services here
 
-    # Add job-level services here if a backend service needs its own dependencies (e.g., Redis)
-    # For hosted DBs like Supabase, no local DB service is required.
-
     defaults:
       run:
         working-directory: backend/${{ matrix.service }}
@@ -64,21 +61,9 @@ jobs:
           pip install flake8 black pytest pytest-cov
 
       - name: Export test env
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: |
           echo "ENV=test" >> $GITHUB_ENV
           echo "FLASK_ENV=test" >> $GITHUB_ENV
-          # Supply dummy envs if your code expects them; override with repository/environment secrets as needed
-          echo "DB_USER=${DB_USER:-test_user}" >> $GITHUB_ENV
-          echo "DB_PASSWORD=${DB_PASSWORD:-test_password}" >> $GITHUB_ENV
-          echo "DB_HOST=${DB_HOST:-localhost}" >> $GITHUB_ENV
-          echo "DB_PORT=${DB_PORT:-5432}" >> $GITHUB_ENV
-          echo "DB_NAME=${DB_NAME:-testdb}" >> $GITHUB_ENV
-          # Supabase configuration
-          echo "SUPABASE_URL=${SUPABASE_URL}" >> $GITHUB_ENV
-          echo "SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}" >> $GITHUB_ENV
 
       - name: Decide integration run
         run: |
@@ -86,19 +71,7 @@ jobs:
           INTEG="${{ github.event.inputs.run_integration || vars.CI_RUN_INTEGRATION || 'false' }}"
           echo "RUN_INTEGRATION=$INTEG" >> $GITHUB_ENV
 
-      # TODO: Uncomment after adding formatter/linter
-      # - name: Lint (flake8)
-      #   run: flake8 .
-
-      # - name: Format check (black)
-      #   run: black --check .
-
-
-      # If you use Alembic per service, uncomment and adapt path:
-      # - name: Run DB migrations
-      #   run: alembic upgrade head
-
-      - name: Run tests (skipped if none)
+      - name: Run tests
         run: |
           set -e
           if pytest -q --maxfail=1 --disable-warnings \
@@ -114,16 +87,6 @@ jobs:
               exit $code
             fi
           fi
-
-      - name: Export real DB env for integration (if available)
-        if: ${{ env.RUN_INTEGRATION == 'true' }}
-        run: |
-          # Load from repository or environment secrets if provided
-          [ -n "${{ secrets.DB_USER }}" ] && echo "DB_USER=${{ secrets.DB_USER }}" >> $GITHUB_ENV || true
-          [ -n "${{ secrets.DB_PASSWORD }}" ] && echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV || true
-          [ -n "${{ secrets.DB_HOST }}" ] && echo "DB_HOST=${{ secrets.DB_HOST }}" >> $GITHUB_ENV || true
-          [ -n "${{ secrets.DB_PORT }}" ] && echo "DB_PORT=${{ secrets.DB_PORT }}" >> $GITHUB_ENV || true
-          [ -n "${{ secrets.DB_NAME }}" ] && echo "DB_NAME=${{ secrets.DB_NAME }}" >> $GITHUB_ENV || true
 
       - name: Run integration tests
         if: ${{ env.RUN_INTEGRATION == 'true' }}
