@@ -1,1 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="0.806" timestamp="2025-10-08T21:52:00.317760+08:00" hostname="Sean"><testcase classname="Tests.test_integration_db" name="test_database_connection_alive" time="0.031" /></testsuite></testsuites>
