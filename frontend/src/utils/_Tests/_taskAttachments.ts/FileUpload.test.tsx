@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { FileUpload } from './FileUpload';
+import { FileUpload } from '../../../components/_TaskCreateModal/FileUpload';
 
 describe('FileUpload Component', () => {
   const mockSetFormData = jest.fn();

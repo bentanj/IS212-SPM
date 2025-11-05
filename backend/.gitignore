@@ -11,6 +11,7 @@
 **/htmlcov/
 **/.coverage
 **/pytest-report.xml
+**/pytest-report-integration.xml
 **/*.db
 **/*.sqlite
 **/*.egg-info/
