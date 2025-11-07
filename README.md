@@ -25,6 +25,14 @@ Before you begin, ensure you have the following installed:
 4. **PostgreSQL Database**
    - You'll need access to a PostgreSQL database (local or cloud-hosted like Supabase)
    - Note down your database credentials for the environment configuration
+   - Set up five tables and populate them with dummy data using the provided CSV files in Database Mock Data:
+         - projects: Import projects.csv
+         - task_attachments: Import task_attachments.csv
+         - tasks: Import tasks.csv
+         - users: 
+            - **IMPT: Add your google email within user.csv before import. Otherwise, middleware will prevent your access to the application**
+            - Import users.csv
+         - reminder_logs: No import required
 
 5. **Google OAuth Credentials** (for authentication)
    - Create a project in [Google Cloud Console](https://console.cloud.google.com/)
